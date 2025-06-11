@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres-db-tauranet
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pgadmin1325
+      POSTGRES_DB: tauranet_db
+    ports:
+      - "25432:5432"
+    volumes:
+      - tauranet-db-data:/var/lib/postgresql/data
+      - ./tauranet-backend/tauranet_db.sql:/docker-entrypoint-initdb.d/tauranet_db.sql
+
+  backend:
+    build:
+      context: ./tauranet-backend
+      dockerfile: Dockerfile
+    container_name: tauranet-backend-container
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: tauranet_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: pgadmin1325
+    volumes:
+      - ./tauranet-backend:/var/www
+
+  frontend:
+    build:
+      context: ./tauranet-frontend
+      dockerfile: Dockerfile
+    container_name: tauranet-frontend-container
+    ports:
+      - "8085:8080"
+    depends_on:
+      - backend
+    volumes:
+      - ./tauranet-frontend:/app
+      - /app/node_modules
+
+volumes:
+  tauranet-db-data:
