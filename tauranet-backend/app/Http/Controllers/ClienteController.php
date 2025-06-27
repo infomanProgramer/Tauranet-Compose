@@ -22,24 +22,18 @@ class ClienteController extends ApiController
     public function index($idSucursal, $dni)
     {
         $response = null;
-        if($dni == -1){
-            $listaClientes = DB::table('clientes as cl')
-                ->join('restaurants as r', 'r.id_restaurant', '=', 'cl.id_restaurant')
-                ->join('sucursals as s', 's.id_restaurant', '=', 'r.id_restaurant')
-                ->where('s.id_sucursal', '=', $idSucursal)
-                ->select('cl.*')
-                ->orderBy('cl.nombre_completo', 'asc')
-                ->get();
-        }else{
-            $listaClientes = DB::table('clientes as cl')
-                ->join('restaurants as r', 'r.id_restaurant', '=', 'cl.id_restaurant')
-                ->join('sucursals as s', 's.id_restaurant', '=', 'r.id_restaurant')
-                ->where('s.id_sucursal', '=', $idSucursal)
-                ->where('cl.dni', 'like', '%'.$dni.'%')
-                ->select('cl.*')
-                ->orderBy('cl.nombre_completo', 'asc')
-                ->get();
-        }
+        $listaClientes = DB::table('clientes as cl')
+            ->join('restaurants as r', 'r.id_restaurant', '=', 'cl.id_restaurant')
+            ->join('sucursals as s', 's.id_restaurant', '=', 'r.id_restaurant')
+            ->where('s.id_sucursal', '=', $idSucursal)
+            ->where('cl.dni', '=', $dni)
+            ->select('cl.*')
+            ->orderBy('cl.nombre_completo', 'asc')
+            ->get();
+        if (!sizeof($listaClientes) > 0){
+            $response = Response::json(['error' => 'No se encontraron clientes con el DNI: '.$dni], 404);
+            return $response;
+        } 
         $response = Response::json(['data' => $listaClientes], 200);
         return $response;
     }
@@ -79,7 +73,7 @@ class ClienteController extends ApiController
                 ->where("h.estado", "=", "true")->get();
             if (sizeof($hcaja) > 0) {
                 $validacionArray = [];
-                if ($request->ant_cliente) {//antiguo cliente
+                if ($request->isNewCustomer) {//antiguo cliente
                     \Log::info('Cliente antiguo 1');
                     $validacionArray = [
                         'id_cajero' => 'required_without_all:id_mozo',
@@ -139,7 +133,7 @@ class ClienteController extends ApiController
                 if ($validator->fails()) {
                     return response()->json(["error" => $validator->errors()], 201);
                 }
-                if (!$request->ant_cliente && !$clienteIsNull) {
+                if (!$request->isNewCustomer && !$clienteIsNull) {
                     //\Log::info('Cliente nuevo 2');
                     //Almacena datos del cliente
 //                    $idRestaurant = DB::table('sucursals')
@@ -167,7 +161,7 @@ class ClienteController extends ApiController
                 $vproducto->estado_atendido = false;
                 $vproducto->id_historial_caja = $hcaja[0]->id_historial_caja;
                 if(!$clienteIsNull){
-                    if (!$request->ant_cliente) {
+                    if (!$request->isNewCustomer) {
                         //\Log::info('Cliente nuevo 3');
                         $vproducto->id_cliente = $cliente->id_cliente;
                     }else {
@@ -201,48 +195,39 @@ class ClienteController extends ApiController
 
     public function storePago(Request $request)
     {
-        $clienteIsNull = !($request->has('nombre_completo')&&$request->has('dni'));
+        \Log::info('Request data:', $request->all());
         $hcaja = DB::table('historial_caja as h')
             ->where("h.id_caja", "=", $request->id_caja)
             ->where("h.estado", "=","true")->get();
         if(sizeof($hcaja)>0) {
             $validacionArray = [];
-            if ($request->ant_cliente) {//antiguo cliente
+            if (!$request->isNewCustomer) {//antiguo cliente
                 \Log::info('Cliente antiguo 1');
                 $validacionArray = [
                     'id_cajero' => 'required_without_all:id_mozo',
                     'id_mozo' => 'required_without_all:id_cajero',
                     'id_sucursal' => 'required|exists:sucursals,id_sucursal',
-                    'total' => 'required',
-                    'sub_total' => 'required',
-                    'descuento' => 'required',
+                    'importe' => 'required',
+                    'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
                     'estado_venta' => 'required',
                     'listaProductos' => 'required',
-                    'efectivo' => 'required|numeric|between:0,99999999.99',
-                    'total_pagar' => 'required|numeric|between:0,99999999.99',
-                    'mastercard' => 'required|numeric|between:0,99999999.99',
-                    'cambio' => 'required|numeric|between:0,99999999.99',
-                    'visa' => 'required|numeric|between:0,99999999.99',
+                    //'efectivo' => 'required|numeric|between:1,99999999.99', // Solo cuando el pago es en efectivo y no puede ser cero
+                    //'cambio' => 'required|numeric|between:0,99999999.99'
                 ];
             } else {
                 \Log::info('Cliente nuevo 1');
                 $validacionArray = [
-                    'nombre_completo' => 'min:4|max:100|nullable',
-                    'dni' => new UniqueCliente($request->id_restaurant),
+                    'nombre_completo' => 'required|min:4|max:100|nullable',
+                    'dni' => ['required', new UniqueCliente($request->id_restaurant)],
                     'id_cajero' => 'required_without_all:id_mozo',
                     'id_mozo' => 'required_without_all:id_cajero',
                     'id_sucursal' => 'required|exists:sucursals,id_sucursal',
-                    'total' => 'required|numeric|between:0,9999999.99',
-                    'sub_total' => 'required|numeric|between:0,9999999.99',
-                    'descuento' => 'required|numeric|between:0,100',
+                    'importe' => 'required|numeric|between:0,9999999.99',
+                    'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
                     'estado_venta' => 'required',
                     'listaProductos' => 'required',
-                    'efectivo' => 'required|numeric|between:0,99999999.99',
-                    'total_pagar' => 'required|numeric|between:0,99999999.99',
-                    'mastercard' => 'required|numeric|between:0,99999999.99',
-                    'cambio' => 'required|numeric|between:0,99999999.99',
-                    'visa' => 'required|numeric|between:0,99999999.99',
-
+                    //'efectivo' => 'required|numeric|between:1,99999999.99',//Solo cuando el pago es en efectivo
+                    // 'cambio' => 'required|numeric|between:0,99999999.99'
                 ];
             }
             $validator = Validator::make($request->all(), $validacionArray,
@@ -262,19 +247,9 @@ class ClienteController extends ApiController
                 'id_sucursal.required' => 'La sucursal es requerido',
                 'id_sucursal.exists' => 'La sucursal no existe',
                 'listaProductos.required' => 'La lista de productos es requerida',
-
                 'efectivo.required' => 'El efectivo es requerido',
                 'efectivo.numeric' => 'El efectivo tiene que ser de tipo numérico',
-                'efectivo.between' => 'El efectivo tiene que estar entre 0 y 999999999,99',
-                'total_pagar.required' => 'El total a pagar es requerido',
-                'total_pagar.numeric' => 'El total a pagar tiene que ser de tipo numérico',
-                'total_pagar.between' => 'El total a pagar tiene que estar entre 0 y 999999999,99',
-                'visa.required' => 'Visa es requerida',
-                'visa.numeric' => 'Visa tiene que ser de tipo numérico',
-                'visa.between' => 'Visa tiene que estar entre 0 y 999999999,99',
-                'mastercard.required' => 'Mastercard es requerida',
-                'mastercard.numeric' => 'Mastercard tiene que ser de tipo numérico',
-                'mastercard.between' => 'Mastercard tiene que estar entre 0 y 999999999,99',
+                'efectivo.between' => 'El efectivo tiene que estar entre 1 y 999999999,99',
                 'cambio.required' => 'El cambio es requerida',
                 'cambio.numeric' => 'El cambio tiene que ser de tipo numérico',
                 'cambio.between' => 'El cambio tiene que estar entre 0 y 999999999,99'
@@ -288,76 +263,71 @@ class ClienteController extends ApiController
             $validator->sometimes('dni', 'numeric|min:999|nullable', function ($input) {
                 return !empty($input->dni);
             });
-
+            $validator->sometimes('efectivo', 'required|numeric|between:1,99999999.99', function ($input) {
+                return $input->tipo_pago == 0;
+            });
+            $validator->sometimes('cambio', 'required|numeric|between:0,99999999.99', function ($input) {
+                return $input->tipo_pago == 0;
+            });
             if ($validator->fails()) {
                 return response()->json(["error" => $validator->errors()], 201);
             }
-            if($request->efectivo >= $request->total) {
-                if($request->total_pagar >= $request->total) {
-                    if (!$request->ant_cliente && !$clienteIsNull) {
-                        //Almacena datos del cliente
-                        $idRestaurant = DB::table('sucursals')
-                            ->where('id_sucursal', '=', $request->id_sucursal)
-                            ->select('id_restaurant')
-                            ->first();
-                        //$data= json_decode( json_encode($idRestaurant), true);
-                        $cliente = new Cliente();
-                        $cliente->nombre_completo = $request->get("nombre_completo");
-                        $cliente->dni = $request->get("dni");
-                        $cliente->id_restaurant = $idRestaurant->id_restaurant;
-                        if ($request->has('id_cajero')) {
-                            $cliente->id_cajero = $request->get("id_cajero");
-                        }
-                        if ($request->has('id_mozo')) {
-                            $cliente->id_mozo = $request->get("id_mozo");
-                        }
-                        $cliente->save();
-                    }
-
-                    $vproducto = new VentaProducto();
-                    $vproducto->total = $request->get("total");
-                    $vproducto->sub_total = $request->get("sub_total");
-                    $vproducto->descuento = $request->get("descuento");
-                    $vproducto->estado_venta = $request->get("estado_venta");
-                    $vproducto->id_historial_caja = $hcaja[0]->id_historial_caja;
-                    $vproducto->estado_atendido = false;
-                    if(!$clienteIsNull) {
-                        if (!$request->ant_cliente) {
-                            //\Log::info('Cliente nuevo 3');
-                            $vproducto->id_cliente = $cliente->id_cliente;
-                        } else {
-                            //\Log::info('Cliente antiguo 3');
-                            $vproducto->id_cliente = $request->get("id_cliente");
-                        }
-                    }
-                    $vproducto->id_sucursal = $request->get("id_sucursal");
+            if(($request->efectivo >= $request->importe && $request->tipo_pago == 0) || $request->tipo_pago != 0) {
+                if ($request->isNewCustomer) {
+                    //Almacena datos del nuevo cliente
+                    $idRestaurant = DB::table('sucursals')
+                        ->where('id_sucursal', '=', $request->id_sucursal)
+                        ->select('id_restaurant')
+                        ->first();
+                    //$data= json_decode( json_encode($idRestaurant), true);
+                    $cliente = new Cliente();
+                    $cliente->nombre_completo = $request->get("nombre_completo");
+                    $cliente->dni = $request->get("dni");
+                    $cliente->id_restaurant = $idRestaurant->id_restaurant;
                     if ($request->has('id_cajero')) {
-                        $vproducto->id_cajero = $request->get("id_cajero");
+                        $cliente->id_cajero = $request->get("id_cajero");
                     }
                     if ($request->has('id_mozo')) {
-                        $vproducto->id_mozo = $request->get("id_mozo");
+                        $cliente->id_mozo = $request->get("id_mozo");
                     }
-                    $vproducto->save();
-                    $pago = new Pago();
-                    $pago->efectivo = $request->get("efectivo");
-                    $pago->total = $request->get("total");
-                    $pago->total_pagar = $request->get("total_pagar");
-                    $pago->visa = $request->get("visa");
-                    $pago->mastercard = $request->get("mastercard");
-                    $pago->cambio = $request->get("cambio");
-                    $pago->id_venta_producto = $vproducto->id_venta_producto;
-                    $pago->id_cajero = $request->get("id_cajero");
-                    $pago->save();
-                    //Ssaca el nro de pedido
-                    $listaProd = DB::table(DB::raw("registraProductosFunction('" . $request->listaProductos . "', " . $vproducto->id_venta_producto . ")"))->get();
-                    $nro_pedido = DB::table('venta_productos')->where('id_historial_caja', '=', $hcaja[0]->id_historial_caja)->where('id_venta_producto', '<=', $vproducto->id_venta_producto)->count();
-                    $ult_vproducto = VentaProducto::find($vproducto->id_venta_producto);
-                    $ult_vproducto->nro_venta = $nro_pedido;
-                    $ult_vproducto->save();
-                    return response()->json(['data' => $listaProd, 'vprod' => $vproducto, 'nro_pedido' => $nro_pedido], 201);
-                }else{
-                    return $this->errorResponse(['total_pagar_mayor' => 'El total a pagar tiene que ser mayor o igual al total'], 201);
+                    $cliente->save();
                 }
+
+                $vproducto = new VentaProducto();
+                $vproducto->estado_venta = $request->get("estado_venta");
+                $vproducto->id_historial_caja = $hcaja[0]->id_historial_caja;
+                $vproducto->estado_atendido = false;
+
+                if ($request->isNewCustomer) {//Si es cliente nuevo se le asigna el id de la base de datos
+                    $vproducto->id_cliente = $cliente->id_cliente;
+                } else {
+                    //Si es cliente antiguo se le asigna el id del cliente que viene en el request
+                    $vproducto->id_cliente = $request->get("id_cliente");
+                }
+
+                $vproducto->id_sucursal = $request->get("id_sucursal");
+                if ($request->has('id_cajero')) {
+                    $vproducto->id_cajero = $request->get("id_cajero");
+                }
+                if ($request->has('id_mozo')) {
+                    $vproducto->id_mozo = $request->get("id_mozo");
+                }
+                $vproducto->save();
+                $pago = new Pago();
+                $pago->efectivo = $request->get("efectivo");
+                $pago->importe = $request->get("importe");
+                $pago->cambio = $request->get("cambio");
+                $pago->id_venta_producto = $vproducto->id_venta_producto;
+                $pago->id_cajero = $request->get("id_cajero");
+                $pago->tipo_pago = $request->get("tipo_pago");
+                $pago->save();
+                //Saca el nro de pedido
+                $listaProd = DB::table(DB::raw("registraProductosFunction('" . $request->listaProductos . "', " . $vproducto->id_venta_producto . ")"))->get();
+                $nro_pedido = DB::table('venta_productos')->where('id_historial_caja', '=', $hcaja[0]->id_historial_caja)->where('id_venta_producto', '<=', $vproducto->id_venta_producto)->count();
+                $ult_vproducto = VentaProducto::find($vproducto->id_venta_producto);
+                $ult_vproducto->nro_venta = $nro_pedido;
+                $ult_vproducto->save();
+                return response()->json(['data' => $listaProd, 'vprod' => $vproducto, 'nro_pedido' => $nro_pedido], 201);
             }else{
                 return $this->errorResponse(['efectivo_mayor' => 'El efectivo tiene que ser mayor o igual al total'], 201);
             }

@@ -25,7 +25,7 @@ class ProductoVendidoController extends ApiController
         $vproducto = DB::table('venta_productos as v')
                         ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
                         ->where('v.id_venta_producto', '=', $idVentaProducto)
-                        ->select('v.*', DB::raw("CASE WHEN c.nombre_completo isNull THEN 'GENERAL' ELSE c.nombre_completo END AS nombre_completo"), DB::raw("CASE WHEN c.dni isNull THEN 'GENERAL' ELSE c.dni END as dni"))
+                        ->select('v.*', DB::raw("CASE WHEN c.nombre_completo isNull THEN 'GENERAL' ELSE c.nombre_completo END AS nombre_completo"), DB::raw("CASE WHEN c.dni isNull THEN 0 ELSE c.dni END as dni"))
                         ->get();
         $pago = DB::table('pagos')
                         ->where('id_venta_producto', '=', $idVentaProducto)

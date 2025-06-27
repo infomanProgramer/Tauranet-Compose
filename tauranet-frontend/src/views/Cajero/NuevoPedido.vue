@@ -5,7 +5,7 @@
                 <div class="col-md-8">
                     <div class="row">
                         <div class="col-md-9 alineacion-botones">
-                            <button class="btn btn-primary" @click="addNuevoPedido()" ref="guardarPedidoBtn"><i class="far fa-save"></i> Guardar</button>
+                            <button class="btn btn-primary" ref="btnNuevoCliente" @click="addNewClient()"><i class="far fa-save"></i> Ciente Nuevo</button>
                             <button class="btn btn-primary" @click="limpiarPedido()"><i class="fas fa-broom"></i> Limpiar</button>
                             <button class="btn btn-primary" @click="printTicket()" :class="{disabled: ventaProdObj==null}"><i class="fas fa-print"></i> Imprimir</button>
                         </div>
@@ -26,8 +26,16 @@
                                     <label for="validationCustom04">Nombre</label>
                                 </div>
                                 <div class="col-md-10">
-                                    <input type="text" class="caja_texto" v-model="cliente.nombre_completo" v-if="swUpdate" disabled>
-                                    <input type="text" class="caja_texto" v-model="cliente.nombre_completo" v-else>
+                                    <input v-if="isNewCustomer" type="text" class="caja_texto" v-model="cliente.nombre_completo" >
+                                    <input
+                                        type="text"
+                                        class="caja_texto"
+                                        v-model="cliente.nombre_completo"
+                                        v-else
+                                        disabled
+                                        style="background-color: #f5f5f5; color: #888; cursor: not-allowed; opacity: 1;"
+                                    >
+                                    
                                     <ListErrors :errores="errores.nombre_completo"></ListErrors>
                                 </div>
                             </div>
@@ -38,9 +46,9 @@
                                 <div class="col-md-10">
                                     <form @submit.prevent="getListaClientes()">
                                     <div class="enlinea caja_texto">                                        
-                                        <input type="number" v-model="cliente.dni" v-if="swUpdate" disabled>
-                                        <input type="number" v-model="cliente.dni" v-else>
-                                        <button type="submit" class="btn" data-toggle="modal" data-target="#modalListaClientes"><i class="fas fa-search"></i></button>
+                                        <!-- <input type="number" v-model="cliente.dni" v-if="isNewCustomer" disabled> -->
+                                        <input type="number" v-model="cliente.dni">
+                                        <button type="submit" class="btn" data-toggle="modal" data-target="#modalListaClientes" v-if="!isNewCustomer"><i class="fas fa-search"></i></button>
                                     </div>
                                     <ListErrors :errores="errores.dni"></ListErrors>
                                     </form>
@@ -75,16 +83,8 @@
                                 <table class="table table-bordered table-condensed">
                                     <tbody>
                                         <tr>
-                                            <th scope="row">Sub total</th>
-                                            <td>{{calculaSubtotal}} {{tipoMoneda}}</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">Descuento</th>
-                                            <td>{{descuento}} %</td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">Total</th>
-                                            <td>{{calculaTotal}} {{tipoMoneda}}</td>
+                                            <th scope="row">Importe total</th>
+                                            <td>{{calculaImporte}} {{tipoMoneda}}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -104,59 +104,75 @@
                                 <table class="table table-bordered table-striped table-condensed">
                                     <tbody>
                                         <tr>
-                                            <td scope="col"><i class="fas fa-percent"></i> Seleccione el método de pago</td>
+                                            <td scope="col">Seleccione el método de pago</td>
                                             <td>
                                                 <ul class="mb-0 mt-0" style="list-style: none;">
-                                                    <li>
-                                                        <input class="form-check-input" type="radio" name="forma_de_pago" v-model=forma_de_pago id="checkEfectivo" :value=formaDePago.efectivo>
+                                                    <li class="li-horizontal">
+                                                        <i class="far fa-money-bill-alt"></i>
+                                                        <input class="form-check-input" type="radio" name="tipo_pago" v-model="reg.tipo_pago" id="checkEfectivo" :value=formaDePago.efectivo>
                                                         <label class="form-check-label" for="checkEfectivo">
                                                             Efectivo
                                                         </label>
                                                     </li>
-                                                    <li>
-                                                        <input class="form-check-input" type="radio" name="forma_de_pago" v-model=forma_de_pago id="checkQR" :value=formaDePago.qr>
-                                                        <label class="form-check-label" for="checkQR">
-                                                            Pago QR
-                                                        </label>
+                                                    <li class="li-horizontal">
+                                                        <i class="fas fa-qrcode"></i>
+                                                        <input class="form-check-input" type="radio" name="tipo_pago" v-model="reg.tipo_pago" id="checkQR" :value="formaDePago.qr">
+                                                        <label class="form-check-label" for="checkQR">Pago QR</label>
                                                     </li>
-                                                    <li>
-                                                        <input class="form-check-input" type="radio" name="forma_de_pago" v-model=forma_de_pago id="checkTarjeta" :value=formaDePago.tarjeta>
+                                                    <li class="li-horizontal">
+                                                        <i class="fab fa-cc-visa"></i>
+                                                        <input class="form-check-input" type="radio" name="tipo_pago" v-model="reg.tipo_pago" id="checkTarjeta" :value=formaDePago.tarjeta>
                                                         <label class="form-check-label" for="checkTarjeta">
                                                             Tarjeta
                                                         </label>
                                                     </li>
                                                 </ul>
+                                                <ListErrors :errores="errores.tipo_pago"></ListErrors>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td scope="col"><i class="far fa-money-bill-alt"></i> Efectivo ({{tipoMoneda}})</td>
+                                        <tr v-if="reg.tipo_pago == 0">
+                                            <td scope="col"><i class="far fa-money-bill-alt"></i> Monto entregado por el cliente ({{tipoMoneda}})</td>
                                             <td>
                                                 <input type="number" class="form-control" v-model="reg.efectivo">
                                                 <ListErrors :errores="errores.efectivo"></ListErrors>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td scope="col"><i class="fas fa-money-bill-wave"></i> Total a pagar ({{tipoMoneda}})</td>
+                                            <td scope="col"><i class="fas fa-money-bill-wave"></i> Importe ({{tipoMoneda}})</td>
                                             <td>
-                                                <input type="number" class="form-control" v-model="reg.total_pagar">
-                                                <ListErrors :errores="errores.total_pagar"></ListErrors>
+                                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                    <input
+                                                        v-if="!editarImporte"
+                                                        type="number"
+                                                        class="form-control"
+                                                        v-model="calculaImporte"
+                                                        style="margin-bottom: 0;"
+                                                        disabled
+                                                    />
+                                                    <input
+                                                        v-if="editarImporte"
+                                                        type="number"
+                                                        class="form-control"
+                                                        v-model="reg.importeRecalculado"
+                                                        style="margin-bottom: 0;"
+                                                    />
+                                                    <button
+                                                        v-if="!editarImporte"
+                                                        class="btn btn-primary"
+                                                        @click="editImporteField"
+                                                        ref="editarBtn"
+                                                    >Editar</button>
+                                                    <button
+                                                        v-if="editarImporte"
+                                                        class="btn btn-primary"
+                                                        @click="recalcularImporte"
+                                                        ref="recalcularBtn"
+                                                    >Recalcular</button>
+                                                </div>
+                                                <ListErrors :errores="errores.importe"></ListErrors>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td scope="col"><i class="fas fa-qrcode"></i> Pago QR ({{tipoMoneda}})</td>
-                                            <td>
-                                                <input type="number" class="form-control" disabled v-model="reg.pago_qr">
-                                                <ListErrors :errores="errores.pago_qr"></ListErrors>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td scope="col"><i class="fab fa-cc-visa"></i> Tarjeta ({{tipoMoneda}})</td>
-                                            <td>
-                                                <input type="number" class="form-control" disabled v-model="reg.tarjeta">
-                                                <ListErrors :errores="errores.tarjeta"></ListErrors>
-                                            </td>
-                                        </tr>
-                                        <tr>
+                                        <tr v-if="reg.tipo_pago == 0">
                                             <td scope="col"><i class="fas fa-hand-holding-usd"></i> Cambio ({{tipoMoneda}})</td>
                                             <td>
                                                 <input type="number" class="form-control" disabled :value="calculaCambio">
@@ -304,8 +320,6 @@ export default{
             nota: '',
             pedidoObj: {},
             subTotal: 0,
-            descuento: 0,
-            total: 0,
             listaClientes: [],
             // cliente: {
             //     nombre_completo: '',
@@ -323,19 +337,17 @@ export default{
             },
             nroPedido_ticket: -1,
             productosArray_ticket: [],
-            swUpdate: false,
+            isNewCustomer: false,
             errores: {},
             nuevoPedidoMsg: '',
             reg: {
                 efectivo: 0,
-                total_pagar: 0,
+                importe: 0,
+                importeRecalculado: 0,
                 pago_qr: 0,
                 tarjeta: 0,
-                sub_total: 0,
                 cambio: 0,
-                visa: 0,
-                mastercard: 0,
-                otros: 0
+                tipo_pago: 0, //0 efectivo, 1 tarjeta, 2 qr
             },
             pedidoMsg: '',
             type_user: this.$store.state.type_user,
@@ -347,7 +359,7 @@ export default{
             esFactura: false,
             detallePago: {},
             btnClientePrint: false,
-            forma_de_pago: null
+            editarImporte: false,
         }
     },
     computed: {
@@ -358,22 +370,29 @@ export default{
                 return a.match(b);
             });
         },
-        calculaSubtotal: function(){
+        calculaImporte: function(){
             let suma = 0
             if(this.tablaProductosPedidos.length>0){
                 this.tablaProductosPedidos.forEach(element => {
                     suma = Number(suma) + Number(element.importe)
                 });
             }
+            // this.reg.importe = parseFloat(suma).toFixed(2)
+            // this.reg.importe = this.reg.importe || 0
             return parseFloat(suma).toFixed(2)
         },
-        calculaTotal: function(){
-            let total = 0
-            total = Number(this.calculaSubtotal) - (Number(this.calculaSubtotal)*(Number(this.descuento/100)))
-            return parseFloat(total).toFixed(2)
-        },
-        calculaCambio() {
-            return parseFloat(this.reg.efectivo-this.reg.total_pagar).toFixed(2)
+        //eliminacion de funcion calculaTotal
+        calculaCambio: function() {
+            //return parseFloat(this.reg.efectivo-this.reg.importe).toFixed(2)
+            if(!this.editarImporte){
+                console.log("No se edito el importe ");
+                return parseFloat(this.reg.efectivo-this.calculaImporte).toFixed(2)
+            }
+            else{
+                console.log("Se edito el importe");
+                return parseFloat(this.reg.efectivo-this.reg.importeRecalculado).toFixed(2)
+            }
+                
         },
         tipoMoneda() {
             return this.$store.state.restauranteData.tipo_moneda
@@ -581,103 +600,48 @@ export default{
             this.cliente.id_cliente = objCliente.id_cliente
             this.cliente.dni = objCliente.dni
             this.cliente.nombre_completo = objCliente.nombre_completo
-            this.swUpdate = true
+            //this.isNewCustomer = true
             this.listaClientes = [];
             window.$("#modalListaClientes").modal('hide');
-        },
-        addNuevoPedido(){
-            //Guardar datos cliente
-            this.$refs.guardarPedidoBtn.className = "btn btn-primary disabled"
-            this.$Progress.start()
-            //Pasando datos al componente factura
-            this.cliente_ticket.nombre_completo = this.cliente.nombre_completo
-            this.cliente_ticket.dni = this.cliente.dni
-            this.productosArray_ticket = this.tablaProductosPedidos
-            if(this.type_user == 1){//cajero
-                this.cliente.id_cajero = this.data_usr.id_cajero //verficar si es cajero o mozo
-            }else{
-                this.cliente.id_mozo = this.data_usr.id_mozo
-            }
-            this.cliente.id_sucursal = this.data_usr.id_sucursal
-            this.cliente.total = this.calculaTotal
-            this.cliente.descuento = this.descuento
-            this.cliente.sub_total = this.calculaSubtotal
-            this.cliente.estado_venta = 'A'
-            this.cliente.id_restaurant = this.$store.state.id_restaurant
-            this.cliente.id_sucursal = this.data_usr.id_sucursal
-            if(this.type_user == 1){//cajero
-                this.cliente.id_caja = this.data_usr.id_caja
-            }else{//mozo
-                this.cliente.id_caja = this.cajaCheck
-            }
-            this.cliente.ant_cliente = this.swUpdate //true antiguo cliente  
-            let i = 0
-            let cad = "";
-            this.tablaProductosPedidos.forEach(element => {
-                if(i == this.tablaProductosPedidos.length-1){
-                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota
-                }else{
-                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+":"
-                }
-                i++
-            });
-            this.cliente.listaProductos = cad
-            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                axios.post(this.$store.state.url_root+`api/auth/cliente`, this.cliente)
-            .then(response => {
-                if(response.data.error == null){
-                    //Guardar en venta_productos
-                    if(response.data.data[0].registraproductosfunction == this.tablaProductosPedidos.length){
-                        // this.$store.dispatch('indicePedidosActiveAction', response.data.vprod.id_venta_producto)
-                        // this.$router.push({name: 'historial_pedidos', params: {obj: response.data.vprod}})
-                        this.btnClientePrint = false
-                        this.esFactura = false
-                        this.ventaProdObj = response.data.vprod
-                        this.nroPedido_ticket = response.data.nro_pedido
-                        this.limpiarPedido();
-                        this.$toasted.show('Se realizó el pedido sin pagar', {type: 'info'})
-                        this.$Progress.finish()
-                        this.$refs.guardarPedidoBtn.className = "btn btn-primary"
-                    }
-                }else{
-                    if(response.data.error.limite_pedidos == null){
-                        if(response.data.error.apertura_caja == null){
-                            this.errores = response.data.error
-                        }else{
-                            this.nuevoPedidoMsg = response.data.error.apertura_caja
-                        }
-                    }else{
-                        this.nuevoPedidoMsg = response.data.error.limite_pedidos
-                    }
-                    this.$Progress.fail()
-                    this.$refs.guardarPedidoBtn.className = "btn btn-primary"
-                }
-            })
-            .catch (error => {
-                this.$toasted.show('NuevoPedido '+error, {type: 'error'})
-                this.$Progress.fail()
-                this.$refs.guardarPedidoBtn.className = "btn btn-primary"
-            });
         },
         limpiarPedido(){
             this.tablaProductosPedidos = [];
             this.cliente = {};
-            this.swUpdate = false;
+            this.isNewCustomer = false;
             this.errores = {};
             this.pedidoMsg = '';
             this.reg = {
                         efectivo: 0, //Monto entregado por el cliente
                         importe: 0, //El monto que debe pagar el cliente
+                        importeRecalculado: null, //El monto que debe pagar el cliente
                         tipo_pago: 0, //0 efectivo, 1 tarjeta, 2 qr
-                        sub_total: 0,
                         cambio: 0,
                     }
-            this.nuevoPedidoMsg = ''
-            this.cajaCheck = -1
+            this.nuevoPedidoMsg = '';
+            this.cajaCheck = -1;
+            this.editarImporte = false;
         },
         habilitaCamposCliente(){
-            this.swUpdate = false;
+            this.isNewCustomer = false;
             this.cliente = {};
+        },
+        editImporteField(){
+            this.editarImporte = true;
+            this.reg.importeRecalculado = this.calculaImporte;
+        },
+        addNewClient(){
+            this.isNewCustomer = true;
+            if(this.isNewCustomer)
+                this.cliente = {}
+            // this.cliente = {
+            //     nombre_completo: '',
+            //     dni: ''
+            // }
+            // this.errores = {};
+            // this.nuevoPedidoMsg = '';
+        },
+        changeNewCustomerStatus(){
+            this.isNewCustomer = true;
         },
         addNuevoPedidoPago(){
             //Guardar datos cliente
@@ -685,25 +649,20 @@ export default{
             this.$Progress.start()
             this.cliente.id_cajero = this.data_usr.id_cajero //verficar si es cajero o mozo
             this.cliente.id_sucursal = this.data_usr.id_sucursal
-            this.cliente.total = this.calculaTotal
-            this.cliente.descuento = this.descuento
-            this.cliente.sub_total = this.calculaSubtotal
+            this.cliente.importe = !this.editarImporte? this.calculaImporte:this.reg.importeRecalculado
             this.cliente.estado_venta = 'P'
             this.cliente.id_caja = this.data_usr.id_caja
-            this.cliente.ant_cliente = this.swUpdate //true antiguo cliente
-            this.cliente.efectivo = this.reg.efectivo
-            this.cliente.total_pagar = this.reg.total_pagar
-            this.cliente.visa = this.reg.visa
-            this.cliente.mastercard = this.reg.mastercard
+            this.cliente.isNewCustomer = this.isNewCustomer //true antiguo cliente
+            this.cliente.efectivo = this.reg.tipo_pago == 0 ? this.reg.efectivo : null
+            this.cliente.tipo_pago = this.reg.tipo_pago
+            //this.cliente.importe = this.reg.importe
             this.cliente.id_sucursal = this.data_usr.id_sucursal
-            this.cliente.cambio = parseFloat(this.reg.efectivo-this.reg.total_pagar).toFixed(2)
+            this.cliente.cambio = this.reg.tipo_pago == 0 ? this.calculaCambio : null
             this.cliente.id_restaurant = this.$store.state.id_restaurant
             //Pasando datos al componente factura
             this.cliente_ticket.nombre_completo = this.cliente.nombre_completo
             this.cliente_ticket.dni = this.cliente.dni
-            this.detallePago.total = this.cliente.total
-            this.detallePago.descuento = this.cliente.descuento
-            this.detallePago.sub_total = this.cliente.sub_total
+//            this.detallePago.sub_total = this.cliente.importe
             this.detallePago.efectivo = this.cliente.efectivo
             this.detallePago.cambio = this.cliente.cambio
             this.productosArray_ticket = this.tablaProductosPedidos
@@ -764,37 +723,6 @@ export default{
                 this.$refs.pagarPedidoBtn.className = "btn btn-primary"
             });
         },
-        hacerPagoMethod(){
-            this.$Progress.start()
-            this.reg.total = parseFloat(this.ventaProductoObj.total).toFixed(2)
-            this.reg.id_venta_producto = this.ventaProductoObj.id_venta_producto
-            this.reg.cambio = parseFloat(this.reg.efectivo-this.reg.total_pagar).toFixed(2)
-            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-            axios.post(this.$store.state.url_root+`api/auth/pago`, this.reg)
-            .then(response => {
-                if(response.data.error == null){
-                    this.reg = response.data.data
-                    this.limpiarPedido();
-                    this.$Progress.finish()
-                }else{
-                    if(response.data.error.efectivo_mayor == null){
-                        if(response.data.error.total_pagar_mayor == null){
-                            this.errores = response.data.error;
-                        }else{
-                            this.pedidoMsg = `${response.data.error.total_pagar_mayor}`
-                        }
-                    }else{
-                        this.pedidoMsg = `${response.data.error.efectivo_mayor}`   
-                    }
-                    this.$Progress.fail()
-                }
-                
-            })
-            .catch(error => {
-                this.$toasted.show('NuevoPedido '+error, {type: 'error'})
-                this.$Progress.fail()
-            })
-        },
         chengeStatePrint(){
             if(this.$refs.statePrint.checked){
                 this.esFactura = true
@@ -804,7 +732,11 @@ export default{
         },
         printTicket(){
             window.print()
-        }
+        },
+        recalcularImporte() {
+            this.reg.importeRecalculado = this.calculaImporte;
+            this.editarImporte = false;
+        },
     },
 }
 </script>
@@ -923,5 +855,10 @@ export default{
         button{
             margin: 3px 3px 3px 0px;
         }
+    }
+    .li-horizontal {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 </style>

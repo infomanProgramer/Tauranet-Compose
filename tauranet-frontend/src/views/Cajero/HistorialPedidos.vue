@@ -50,17 +50,17 @@
                                 <table class="table table-bordered table-condensed">
                                     <thead class="head-table">
                                         <tr>
-                                            <th scope="col">Sub total</th>
-                                            <th>{{parseFloat(ventaProductoObj.sub_total).toFixed(2)}} {{tipoMoneda}}</th>
+                                            <th scope="col">Importe total</th>
+                                            <th>{{ reg.importe?parseFloat(reg.importe).toFixed(2):"" }} {{ reg.importe?tipoMoneda:"" }}</th>
+                                        </tr>
+                                        <!-- <tr>
+                                            <th scope="col">Efectivo</th>
+                                            <th>{{ parseFloat(reg.efectivo).toFixed(2) }} {{ tipoMoneda }}</th>
                                         </tr>
                                         <tr>
-                                            <th scope="col">Descuento</th>
-                                            <th>{{parseFloat(ventaProductoObj.descuento).toFixed(2)}} %</th>
-                                        </tr>
-                                        <tr>
-                                            <th scope="col">Total</th>
-                                            <th>{{parseFloat(ventaProductoObj.total).toFixed(2)}} {{tipoMoneda}}</th>
-                                        </tr>
+                                            <th scope="col">Cambio</th>
+                                            <th>{{ parseFloat(reg.cambio).toFixed(2) }} {{tipoMoneda}}</th>
+                                        </tr> -->
                                     </thead>
                                 </table>
                             </div>
@@ -87,10 +87,35 @@
                                 <table class="table table-bordered table-striped table-condensed">
                                     <tbody>
                                         <tr>
-                                            <td scope="col" class="subtituloPedidos">TOTAL</td>
-                                            <td class="subtituloPedidos">{{parseFloat(ventaProductoObj.total).toFixed(2)}} {{tipoMoneda}}</td>
+                                            <td scope="col" class="subtituloPedidos">Resumen</td>
+                                            <td class="subtituloPedidos"></td>
                                         </tr>
                                         <tr>
+                                            <!-- inicio tipo de pago -->
+                                                <ul class="mb-0 mt-0" style="list-style: none;">
+                                                    <li class="li-horizontal">
+                                                        <i class="far fa-money-bill-alt"></i>
+                                                        <input class="form-check-input" type="radio" name="tipo_pago" v-model="reg.tipo_pago" id="checkEfectivo" :value=formaDePago.efectivo disabled>
+                                                        <label class="form-check-label" for="checkEfectivo">
+                                                            Efectivo
+                                                        </label>
+                                                    </li>
+                                                    <li class="li-horizontal">
+                                                        <i class="fas fa-qrcode"></i>
+                                                        <input class="form-check-input" type="radio" name="tipo_pago" v-model="reg.tipo_pago" id="checkQR" :value=formaDePago.qr disabled>
+                                                        <label class="form-check-label" for="checkQR">Pago QR</label>
+                                                    </li>
+                                                    <li class="li-horizontal">
+                                                        <i class="fab fa-cc-visa"></i>
+                                                        <input class="form-check-input" type="radio" name="tipo_pago" v-model="reg.tipo_pago" id="checkTarjeta" :value=formaDePago.tarjeta disabled>
+                                                        <label class="form-check-label" for="checkTarjeta">
+                                                            Tarjeta
+                                                        </label>
+                                                    </li>
+                                                </ul>
+                                                <!-- fin tipo de pago -->
+                                        </tr>
+                                        <tr v-if="reg.tipo_pago == 0">
                                             <td scope="col"><i class="far fa-money-bill-alt"></i> Efectivo</td>
                                             <td>
                                                 <input type="number" class="form-control"  v-if="pagoObj != null" v-model="reg.efectivo" disabled>
@@ -99,33 +124,18 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td scope="col"><i class="fas fa-money-bill-wave"></i> Total pagar</td>
+                                            <td scope="col"><i class="fas fa-money-bill-wave"></i> Importe</td>
                                             <td>
-                                                <input type="number" class="form-control" v-if="pagoObj != null" v-model="reg.total_pagar" disabled>
-                                                <input type="number" class="form-control" v-else v-model="reg.total_pagar">
+                                                <input type="number" class="form-control" v-if="pagoObj != null" v-model="reg.importe" disabled>
+                                                <input type="number" class="form-control" v-else v-model="reg.importe">
                                                 <ListErrors :errores="errores.total_pagar"></ListErrors>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td scope="col"><i class="fab fa-cc-visa"></i> Visa</td>
+                                        <tr v-if="reg.tipo_pago == 0">
+                                            <td scope="col"><i class="fab fa-cc-visa"></i> Cambio</td>
                                             <td>
-                                                <input type="number" class="form-control" disabled v-model="reg.visa">
+                                                <input type="number" class="form-control" disabled v-model="reg.cambio">
                                                 <ListErrors :errores="errores.visa"></ListErrors>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td scope="col"><i class="fab fa-cc-mastercard"></i> Master Card</td>
-                                            <td>
-                                                <input type="number" class="form-control" disabled v-model="reg.mastercard">
-                                                <ListErrors :errores="errores.mastercard"></ListErrors>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td scope="col"><i class="fas fa-hand-holding-usd"></i> Cambio</td>
-                                            <td>
-                                                <input type="number" class="form-control" v-if="pagoObj != null" disabled v-model="reg.cambio">
-                                                <input type="number" class="form-control" v-else disabled :value="calculaCambio">
-                                                <ListErrors :errores="errores.cambio"></ListErrors>    
                                             </td>
                                         </tr>
                                     </tbody>
@@ -190,7 +200,12 @@ export default{
             pedidoMsg: '',
             sw: false,
             type_user: this.$store.state.type_user,
-            esFactura: false
+            esFactura: false,
+            formaDePago: {
+                efectivo: 0,
+                tarjeta: 1,
+                qr: 2
+            }, //0 efectivo, 1 tarjeta, 2 qr
         }
     },
     mixins: [misMixins],
@@ -264,13 +279,11 @@ export default{
                 this.productosArray = response.data.data
                 this.ventaProductoObj = response.data.vprod[0]
                 this.pagoObj = response.data.vpag[0]
+                console.log("Detalle de pago: ",this.pagoObj)
                 if(this.pagoObj == null){
                     this.reg = {
                         efectivo: 0,
-                        total_pagar: 0,
-                        visa: 0,
-                        mastercard: 0,
-                        sub_total: 0,
+                        importe: 0,
                         cambio: 0,
                     }
                 }else{

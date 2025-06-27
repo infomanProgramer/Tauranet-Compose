@@ -153,6 +153,10 @@ Esportar en formato directo, útil para backups grandes
 pg_dump -F d -f /ruta/directorio_backup -U postgres -d midb
 ~~~
 
+## Aclaraciones en Base de datos
+
+La tabla **venta_productos** tiene el detalle del grupo de productos vendidos en una sola venta y la tabla **producto_vendidos** tiene detalle por producto como cantidad, precio, etc
+
 
 
 

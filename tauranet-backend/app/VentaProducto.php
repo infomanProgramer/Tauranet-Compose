@@ -10,21 +10,21 @@ use App\Sucursal;
 class VentaProducto extends Model
 {
     protected $primaryKey = 'id_venta_producto';
-    protected $fillable = [
-        'nro_venta',
-        'total',
-        'sub_total',
-        'descuento',
-        'estado_venta',
-        'fecha',
-        'id_cajero',
-        'id_sucursal',
-        'id_cliente',
-        'id_mozo',
-        'id_historial_caja',
-        'estado_atendido',
-        'id_cocinero'
-    ];
+    // protected $fillable = [
+    //     'nro_venta',
+    //     'total',
+    //     'sub_total',
+    //     'descuento',
+    //     'estado_venta',
+    //     'fecha',
+    //     'id_cajero',
+    //     'id_sucursal',
+    //     'id_cliente',
+    //     'id_mozo',
+    //     'id_historial_caja',
+    //     'estado_atendido',
+    //     'id_cocinero'
+    // ];
 
     /*Pertenece a */
     public function clientes(){
