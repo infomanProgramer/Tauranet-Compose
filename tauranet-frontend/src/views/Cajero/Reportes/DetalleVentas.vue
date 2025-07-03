@@ -75,11 +75,11 @@
                             <table-column show="nro_venta" data-type="numeric" label="Nro"></table-column>
                             <table-column show="nombre_completo" label="Cliente"></table-column>
                             <table-column show="nombre_usuario" label="Atendido por:"></table-column>
-                            <table-column show="perfil" label="Perfil"></table-column>
+                            <!-- <table-column show="perfil" label="Perfil"></table-column> -->
                             <table-column show="id_venta_producto" label="Código" :sortable="false"></table-column> 
-                            <table-column show="total" label="Total" :sortable="false"></table-column>
-                            <table-column show="total_pagar" label="Total Pagar" :sortable="false"></table-column>
+                            <table-column show="tipo_pago" label="Tipo Pago" :sortable="false"></table-column>
                             <table-column show="efectivo" label="Efectivo" :sortable="false"></table-column>
+                            <table-column show="importe" label="Importe Total" :sortable="false"></table-column>
                             <table-column show="cambio" label="Cambio" :sortable="false"></table-column>
                             <table-column label="Cocina" :sortable="false" :filterable="false" cell-class="col-center">
                                 <template slot-scope="row">
@@ -100,19 +100,15 @@
                         <table class="table table-bordered table-striped table-condensed">
                             <tbody>
                                 <tr>
-                                    <td scope="col" class="subtituloPedidos">Total</td>
-                                    <td scope="col">{{totales.total}}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="col" class="subtituloPedidos">Total a Pagar</td>
-                                    <td scope="col">{{totales.totalpagar}}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="col" class="subtituloPedidos">Efectivo</td>
+                                    <td scope="col" class="subtituloPedidos">Efectivo Total</td>
                                     <td scope="col">{{totales.efectivo}}</td>
                                 </tr>
                                 <tr>
-                                    <td scope="col" class="subtituloPedidos">Cambio</td>
+                                    <td scope="col" class="subtituloPedidos">Importe Total</td>
+                                    <td scope="col">{{totales.importe}}</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="subtituloPedidos">Cambio Total</td>
                                     <td scope="col">{{totales.cambio}}</td>
                                 </tr>
                             </tbody>
@@ -160,16 +156,8 @@
                                         <table class="table table-bordered table-condensed">
                                             <thead class="head-table">
                                                 <tr>
-                                                    <th scope="col">Sub total</th>
-                                                    <th>{{parseFloat(ventaProductoObj.sub_total).toFixed(2)}} {{tipoMoneda}}</th>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="col">Descuento</th>
-                                                    <th>{{parseFloat(ventaProductoObj.descuento).toFixed(2)}} %</th>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="col">Total</th>
-                                                    <th>{{parseFloat(ventaProductoObj.total).toFixed(2)}} {{tipoMoneda}}</th>
+                                                    <th scope="col">Importe Total</th>
+                                                    <th>{{parseFloat(pagoObj.importe).toFixed(2)}} {{tipoMoneda}}</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -178,6 +166,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
+                                    <!-- Datos Cliente -->
                                     <h5 class="sub-cajero">Cliente</h5>
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped table-condensed">
@@ -191,52 +180,6 @@
                                                     <td scope="col">{{getIdentificacion}}</td>
                                                     <td v-if="ventaProductoObj.dni!=null">{{ventaProductoObj.dni}}</td>
                                                     <td v-else>GENERAL</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="table-responsive">
-                                        <!-- Modulo de pagos -->
-                                        <table class="table table-bordered table-striped table-condensed">
-                                            <tbody>
-                                                <tr>
-                                                    <td scope="col" class="subtituloPedidos">TOTAL</td>
-                                                    <td class="subtituloPedidos">{{parseFloat(ventaProductoObj.total).toFixed(2)}} {{tipoMoneda}}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td scope="col"><i class="far fa-money-bill-alt"></i> Efectivo</td>
-                                                    <td>
-                                                        <input type="number" class="form-control"  v-model="reg.efectivo" disabled>
-                                                        <ListErrors :errores="errores.efectivo"></ListErrors>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td scope="col"><i class="fas fa-money-bill-wave"></i> Total pagar</td>
-                                                    <td>
-                                                        <input type="number" class="form-control" v-model="reg.total_pagar" disabled>
-                                                        <ListErrors :errores="errores.total_pagar"></ListErrors>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td scope="col"><i class="fab fa-cc-visa"></i> Visa</td>
-                                                    <td>
-                                                        <input type="number" class="form-control" disabled v-model="reg.visa">
-                                                        <ListErrors :errores="errores.visa"></ListErrors>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td scope="col"><i class="fab fa-cc-mastercard"></i> Master Card</td>
-                                                    <td>
-                                                        <input type="number" class="form-control" disabled v-model="reg.mastercard">
-                                                        <ListErrors :errores="errores.mastercard"></ListErrors>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td scope="col"><i class="fas fa-hand-holding-usd"></i> Cambio</td>
-                                                    <td>
-                                                        <input type="number" class="form-control" disabled v-model="reg.cambio">
-                                                        <ListErrors :errores="errores.cambio"></ListErrors>    
-                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -296,12 +239,7 @@ export default{
             fecha_ini: null,
             fecha_fin: null,
             errores: {},
-            totales: {
-                total: 0,
-                totalpagar: 0,
-                efectivo: 0,
-                cambio: 0
-            },
+            totales: {},
             
             sucursalFiltro: -1,
             perfilFiltro: -1,
@@ -356,7 +294,8 @@ export default{
         },
         getListaClientes(){
             this.$Progress.start()
-            let url = this.$store.state.url_root+`api/auth/cliente/restaurant/${this.data_usr.id_restaurant}`
+            //let url = this.$store.state.url_root+`api/auth/cliente/restaurant/${this.data_usr.id_restaurant}`
+            let url = this.$store.state.url_root+`api/auth/cliente/restaurant/${this.$store.state.id_restaurant}`
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.get(url)
             .then(response => {
@@ -395,14 +334,7 @@ export default{
                 this.ventaProductoObj = response.data.vprod[0]
                 this.pagoObj = response.data.vpag[0]
                 if(this.pagoObj == null){
-                    this.reg = {
-                        efectivo: 0,
-                        total_pagar: 0,
-                        visa: 0,
-                        mastercard: 0,
-                        sub_total: 0,
-                        cambio: 0,
-                    }
+                    this.reg = {}
                 }else{
                     this.reg = this.pagoObj
                 }

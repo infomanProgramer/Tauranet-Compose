@@ -101,50 +101,6 @@
                     },
                     {
                         id: 3,
-                        name: 'Productos',
-                        icon: "fab fa-product-hunt",
-                        sub_menus: [
-                            {
-                                id: 1,
-                                name_path: 'categoriproductos',
-                                name: 'Categoria de Productos',
-                            },
-                            {
-                                id: 2,
-                                name_path: 'productos',
-                                name: 'Productos',
-                            },
-                        ]
-                    },
-                    {
-                        id: 4,
-                        name: 'Reportes',
-                        icon: "fas fa-chart-bar",
-                        sub_menus: [
-                            {
-                                id: 1,
-                                name_path: 'hoy',
-                                name: 'Hoy',
-                            },
-                            {
-                                id: 2,
-                                name_path: 'detalleventas',
-                                name: 'Detalle Ventas',
-                            },
-                            {
-                                id: 3,
-                                name_path: 'estadisticas',
-                                name: 'Estadísticas',
-                            },
-                            {
-                                id: 4,
-                                name_path: 'cajareport',
-                                name: 'Cajas',
-                            },
-                        ]
-                    },
-                    {
-                        id: 5,
                         name: 'Configuracion',
                         icon: "fas fa-wrench",
                         sub_menus: [
@@ -239,6 +195,50 @@
                     },
                     {
                         id: 4,
+                        name: 'Productos',
+                        icon: "fab fa-product-hunt",
+                        sub_menus: [
+                            {
+                                id: 1,
+                                name_path: 'categoriproductos',
+                                name: 'Categoria de Productos',
+                            },
+                            {
+                                id: 2,
+                                name_path: 'productos',
+                                name: 'Productos',
+                            },
+                        ]
+                    },
+                    {
+                        id: 5,
+                        name: 'Reportes',
+                        icon: "fas fa-chart-bar",
+                        sub_menus: [
+                            {
+                                id: 1,
+                                name_path: 'hoy',
+                                name: 'Hoy',
+                            },
+                            {
+                                id: 2,
+                                name_path: 'detalleventas',
+                                name: 'Detalle Ventas',
+                            },
+                            {
+                                id: 3,
+                                name_path: 'estadisticas',
+                                name: 'Estadísticas',
+                            },
+                            {
+                                id: 4,
+                                name_path: 'cajareport',
+                                name: 'Cajas',
+                            },
+                        ]
+                    },
+                    {
+                        id: 6,
                         name: 'Configuracion',
                         icon: "fas fa-wrench",
                         sub_menus: [

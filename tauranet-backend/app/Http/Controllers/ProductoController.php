@@ -90,12 +90,21 @@ class ProductoController extends ApiController
     public function store(Request $request)
     {
         \Log::info($request);
-        $validator = Validator::make($request->all(), [
+        $dataValidation = [
             'nombre' => 'required|min:4|max:50',
             'precio' => 'required|numeric|between:0,9999999.99',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
-            'id_administrador' => 'required|exists:administradors,id_administrador',
-        ],
+        ];
+        if ($request->get("id_administrador") !== null) {
+            $dataValidation = array_merge($dataValidation, [
+                'id_administrador' => 'required|exists:administradors,id_administrador',
+            ]);
+        } elseif ($request->get("id_cajero") !== null) {
+            $dataValidation = array_merge($dataValidation, [
+                'id_cajero' => 'required|exists:cajeros,id_cajero',
+            ]);
+        }
+        $validator = Validator::make($request->all(), $dataValidation,
         $messages = [
             'nombre.required' => 'El Nombre es requerido',
             'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
@@ -117,6 +126,11 @@ class ProductoController extends ApiController
         $producto->descripcion = $request->get("descripcion");
         $producto->precio = $request->get("precio");
         $producto->id_administrador = $request->get("id_administrador");
+        if ($request->get("id_administrador") !== null) {
+            $producto->id_administrador = $request->get("id_administrador");
+        } elseif ($request->get("id_cajero") !== null) {
+            $producto->id_cajero = $request->get("id_cajero");
+        }
         $producto->id_categoria_producto = $request->get("id_categoria_producto");
         if($request->hasFile('image')){
             $producto->producto_image = $request->image->store('', 'imagesProductos');
@@ -159,12 +173,21 @@ class ProductoController extends ApiController
     {
         \Log::info($request);
         $producto = Producto::find($id);
-        $validator = Validator::make($request->all(), [
+        $dataValidation = [
             'nombre' => 'required|min:4|max:50',
             'precio' => 'required|numeric|between:0,9999999.99',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
-            'id_administrador' => 'required|exists:administradors,id_administrador',
-        ],
+        ];
+        if ($request->get("id_administrador") !== null && $request->get("id_administrador") !== 'null') {
+            $dataValidation = array_merge($dataValidation, [
+                'id_administrador' => 'required|exists:administradors,id_administrador',
+            ]);
+        } elseif ($request->get("id_cajero") !== null && $request->get("id_cajero") !== 'null') {
+            $dataValidation = array_merge($dataValidation, [
+                'id_cajero' => 'required|exists:cajeros,id_cajero',
+            ]);
+        }
+        $validator = Validator::make($request->all(), $dataValidation,
         $messages = [
             'nombre.required' => 'El Nombre es requerido',
             'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
@@ -185,14 +208,15 @@ class ProductoController extends ApiController
             $producto->nombre = $request->get("nombre");
         }
         if($request->has('descripcion') && $request->descripcion != 'null') {
-            \Log::info($request->descripcion);
             $producto->descripcion = $request->get("descripcion");
         }
         if($request->has('precio')) {
             $producto->precio = $request->get("precio");
         }
-        if($request->has('id_administrador')) {
+        if ($request->get("id_administrador") !== null && $request->get("id_administrador") !== 'null') {
             $producto->id_administrador = $request->get("id_administrador");
+        } elseif ($request->get("id_cajero") !== null) {
+            $producto->id_cajero = $request->get("id_cajero");
         }
         if($request->has('id_categoria_producto')) {
             $producto->id_categoria_producto = $request->get("id_categoria_producto");

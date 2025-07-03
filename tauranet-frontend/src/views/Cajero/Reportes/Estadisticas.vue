@@ -22,11 +22,11 @@
 <script>
 import Marco from '@/components/Layout/Marco';
 import {misMixins} from '@/mixins/misMixins.js';
-import EmpleadoPedido from '@/components/Administrador/GraphTable/EmpleadoPedido'
-import ProductoCantidad from '@/components/Administrador/GraphTable/ProductoCantidad'
-import ProductoImporte from '@/components/Administrador/GraphTable/ProductoImporte'
-import FechaPedido from '@/components/Administrador/GraphTable/FechaPedido'
-import FechaImporte from '@/components/Administrador/GraphTable/FechaImporte'
+import EmpleadoPedido from '@/components/Cajero/GraphTable/EmpleadoPedido'
+import ProductoCantidad from '@/components/Cajero/GraphTable/ProductoCantidad'
+import ProductoImporte from '@/components/Cajero/GraphTable/ProductoImporte'
+import FechaPedido from '@/components/Cajero/GraphTable/FechaPedido'
+import FechaImporte from '@/components/Cajero/GraphTable/FechaImporte'
 export default{
     name: 'Estadisticas',
     components: {

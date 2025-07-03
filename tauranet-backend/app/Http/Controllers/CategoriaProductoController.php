@@ -56,19 +56,28 @@ class CategoriaProductoController extends ApiController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea nueva categoria de productos.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request) 
     {
         \Log::info($request);
-        $validator = Validator::make($request->all(), [
+        $dataValidation = [
             'nombre' => 'required|min:4|max:50',
-            'id_administrador' => 'required|exists:administradors,id_administrador',
             'id_restaurant' => 'required|exists:restaurants,id_restaurant',
-        ],
+        ];
+        if ($request->get("id_administrador") !== null) {
+            $dataValidation = array_merge($dataValidation, [
+                'id_administrador' => 'required|exists:administradors,id_administrador',
+            ]);
+        } elseif ($request->get("id_cajero") !== null) {
+            $dataValidation = array_merge($dataValidation, [
+                'id_cajero' => 'required|exists:cajeros,id_cajero',
+            ]);
+        }
+        $validator = Validator::make($request->all(), $dataValidation,
         $messages = [
             'nombre.required' => 'El Nombre es requerido',
             'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
@@ -84,7 +93,12 @@ class CategoriaProductoController extends ApiController
         $cproducto = new CategoriaProducto();
         $cproducto->nombre = $request->get("nombre");
         $cproducto->descripcion = $request->get("descripcion");
-        $cproducto->id_administrador = $request->get("id_administrador");
+        if ($request->get("id_administrador") !== null) {
+            $cproducto->id_administrador = $request->get("id_administrador");
+        } elseif ($request->get("id_cajero") !== null) {
+            $cproducto->id_cajero = $request->get("id_cajero");
+        }
+        $cproducto->id_cajero = $request->get("id_cajero");
         $cproducto->id_restaurant = $request->get("id_restaurant");
         $cproducto->save();
         return response()->json(['data' => $cproducto], 201);
@@ -124,19 +138,28 @@ class CategoriaProductoController extends ApiController
     {
         \Log::info($request);
         $cproducto = CategoriaProducto::find($id);
-        $validator = Validator::make($request->all(), [
+        $dataValidation = [
             'nombre' => 'required|min:4|max:50',
-            'id_administrador' => 'required|exists:administradors,id_administrador',
             'id_restaurant' => 'required|exists:restaurants,id_restaurant',
-        ],
+        ];
+        if ($request->get("id_administrador") !== null) {
+            $dataValidation = array_merge($dataValidation, [
+                'id_administrador' => 'required|exists:administradors,id_administrador',
+            ]);
+        } elseif ($request->get("id_cajero") !== null) {
+            $dataValidation = array_merge($dataValidation, [
+                'id_cajero' => 'required|exists:cajeros,id_cajero',
+            ]);
+        }
+        $validator = Validator::make($request->all(), $dataValidation,
         $messages = [
             'nombre.required' => 'El Nombre es requerido',
             'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
             'nombre.max' => 'El Nombre tiene que tener 50 caracteres como maximo',
             'id_administrador.required' => 'El Administrador es requerido',
             'id_administrador.exists' => 'El Administrador no existe',
-            'id_restaurant.required' => 'El Administrador es requerido',
-            'id_restaurant.exists' => 'El Administrador no existe',
+            'id_restaurant.required' => 'El restaurante es requerido',
+            'id_restaurant.exists' => 'El restaurante no existe',
         ]);
         if ($validator->fails()) {
             return response()->json(["error" => $validator->errors()], 201);
@@ -147,8 +170,10 @@ class CategoriaProductoController extends ApiController
         if($request->has('descripcion')) {
             $cproducto->descripcion = $request->get("descripcion");
         }
-        if($request->has('id_administrador')) {
+        if ($request->get("id_administrador") !== null) {
             $cproducto->id_administrador = $request->get("id_administrador");
+        } elseif ($request->get("id_cajero") !== null) {
+            $cproducto->id_cajero = $request->get("id_cajero");
         }
         if($request->has('id_restaurant')) {
             $cproducto->id_restaurant = $request->get("id_restaurant");

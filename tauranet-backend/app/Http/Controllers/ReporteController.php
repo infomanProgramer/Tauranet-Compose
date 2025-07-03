@@ -26,8 +26,9 @@ class ReporteController extends ApiController
         return $response;
     }
     public function detalleVentas($idRestaurante, $fecha_ini, $fecha_fin, $idSucursal, $idPerfil){
-        
+        //Datos de todas las sucursales y roles
         if($idSucursal == -1 && $idPerfil == -1){
+            \Log::info('Todas las sucursales y perfiles');
             $dventas = DB::table('venta_productos as v')
                 ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
                 ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
@@ -39,7 +40,7 @@ class ReporteController extends ApiController
                 ->where('s.id_restaurant', '=', $idRestaurante)
                 ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
                 ->orderBy('v.created_at', 'desc')
-                ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'v.total', 'p.efectivo', 'p.total_pagar', 'p.cambio', 'v.estado_atendido')
+                ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
                 ->paginate(15);
             //Totales
             $totales = DB::table('venta_productos as v')
@@ -52,11 +53,12 @@ class ReporteController extends ApiController
                 ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
                 ->where('s.id_restaurant', '=', $idRestaurante)
                 ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                ->select(DB::raw('sum(v.total) as Total'), DB::raw('sum(p.efectivo) as Efectivo'), DB::raw('sum(p.total_pagar) as TotalPagar'), DB::raw('sum(p.cambio) as Cambio'))
+                ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
                 ->get();
             $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
             return $response;
         }
+        //Datos de cualquier sucursal y un rol especifico
         if($idSucursal == -1 && $idPerfil != -1){
             if($idPerfil == 0){//Mozo
                 $dventas = DB::table('venta_productos as v')
@@ -71,7 +73,8 @@ class ReporteController extends ApiController
                     ->whereNull('v.id_cajero')
                     ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
                     ->orderBy('v.created_at', 'desc')
-                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'v.total', 'p.efectivo', 'p.total_pagar', 'p.cambio', 'v.estado_atendido')
+                    //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
+                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
                     ->paginate(15);
                 //Totales
                 $totales = DB::table('venta_productos as v')
@@ -85,7 +88,8 @@ class ReporteController extends ApiController
                     ->where('s.id_restaurant', '=', $idRestaurante)
                     ->whereNull('v.id_cajero')
                     ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    ->select(DB::raw('sum(v.total) as Total'), DB::raw('sum(p.efectivo) as Efectivo'), DB::raw('sum(p.total_pagar) as TotalPagar'), DB::raw('sum(p.cambio) as Cambio'))
+                    //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
+                    ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
                     ->get();
                 $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
                 return $response;
@@ -102,7 +106,8 @@ class ReporteController extends ApiController
                     ->whereNull('v.id_mozo')
                     ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
                     ->orderBy('v.created_at', 'desc')
-                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'v.total', 'p.efectivo', 'p.total_pagar', 'p.cambio', 'v.estado_atendido')
+                    //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
+                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
                     ->paginate(15);
                 //Totales
                 $totales = DB::table('venta_productos as v')
@@ -116,7 +121,8 @@ class ReporteController extends ApiController
                     ->where('s.id_restaurant', '=', $idRestaurante)
                     ->whereNull('v.id_mozo')
                     ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    ->select(DB::raw('sum(v.total) as Total'), DB::raw('sum(p.efectivo) as Efectivo'), DB::raw('sum(p.total_pagar) as TotalPagar'), DB::raw('sum(p.cambio) as Cambio'))
+                    //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
+                    ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
                     ->get();
                 $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
                 return $response;
@@ -135,7 +141,8 @@ class ReporteController extends ApiController
                 ->where('v.id_sucursal', '=', $idSucursal)
                 ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
                 ->orderBy('v.created_at', 'desc')
-                ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'v.total', 'p.efectivo', 'p.total_pagar', 'p.cambio', 'v.estado_atendido')
+                //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
+                ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
                 ->paginate(15);
             //Totales
              $totales = DB::table('venta_productos as v')
@@ -149,7 +156,8 @@ class ReporteController extends ApiController
                 ->where('s.id_restaurant', '=', $idRestaurante)
                 ->where('v.id_sucursal', '=', $idSucursal)
                 ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                ->select(DB::raw('sum(v.total) as Total'), DB::raw('sum(p.efectivo) as Efectivo'), DB::raw('sum(p.total_pagar) as TotalPagar'), DB::raw('sum(p.cambio) as Cambio'))
+                //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
+                ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
                 ->get();
             $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
             return $response;
@@ -169,7 +177,8 @@ class ReporteController extends ApiController
                     ->whereNull('v.id_cajero')
                     ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
                     ->orderBy('v.created_at', 'desc')
-                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'v.total', 'p.efectivo', 'p.total_pagar', 'p.cambio', 'v.estado_atendido')
+                    //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
+                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
                     ->paginate(15);
                  //Totales
                  $totales = DB::table('venta_productos as v')
@@ -184,7 +193,8 @@ class ReporteController extends ApiController
                     ->where('v.id_sucursal', '=', $idSucursal)
                     ->whereNull('v.id_cajero')
                     ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    ->select(DB::raw('sum(v.total) as Total'), DB::raw('sum(p.efectivo) as Efectivo'), DB::raw('sum(p.total_pagar) as TotalPagar'), DB::raw('sum(p.cambio) as Cambio'))
+                    //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
+                    ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
                     ->get();
                     $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
                     return $response;
@@ -202,7 +212,8 @@ class ReporteController extends ApiController
                     ->whereNull('v.id_mozo')
                     ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
                     ->orderBy('v.created_at', 'desc')
-                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'v.total', 'p.efectivo', 'p.total_pagar', 'p.cambio', 'v.estado_atendido')
+                    //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
+                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
                     ->paginate(15);
                 //Totales
                 $totales = DB::table('venta_productos as v')
@@ -217,7 +228,8 @@ class ReporteController extends ApiController
                     ->where('v.id_sucursal', '=', $idSucursal)
                     ->whereNull('v.id_mozo')
                     ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    ->select(DB::raw('sum(v.total) as Total'), DB::raw('sum(p.efectivo) as Efectivo'), DB::raw('sum(p.total_pagar) as TotalPagar'), DB::raw('sum(p.cambio) as Cambio'))
+                    //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
+                    ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
                     ->get();
                 $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
                 return $response;

@@ -140,7 +140,7 @@ export default{
         this.listaSucursalesMethod();//Carga combo sucursales
         this.listaCategoriaProductosMethod()
         this.$Progress.start()
-        this.getDataUser(2).then(response => {
+        this.getDataUser(1).then(response => {//Extrae datos del cajero
             this.data_usr = response.data;
             this.$Progress.finish()
         }).catch(error => {   
@@ -197,7 +197,7 @@ export default{
         nuevaCategoria(){
             this.$refs.nuevoCategoriaBtn.className = "btn btn-primary disabled"
             this.$Progress.start()
-            this.categoria.id_administrador = this.data_usr.id_administrador
+            this.categoria.id_cajero = this.data_usr.id_cajero
             this.categoria.id_restaurant = this.$store.state.id_restaurant
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.post(this.$store.state.url_root+`api/auth/cproducto`, this.categoria)
@@ -224,7 +224,8 @@ export default{
         editaCategoria(idCategoria){
             this.$refs.editaCategoriaBtn.className = "btn btn-primary disabled"
             this.$Progress.start()
-            this.categoria.id_administrador = this.data_usr.id_administrador
+            this.categoria.id_cajero = this.data_usr.id_cajero
+            console.log("editaCategoria", this.categoria);
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.put(this.$store.state.url_root+`api/auth/cproducto/${idCategoria}`, this.categoria)
             .then(response => {

@@ -126,12 +126,36 @@ Route::group([
         Route::get('calculamonto/{iventaproductosdHistorialCaja}', 'HistorialCajaController@calculaMontoFinal');
         Route::put('updatemonto/{id}', 'HistorialCajaController@updateMontoFinal');
         Route::post('clientepago', 'ClienteController@storePago')->middleware('pedidos_habilitados');
+        //Ex rutas de Administrador (Categoría Productos)
+        Route::get('sucursalcombo/{idRestaurant}', 'CajaController@sucursalPerRestaurant');
+        Route::get('cproducto/{id}', 'CategoriaProductoController@show');
+        Route::post('cproducto', 'CategoriaProductoController@store');
+        Route::put('cproducto/{id}', 'CategoriaProductoController@update');
+        Route::get('cproducto/{pag}/restaurant/{idRestaurante}', 'CategoriaProductoController@index');
+        Route::get('cproducto/restaurant/{idRestaurante}', 'CategoriaProductoController@combo');
+        Route::delete('cproducto/{id}', 'CategoriaProductoController@destroy');
+        //Ex rutas de Administrador (Productos)
+        Route::get('producto/{pag}/restaurant/{idRestaurante}/categoria/{idCategoria}', 'ProductoController@index');
+        Route::get('producto/{id}', 'ProductoController@show');
+        Route::post('producto', 'ProductoController@store');
+        Route::post('productoupdate/{id}', 'ProductoController@update');
+        Route::delete('producto/{id}', 'ProductoController@destroy');
+        Route::delete('delimage/{id}', 'ProductoController@destroyImage');
+        //Ex rutas de Administrador (Reportes)
+        Route::get('aperturacajas/{idRestaurante}/sucursal/{idSucursal}', 'ReporteController@aperturaCajas');
+        Route::get('cliente/restaurant/{idRestaurant}', 'ClienteController@getClientesByRestaurant');
+        Route::get('detalleventas/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/sucursal/{idSucursal}/perfil/{idPerfil}', 'ReporteController@detalleVentas');
+        Route::get('empleadopedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@empleadoPedido');
+        Route::get('fechaimporte/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaImporte');
+        Route::get('fechapedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaPedidos');
+        Route::get('productocantidad/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@productoCantidad');
+        Route::get('productoimporte/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@productoImporte');
+        Route::get('reportehoy/{idRestaurante}', 'ReporteController@getReportesHoy');
     });
 
     //Rutas Administrador
     Route::group(['middleware' => 'auth:admin'], function () {
         Route::get('caja/sucursal/{idSucursal}/page/{pag}', 'CajaController@index');
-        Route::get('sucursalcombo/{idRestaurant}', 'CajaController@sucursalPerRestaurant');
         Route::post('caja', 'CajaController@store')->middleware('cajas_habilitados');
         Route::get('caja/{id}', 'CajaController@show');
         Route::put('caja/{id}', 'CajaController@update');
@@ -154,30 +178,10 @@ Route::group([
         Route::get('cocinero/{id}', 'CocineroController@show');
         Route::put('cocinero/{id}', 'CocineroController@update');
         Route::delete('cocinero/{id}', 'CocineroController@destroy');
-
-        Route::get('cproducto/{pag}/restaurant/{idRestaurante}', 'CategoriaProductoController@index');
-        Route::get('cproducto/restaurant/{idRestaurante}', 'CategoriaProductoController@combo');
-        Route::post('cproducto', 'CategoriaProductoController@store');
-        Route::get('cproducto/{id}', 'CategoriaProductoController@show');
-        Route::put('cproducto/{id}', 'CategoriaProductoController@update');
-        Route::delete('cproducto/{id}', 'CategoriaProductoController@destroy');
-
-        Route::get('producto/{pag}/restaurant/{idRestaurante}/categoria/{idCategoria}', 'ProductoController@index');
-        Route::post('producto', 'ProductoController@store');
-        Route::get('producto/{id}', 'ProductoController@show');
-        Route::post('productoupdate/{id}', 'ProductoController@update');
-        Route::delete('producto/{id}', 'ProductoController@destroy');
-        Route::delete('delimage/{id}', 'ProductoController@destroyImage');
+        
         Route::put('updatemoneda/{id}', 'RestaurantController@updateMoneda');
         Route::put('udpateidentificacacion/{id}', 'RestaurantController@updateIdentificacion');
-        Route::get('reportehoy/{idRestaurante}', 'ReporteController@getReportesHoy');
-        Route::get('detalleventas/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/sucursal/{idSucursal}/perfil/{idPerfil}', 'ReporteController@detalleVentas');
-        Route::get('empleadopedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@empleadoPedido');
-        Route::get('productocantidad/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@productoCantidad');
-        Route::get('productoimporte/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@productoImporte');
-        Route::get('fechapedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaPedidos');
-        Route::get('fechaimporte/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaImporte');
-        Route::get('aperturacajas/{idRestaurante}/sucursal/{idSucursal}', 'ReporteController@aperturaCajas');
-        Route::get('cliente/restaurant/{idRestaurant}', 'ClienteController@getClientesByRestaurant');
+
+        //Rutas copiadas de cajero de forma temporal, después eliminar
     });
 });

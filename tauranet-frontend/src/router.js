@@ -10,8 +10,8 @@ import LoginSA from "./views/Auth/LoginSA";
 import Restaurant from "./views/Superadmin/Restaurant";
 import Administrador from "./views/Superadmin/Administrador";
 import GestorEmpleados from "./views/Administrador/Personal/GestorEmpleados";
-import CategoriaProductos from "./views/Administrador/Productos/CategoriaProductos";
-import Productos from "./views/Administrador/Productos/Productos";
+import CategoriaProductos from "./views/Cajero/Productos/CategoriaProductos";
+import Productos from "./views/Cajero/Productos/Productos";
 import NuevoPedido from "./views/Cajero/NuevoPedido";
 import AperturaCierre from "./views/Cajero/AperturaCierre";
 import HistorialPedidos from "./views/Cajero/HistorialPedidos";
@@ -19,10 +19,10 @@ import TipoMoneda from "./views/Administrador/Config/TipoMoneda";
 import facturaCocina from "./components/Invoices/facturaCocina";
 import Password from "./views/Config/Password";
 import ConfigDni from "./views/Administrador/Config/ConfigDni";
-import Hoy from "./views/Administrador/Reportes/Hoy";
-import CajaReport from "./views/Administrador/Reportes/CajaReport";
-import DetalleVentas from "./views/Administrador/Reportes/DetalleVentas";
-import Estadisticas from "./views/Administrador/Reportes/Estadisticas";
+import Hoy from "./views/Cajero/Reportes/Hoy";
+import CajaReport from "./views/Cajero/Reportes/CajaReport";
+import DetalleVentas from "./views/Cajero/Reportes/DetalleVentas";
+import Estadisticas from "./views/Cajero/Reportes/Estadisticas";
 import CocinaPedidos from "./views/Cocinero/CocinaPedidos";
 
 Vue.use(Router);
@@ -107,54 +107,6 @@ export default new Router({
             requiresRolAdministrador: true
           }
         },
-        {
-          name: "categoriproductos",
-          path: "categoriproductos",
-          component: CategoriaProductos,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
-        {
-          name: "productos",
-          path: "productos",
-          component: Productos,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
-        {
-          name: "hoy",
-          path: "hoy",
-          component: Hoy,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
-        {
-          name: "detalleventas",
-          path: "detalleventas",
-          component: DetalleVentas,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
-        {
-          name: "estadisticas",
-          path: "estadisticas",
-          component: Estadisticas,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
-        {
-          name: "cajareport",
-          path: "cajareport",
-          component: CajaReport,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
         //Rutas Cajero
         {
           name: "nuevopedido",
@@ -178,6 +130,54 @@ export default new Router({
           component: HistorialPedidos,
           meta: {
             requiresCajeroOrMozo: true
+          }
+        },
+        {
+          name: "categoriproductos",
+          path: "categoriproductos",
+          component: CategoriaProductos,
+          meta: {
+            requiresCajeroOrMozo: true
+          }
+        },
+        {
+          name: "productos",
+          path: "productos",
+          component: Productos,
+          meta: {
+            requiresCajeroOrMozo: true
+          }
+        },
+        {
+          name: "hoy",
+          path: "hoy",
+          component: Hoy,
+          meta: {
+            requiresRolCajero: true
+          }
+        },
+        {
+          name: "detalleventas",
+          path: "detalleventas",
+          component: DetalleVentas,
+          meta: {
+            requiresRolCajero: true
+          }
+        },
+        {
+          name: "estadisticas",
+          path: "estadisticas",
+          component: Estadisticas,
+          meta: {
+            requiresRolCajero: true
+          }
+        },
+        {
+          name: "cajareport",
+          path: "cajareport",
+          component: CajaReport,
+          meta: {
+            requiresRolCajero: true
           }
         },
         {

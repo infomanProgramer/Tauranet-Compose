@@ -100,7 +100,7 @@
                                 this.$router.push({name: 'nuevopedido'})
                                 this.$Progress.finish()
                             }else if(this.type_user == 2){//Administrador
-                                this.$router.push({name: 'hoy'})
+                                this.$router.push({name: 'sucursal'})
                                 this.$Progress.finish()
                             }else if(this.type_user == 4){//Cocinero
                                 console.log("cocinero autenticado")

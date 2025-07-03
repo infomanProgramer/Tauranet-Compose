@@ -250,7 +250,7 @@ export default{
         this.listaProductosMethod();//Carga combo sucursales
         this.comboCategoria();
         this.$Progress.start()
-        this.getDataUser(2).then(response => {
+        this.getDataUser(1).then(response => {//Extrae datos del cajero
             this.data_usr = response.data;
             this.$Progress.finish()
         }).catch(error => {
@@ -291,7 +291,7 @@ export default{
         comboCategoria(){
             this.$Progress.start()
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                axios.get(this.$store.state.url_root+`api/auth/cproducto/restaurant/${this.$store.state.id_restaurant}`)
+                axios.get(this.$store.state.url_root+`api/auth/cproducto/restaurant/${this.$store.state.id_restaurant}`)//ok
             .then(response => {
                 this.listaCategoria = response.data.data;
                 this.$Progress.finish()
@@ -303,7 +303,7 @@ export default{
         },
         listaProductosMethod(url){
             this.$Progress.start()
-            url = url || this.$store.state.url_root+`api/auth/producto/${this.nro_page}/restaurant/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}`
+            url = url || this.$store.state.url_root+`api/auth/producto/${this.nro_page}/restaurant/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}`//ok
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.get(url)
             .then(response => {
@@ -320,11 +320,10 @@ export default{
             this.nro_page = this.$refs.nroEntradas.value
             this.listaProductosMethod()
         },
-        getDatosProducto(idPersonal){
+        getDatosProducto(idPersonal){//Revisando
             this.$Progress.start()
-            this.producto.id_administrador = this.data_usr.id_administrador
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                axios.get(this.$store.state.url_root+`api/auth/producto/${idPersonal}`)
+                axios.get(this.$store.state.url_root+`api/auth/producto/${idPersonal}`)//ok
             .then(response => {
                 this.producto = response.data.data
                 this.$Progress.finish()
@@ -341,7 +340,7 @@ export default{
             let type = 'image/jpeg'
             let compressionRate = 0.5
             this.myCroppa.generateBlob((blob) => {
-                this.producto.id_administrador = this.data_usr.id_administrador
+                this.producto.id_cajero = this.data_usr.id_cajero
                 this.producto.image = blob
                 let formData = new FormData();
                 for(let item in this.producto){
@@ -354,7 +353,7 @@ export default{
                 // }
                 axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.defaults.headers.common["Content-Type"] = "multipart/form-data";
-                axios.post(this.$store.state.url_root+`api/auth/producto`, formData)
+                axios.post(this.$store.state.url_root+`api/auth/producto`, formData)//ok
                 .then(response => {
                     if(response.data.error == null){
                         this.listaProductosMethod()
@@ -382,7 +381,7 @@ export default{
             let type = 'image/jpeg'
             let compressionRate = 0.5
             this.myCroppaUpdate.generateBlob((blob) => {
-                this.producto.id_administrador = this.data_usr.id_administrador
+                this.producto.id_cajero = this.data_usr.id_cajero
                 if(this.producto.producto_image==null){
                     this.producto.image = blob
                 }
@@ -395,7 +394,7 @@ export default{
                 //formData.append('_method', 'PUT')
                 axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.defaults.headers.common["Content-Type"] = "multipart/form-data";
-                axios.post(this.$store.state.url_root+`api/auth/productoupdate/${idProducto}`, formData)
+                axios.post(this.$store.state.url_root+`api/auth/productoupdate/${idProducto}`, formData)//ok
                 .then(response => {
                     if(response.data.error == null){
                         this.listaProductosMethod(this.$store.state.url_root+`api/auth/producto/${this.nro_page}/restaurant/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}?page=${this.pagination.current_page}`)
@@ -439,11 +438,11 @@ export default{
             let sw = confirm(`Desea eliminar el usuario ${nomProducto}`)
             if(sw){
                 this.$Progress.start()
-                let url = this.$store.state.url_root+`api/auth/producto/${idProducto}`
+                let url = this.$store.state.url_root+`api/auth/producto/${idProducto}`//ok
                 axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                     axios.delete(url)
                 .then(response => {
-                    this.listaProductosMethod(this.$store.state.url_root+`api/auth/producto/${this.nro_page}/restaurant/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}?page=${this.pagination.current_page}`)
+                    this.listaProductosMethod(this.$store.state.url_root+`api/auth/producto/${this.nro_page}/restaurant/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}?page=${this.pagination.current_page}`)//ok
                     this.limpiaProducto();
                     this.nuevoProductoMsg = `El producto <strong>${nomProducto}</strong> se elimino correctamente`
                     this.$Progress.finish()
@@ -464,7 +463,7 @@ export default{
                 axios.delete(this.$store.state.url_root+"api/auth/delimage/"+this.producto.id_producto)
                 .then(response => {
                     this.producto = response.data.data
-                    this.listaProductosMethod(this.$store.state.url_root+`api/auth/producto/${this.nro_page}/restaurant/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}?page=${this.pagination.current_page}`)
+                    this.listaProductosMethod(this.$store.state.url_root+`api/auth/producto/${this.nro_page}/restaurant/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}?page=${this.pagination.current_page}`)//ok
                     this.$Progress.finish()
                 })
                 .catch (error => {
