@@ -8,20 +8,20 @@
         </li>
         <li class="nav-item" id="datos-usuario">
             <!-- Opciones del Usuario -->
-                <a data-toggle="collapse" href="#subMenuAdministrador" class="custom-menu-link-profile" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrowA">
-                    <img id="foto-perfil" :src="fotoperfil" class="rounded-circle" alt="Cinque Terre" width="40" height="40">
-                    <div for="" style="line-height: 0.6; height: 100%; width: 100%; display: flex; flex-direction: column; justify-content: center;">
-                        <strong><DataUser :dataReturn="['nombre_usuario']"></DataUser></strong><br>
-                        <span id="rol_usuario">{{rol}}</span>
-                    </div>
-                    <i class="fas fa-angle-left arrow icon-right-profile" style="" ref="iconoSubMenuAdmin"></i>
-                </a>
-                <!-- Sub menu -->
-                <ul class="collapse" id="subMenuAdministrador">
-                    <li class="nav-link">
-                        <router-link :to="{name: 'logout'}">Cerrar sesión</router-link>
-                    </li>
-                </ul>
+            <a data-toggle="collapse" href="#subMenuAdministrador" class="custom-menu-link-profile" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrowA">
+                <img id="foto-perfil" :src="fotoperfil" class="rounded-circle" alt="Cinque Terre" width="40" height="40">
+                <div class="align-middle" for="" style="line-height: 0.6; height: 100%; width: 100%; display: flex; flex-direction: column; justify-content: center;">
+                    <strong><DataUser :dataReturn="['nombre_usuario']"></DataUser></strong><br>
+                    <span id="rol_usuario">{{rol}}</span>
+                </div>
+                <i class="fas fa-angle-left arrow icon-right-profile" ref="iconoSubMenuAdmin"></i>
+            </a>
+            <!-- Sub menu -->
+            <ul class="collapse" id="subMenuAdministrador" style="background-color: red;">
+                <li class="nav-link">
+                    <router-link :to="{name: 'logout'}">Cerrar sesión</router-link>
+                </li>
+            </ul>
         </li>
         <li class="nav-item" v-for="item in menu" :key="item.id">
             <a data-toggle="collapse" :href="'#collapseExample'+item.id" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrow(item.id-1)" v-if="item.sub_menus.length>0" class="custom-menu-link">
@@ -353,6 +353,8 @@
             #subMenuAdministrador{
                 background-color: transparent;
                 color: #D3D3D3;
+                // position: static !important;
+                // transition: height 0.3s ease;
             }
         }
         #logo-tauranet{
@@ -362,11 +364,11 @@
         #datos-usuario{
             background-color: #35465C;
             height: 5rem;
-            >i{
-                // float: right;
-                margin-right: 0rem;
-                color: white;    
-            }
+            // >i{
+            //     // float: right;
+            //     margin-right: 0rem;
+            //     color: white;    
+            // }
         }
         .custom-menu-link{
             display: flex; 
