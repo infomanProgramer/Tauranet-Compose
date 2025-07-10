@@ -8,30 +8,35 @@
         </li>
         <li class="nav-item" id="datos-usuario">
             <!-- Opciones del Usuario -->
-                <a data-toggle="collapse" href="#subMenuAdministrador" role="button" aria-expanded="false" aria-controls="collapseExample" class="nav-link" @click="changeArrowA">
-                    <!-- <i :class="item.icon+' menu-icon'"></i> -->
+                <a data-toggle="collapse" href="#subMenuAdministrador" class="custom-menu-link-profile" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrowA">
                     <img id="foto-perfil" :src="fotoperfil" class="rounded-circle" alt="Cinque Terre" width="40" height="40">
-                    <!-- <img id="foto-perfil" :src="'../../assets/iconos-usuarios/perfil-femenino.svg'" class="rounded-circle" alt="Cinque Terre" width="40" height="40"> -->
-                    <label for="" class="align-middle" style="line-height: 0.9;">
+                    <div for="" style="line-height: 0.6; height: 100%; width: 100%; display: flex; flex-direction: column; justify-content: center;">
                         <strong><DataUser :dataReturn="['nombre_usuario']"></DataUser></strong><br>
                         <span id="rol_usuario">{{rol}}</span>
-                    </label>
-                    <i class="fas fa-angle-left arrow" ref="iconoSubMenuAdmin"></i>
+                    </div>
+                    <i class="fas fa-angle-left arrow icon-right-profile" style="" ref="iconoSubMenuAdmin"></i>
                 </a>
                 <!-- Sub menu -->
                 <ul class="collapse" id="subMenuAdministrador">
-                    <li class="nav-link"><router-link :to="{name: 'logout'}">Cerrar sesión</router-link></li>
+                    <li class="nav-link">
+                        <router-link :to="{name: 'logout'}">Cerrar sesión</router-link>
+                    </li>
                 </ul>
         </li>
-        <li class="nav-item opciones" v-for="item in menu" :key="item.id">
-            <a data-toggle="collapse" :href="'#collapseExample'+item.id" role="button" aria-expanded="false" aria-controls="collapseExample" class="nav-link" @click="changeArrow(item.id-1)" v-if="item.sub_menus.length>0">
-                <i :class="item.icon+' menu-icon'"></i>
-                <span class="menu-text">{{item.name}}</span>
-                <i v-if="item.sub_menus.length>0" class="fas fa-angle-left arrow" ref="iconoSubMenu"></i>
+        <li class="nav-item" v-for="item in menu" :key="item.id">
+            <a data-toggle="collapse" :href="'#collapseExample'+item.id" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrow(item.id-1)" v-if="item.sub_menus.length>0" class="custom-menu-link">
+                <i :class="item.icon+' menu-icon icon-left'"></i>
+                <span class="text-menu-item">{{item.name}}</span>
+                <i
+                    v-if="item.sub_menus.length>0"
+                    class="fas fa-angle-left arrow icon-right"
+                    ref="iconoSubMenu"
+                ></i>
             </a>
-            <router-link class="nav-link" tag="a" v-else :to="{name: item.name_path}">
-                <i :class="item.icon+' menu-icon'"></i><span class="menu-text">{{item.name}}</span>
-                <i v-show="false" class="fas fa-angle-left arrow" ref="iconoSubMenu"></i>
+            <router-link class="custom-menu-link" tag="a" v-else :to="{name: item.name_path}">
+                <i :class="item.icon+' menu-icon icon-left'"></i>
+                <span class="text-menu-item">{{item.name}}</span>
+                <i v-show="false" class="fas fa-angle-left arrow icon-right" ref="iconoSubMenu"></i>
             </router-link>
             <!-- sub menu -->
             <ul class="collapse" :id="'collapseExample'+item.id">
@@ -292,17 +297,17 @@
                 }
             },
             changeArrow(i){
-                if(this.$refs.iconoSubMenu[i].className == "fas fa-angle-left arrow"){
-                    this.$refs.iconoSubMenu[i].className = "fas fa-angle-down arrow";
+                if(this.$refs.iconoSubMenu[i].className == "fas fa-angle-left arrow icon-right"){
+                    this.$refs.iconoSubMenu[i].className = "fas fa-angle-down arrow icon-right";
                 }else{
-                    this.$refs.iconoSubMenu[i].className = "fas fa-angle-left arrow";
+                    this.$refs.iconoSubMenu[i].className = "fas fa-angle-left arrow icon-right";
                 }
             },
             changeArrowA(){
-                if(this.$refs.iconoSubMenuAdmin.className == "fas fa-angle-left arrow"){
-                    this.$refs.iconoSubMenuAdmin.className = "fas fa-angle-down arrow";
+                if(this.$refs.iconoSubMenuAdmin.className == "fas fa-angle-left arrow icon-right-profile"){
+                    this.$refs.iconoSubMenuAdmin.className = "fas fa-angle-down arrow icon-right-profile";
                 }else{
-                    this.$refs.iconoSubMenuAdmin.className = "fas fa-angle-left arrow";
+                    this.$refs.iconoSubMenuAdmin.className = "fas fa-angle-left arrow icon-right-profile";
                 }
             }
         },
@@ -319,7 +324,8 @@
             }
             #foto-perfil{
                 background-color: white;
-                margin: 0rem .5rem 0rem 0rem;
+                margin-left: .5rem;
+                margin-right: .5rem;
             }
             >a{
                 width: 100%;
@@ -355,12 +361,54 @@
         }
         #datos-usuario{
             background-color: #35465C;
-            padding-top: 1rem;
-            padding-bottom: 1rem;
+            height: 5rem;
             >i{
                 // float: right;
                 margin-right: 0rem;
                 color: white;    
+            }
+        }
+        .custom-menu-link{
+            display: flex; 
+            flex-direction: row; 
+            justify-content: space-between; 
+            align-items: center;
+            height: 3rem; 
+            text-decoration: none;
+            padding-right: .7rem;
+            .icon-left{
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                padding-left: 0.5rem;
+            }
+            .icon-right{
+                display: flex; 
+                align-items: center; 
+                justify-content: right; 
+            }
+            .text-menu-item{
+                display: flex;
+                align-items: center;
+                justify-content: left;
+                padding-left: .5rem; 
+                width: 100%;
+            }
+        }
+        .custom-menu-link-profile{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+            text-decoration: none;
+            padding-right: 0.7rem;
+            .icon-right-profile{
+                height: 100%;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: right;
             }
         }
     }
