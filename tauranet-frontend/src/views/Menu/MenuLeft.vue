@@ -10,16 +10,19 @@
             <!-- Opciones del Usuario -->
             <a data-toggle="collapse" href="#subMenuAdministrador" class="custom-menu-link-profile" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrowA">
                 <img id="foto-perfil" :src="fotoperfil" class="rounded-circle" alt="Cinque Terre" width="40" height="40">
-                <div class="align-middle" for="" style="line-height: 0.6; height: 100%; width: 100%; display: flex; flex-direction: column; justify-content: center;">
-                    <strong><DataUser :dataReturn="['nombre_usuario']"></DataUser></strong><br>
-                    <span id="rol_usuario">{{rol}}</span>
+                <div class="align-middle" style="line-height: 1.2; height: 100%; width: 100%; display: flex; flex-direction: column; justify-content: center;">
+                    <strong><DataUser :dataReturn="['nombre_usuario']"></DataUser></strong>
+                    <span id="rol_usuario" style="font-size: 0.85rem; color: #b0b0b0; margin-top: 2px;">{{rol}}</span>
                 </div>
                 <i class="fas fa-angle-left arrow icon-right-profile" ref="iconoSubMenuAdmin"></i>
             </a>
             <!-- Sub menu -->
-            <ul class="collapse" id="subMenuAdministrador">
-                <li class="nav-link">
-                    <router-link :to="{name: 'logout'}">Cerrar sesión</router-link>
+            <ul class="collapse deleteStyleUL" id="subMenuAdministrador">
+                <li>
+                    <router-link :to="{name: 'logout'}">
+                        <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>
+                        Cerrar sesión
+                    </router-link>
                 </li>
             </ul>
         </li>
@@ -33,15 +36,19 @@
                     ref="iconoSubMenu"
                 ></i>
             </a>
-            <router-link class="custom-menu-link" tag="a" v-else :to="{name: item.name_path}">
+            <router-link class="custom-menu-link" tag="a" v-else :to="{name: item.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu">
                 <i :class="item.icon+' menu-icon icon-left'"></i>
                 <span class="text-menu-item">{{item.name}}</span>
                 <i v-show="false" class="fas fa-angle-left arrow icon-right" ref="iconoSubMenu"></i>
             </router-link>
             <!-- sub menu -->
-            <ul class="collapse" :id="'collapseExample'+item.id">
+            <ul class="collapse deleteStyleUL" :id="'collapseExample'+item.id">
+                <!-- <li v-for="sub in item.sub_menus" :key="sub.id" class="nav-link" style="justify-content: left; padding-left: 1rem; height: 2.5rem;"> -->
                 <li v-for="sub in item.sub_menus" :key="sub.id" class="nav-link">
-                    <router-link :to="{name: sub.name_path}">{{sub.name}}</router-link>
+                    <router-link :to="{name: sub.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu">
+                        <i class="fas fa-circle" style="font-size: 0.3rem; color: #b0b0b0; margin-right: 8px;"></i>
+                        {{sub.name}}
+                    </router-link>
                 </li>
             </ul>
         </li>
@@ -345,7 +352,7 @@
             }
             //sub menu
             ul{
-                background-color: #5E5E5E;
+                // background-color: #5E5E5E;
                 >li>a{
                     color: #D3D3D3;
                 }
@@ -371,22 +378,32 @@
             text-decoration: none;
             padding-right: .7rem;
             .icon-left{
-                display: flex; 
-                align-items: center; 
-                justify-content: center; 
-                padding-left: 0.5rem;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding-left: 0.5rem;
             }
             .icon-right{
-                display: flex; 
-                align-items: center; 
-                justify-content: right; 
+            display: flex; 
+            align-items: center; 
+            justify-content: right; 
             }
             .text-menu-item{
-                display: flex;
-                align-items: center;
-                justify-content: left;
-                padding-left: .5rem; 
-                width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: left;
+            padding-left: .5rem; 
+            width: 100%;
+            }
+            &:hover {
+            background-color: #444;
+            color: #fff;
+            .text-menu-item {
+                color: #fff;
+            }
+            .icon-left, .icon-right {
+                color: #fff;
+            }
             }
         }
         .custom-menu-link-profile{
@@ -405,6 +422,49 @@
                 flex-direction: row;
                 align-items: center;
                 justify-content: right;
+            }
+        }
+    }
+    .activo_sub_menu {
+        font-weight: 600;
+        color: #1976d2;
+        background: #737373cc;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+        transition: background 0.2s, color 0.2s;
+    }
+    .deleteStyleUL{
+        background: none;
+        box-shadow: none;
+        border: none;
+        padding-left: 0;
+        margin: 0;
+        >li{
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+            background-color: transparent; 
+            height: 3rem; 
+            display: flex; 
+            flex-direction: row; 
+            justify-content: center; 
+            align-items: center;
+            transition: background 0.2s;
+            >a{
+            text-decoration: none; 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: row; 
+            justify-content: left; 
+            align-items: center; 
+            padding-left: .5rem;
+            }
+            &:hover {
+            background-color: #444; // Cambia el color de fondo al pasar el mouse
+            >a {
+                color: #fff; // Cambia el color del texto al pasar el mouse
+            }
             }
         }
     }
