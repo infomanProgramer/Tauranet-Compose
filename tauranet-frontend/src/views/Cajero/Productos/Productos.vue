@@ -106,9 +106,18 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label for="" class="label-style">* Precio ({{tipoMoneda}})</label>
+                                        <label for="" class="label-style">* Precio al consumidor({{tipoMoneda}})</label>
                                         <input type="text" class="form-control input-style" v-model="producto.precio" :placeholder="'Precio ('+tipoMoneda+')'">
                                         <ListErrors :errores="errores.precio"></ListErrors>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="" class="label-style">* Precio base({{tipoMoneda}})</label>
+                                        <input type="text" class="form-control input-style" v-model="producto.precio_base" :placeholder="'Precio unitario ('+tipoMoneda+')'">
+                                        <ListErrors :errores="errores.precio_base"></ListErrors>
                                     </div>
                                 </div>
                             </div>
@@ -180,6 +189,15 @@
                                         <label for="" class="label-style">* Precio ({{tipoMoneda}})</label>
                                         <input type="text" class="form-control input-style" v-model="producto.precio" >
                                         <ListErrors :errores="errores.precio"></ListErrors>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="" class="label-style">* Precio base ({{tipoMoneda}})</label>
+                                        <input type="text" class="form-control input-style" v-model="producto.precio_base" >
+                                        <ListErrors :errores="errores.precio_base"></ListErrors>
                                     </div>
                                 </div>
                             </div>

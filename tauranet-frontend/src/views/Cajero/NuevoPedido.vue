@@ -377,9 +377,16 @@ export default{
                     suma = Number(suma) + Number(element.importe)
                 });
             }
-            // this.reg.importe = parseFloat(suma).toFixed(2)
-            // this.reg.importe = this.reg.importe || 0
             return parseFloat(suma).toFixed(2)
+        },
+        calculaImporteBase: function(){
+            let suma_base = 0
+            if(this.tablaProductosPedidos.length>0){
+                this.tablaProductosPedidos.forEach(element => {
+                    suma_base = Number(suma_base) + Number(element.importe_base)
+                });
+            }
+            return parseFloat(suma_base).toFixed(2)
         },
         //eliminacion de funcion calculaTotal
         calculaCambio: function() {
@@ -479,9 +486,27 @@ export default{
                 i++
             });
             if(sw){
-                this.tablaProductosPedidos.splice(indice, 1, {id_producto: item.id_producto, cantidad: cant_prod, detalle: item.nombre, p_unit: parseFloat(item.precio), importe: parseFloat(item.precio*cant_prod).toFixed(2) ,nota: nota})
+                this.tablaProductosPedidos.splice(indice, 1, {
+                    id_producto: item.id_producto, 
+                    cantidad: cant_prod, 
+                    detalle: item.nombre, 
+                    p_unit: parseFloat(item.precio), 
+                    p_base: parseFloat(item.precio_base),
+                    importe: parseFloat(item.precio*cant_prod).toFixed(2),
+                    importe_base: parseFloat(item.precio_base*cant_prod).toFixed(2),
+                    nota: nota
+                })
             }else{//nuveo pedido
-                this.tablaProductosPedidos.push({id_producto: item.id_producto, cantidad: cant_prod, detalle: item.nombre, p_unit: parseFloat(item.precio), importe: parseFloat(item.precio*cant_prod).toFixed(2) ,nota: ''})
+                this.tablaProductosPedidos.push({
+                    id_producto: item.id_producto, 
+                    cantidad: cant_prod, 
+                    detalle: item.nombre, 
+                    p_unit: parseFloat(item.precio), 
+                    p_base: parseFloat(item.precio_base),
+                    importe: parseFloat(item.precio*cant_prod).toFixed(2),
+                    importe_base: parseFloat(item.precio_base*cant_prod).toFixed(2),
+                    nota: ''
+                })
             }
         },
         cerrarNota(){
@@ -650,6 +675,7 @@ export default{
             this.cliente.id_cajero = this.data_usr.id_cajero //verficar si es cajero o mozo
             this.cliente.id_sucursal = this.data_usr.id_sucursal
             this.cliente.importe = !this.editarImporte? this.calculaImporte:this.reg.importeRecalculado
+            this.cliente.importe_base = this.calculaImporteBase
             this.cliente.estado_venta = 'P'
             this.cliente.id_caja = this.data_usr.id_caja
             this.cliente.isNewCustomer = this.isNewCustomer //true antiguo cliente
@@ -671,9 +697,9 @@ export default{
             let cad = "";
             this.tablaProductosPedidos.forEach(element => {
                 if(i == this.tablaProductosPedidos.length-1){
-                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota
+                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+"|"+element.p_base+"|"+element.importe_base
                 }else{
-                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+":"
+                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+"|"+element.p_base+"|"+element.importe_base+":"
                 }
                 i++
             });

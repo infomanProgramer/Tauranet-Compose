@@ -93,6 +93,7 @@ class ProductoController extends ApiController
         $dataValidation = [
             'nombre' => 'required|min:4|max:50',
             'precio' => 'required|numeric|between:0,9999999.99',
+            'precio_base' => 'required|numeric|between:0,9999999.99',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
         ];
         if ($request->get("id_administrador") !== null) {
@@ -111,7 +112,10 @@ class ProductoController extends ApiController
             'nombre.max' => 'El Nombre tiene que tener 50 caracteres como maximo',
             'precio.required' => 'El precio es requerido',
             'precio.numeric' => 'El precio tiene que ser de tipo numérico',
-            'precio.between' => 'El precio tiene que estar entre 0 y 99999999.99',
+            'precio.between' => 'El precio tiene ser un número positivo',
+            'precio_base.required' => 'El precio base es requerido',
+            'precio_base.numeric' => 'El precio base tiene que ser de tipo numérico',
+            'precio_base.between' => 'El precio base tiene ser un número positivo',
             'id_administrador.required' => 'El Administrador es requerido',
             'id_administrador.exists' => 'El Administrador no existe',
             'id_categoria_producto.required' => 'La Categoria es requerida',
@@ -125,6 +129,7 @@ class ProductoController extends ApiController
         $producto->nombre = $request->get("nombre");
         $producto->descripcion = $request->get("descripcion");
         $producto->precio = $request->get("precio");
+        $producto->precio_base = $request->get("precio_base");
         $producto->id_administrador = $request->get("id_administrador");
         if ($request->get("id_administrador") !== null) {
             $producto->id_administrador = $request->get("id_administrador");
@@ -176,6 +181,7 @@ class ProductoController extends ApiController
         $dataValidation = [
             'nombre' => 'required|min:4|max:50',
             'precio' => 'required|numeric|between:0,9999999.99',
+            'precio_base' => 'required|numeric|between:0,9999999.99',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
         ];
         if ($request->get("id_administrador") !== null && $request->get("id_administrador") !== 'null') {
@@ -195,6 +201,9 @@ class ProductoController extends ApiController
             'precio.required' => 'El precio es requerido',
             'precio.numeric' => 'El precio tiene que ser de tipo numérico',
             'precio.between' => 'El precio tiene que estar entre 0 y 99999999.99',
+            'precio_base.required' => 'El precio base es requerido',
+            'precio_base.numeric' => 'El precio base tiene que ser de tipo númerico',
+            'precio_base.between' => 'El precio base tiene un número positivo',
             'id_administrador.required' => 'El Administrador es requerido',
             'id_administrador.exists' => 'El Administrador no existe',
             'id_categoria_producto.required' => 'La Categoria es requerida',
@@ -212,6 +221,9 @@ class ProductoController extends ApiController
         }
         if($request->has('precio')) {
             $producto->precio = $request->get("precio");
+        }
+        if($request->has('precio_base')) {
+            $producto->precio_base = $request->get("precio_base");
         }
         if ($request->get("id_administrador") !== null && $request->get("id_administrador") !== 'null') {
             $producto->id_administrador = $request->get("id_administrador");

@@ -208,6 +208,7 @@ class ClienteController extends ApiController
                     'id_mozo' => 'required_without_all:id_cajero',
                     'id_sucursal' => 'required|exists:sucursals,id_sucursal',
                     'importe' => 'required',
+                    'importe_base' => 'required',
                     'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
                     'estado_venta' => 'required',
                     'listaProductos' => 'required',
@@ -223,6 +224,7 @@ class ClienteController extends ApiController
                     'id_mozo' => 'required_without_all:id_cajero',
                     'id_sucursal' => 'required|exists:sucursals,id_sucursal',
                     'importe' => 'required|numeric|between:0,9999999.99',
+                    'importe_base' => 'required|numeric|between:0,9999999.99',
                     'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
                     'estado_venta' => 'required',
                     'listaProductos' => 'required',
@@ -316,6 +318,7 @@ class ClienteController extends ApiController
                 $pago = new Pago();
                 $pago->efectivo = $request->get("efectivo");
                 $pago->importe = $request->get("importe");
+                $pago->importe_base = $request->get("importe_base");
                 $pago->cambio = $request->get("cambio");
                 $pago->id_venta_producto = $vproducto->id_venta_producto;
                 $pago->id_cajero = $request->get("id_cajero");
