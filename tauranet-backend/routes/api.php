@@ -151,6 +151,9 @@ Route::group([
         Route::get('productocantidad/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@productoCantidad');
         Route::get('productoimporte/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@productoImporte');
         Route::get('reportehoy/{idRestaurante}', 'ReporteController@getReportesHoy');
+
+        //Nuevos reportes
+        Route::get('getreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteController@getReportePerDay');
     });
 
     //Rutas Administrador

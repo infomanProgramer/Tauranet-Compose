@@ -24,6 +24,8 @@ import CajaReport from "./views/Cajero/Reportes/CajaReport";
 import DetalleVentas from "./views/Cajero/Reportes/DetalleVentas";
 import Estadisticas from "./views/Cajero/Reportes/Estadisticas";
 import CocinaPedidos from "./views/Cocinero/CocinaPedidos";
+import VentasPorDia from "./views/Cajero/Reportes/VentasPorDia";
+import VentasPorRangoFecha from "./views/Cajero/Reportes/VentasPorRangoFecha";
 
 Vue.use(Router);
 
@@ -156,6 +158,24 @@ export default new Router({
             requiresRolCajero: true
           }
         },
+        //Rutas Reportes
+        {
+          name: "ventaspordia",
+          path: "ventaspordia",
+          component: VentasPorDia,
+          meta: {
+            requiresRolCajero: true
+          }
+        },
+        {
+          name: "ventasporrangofecha",
+          path: "ventasporrangofecha",
+          component: VentasPorRangoFecha,
+          meta: {
+            requiresRolCajero: true
+          }
+        },
+        //Fin de Rutas Reportes
         {
           name: "detalleventas",
           path: "detalleventas",

@@ -366,4 +366,60 @@ class ReporteController extends ApiController
         }
 
     }
+
+    //Nuevo reportes
+    //Reporte de ventas por día - probar con fecha '2025-07-15'
+    public function getReportePerDay($idRestaurante, $fecha){
+        \Log::info('getReportePerDay - idRestaurante: ' . $idRestaurante . ', fecha: ' . $fecha);
+        if($fecha == 'null'){
+            $response = Response::json(['error' => ['fecha' => ['Fecha es requerido']]], 200);
+            return $response;
+        }
+        $ventasPorDia = DB::table('venta_productos as vp')->selectRaw("
+                CAST(vp.created_at AS TIME) as hora,
+                vp.nro_venta as nro_pedido,
+                c.nombre_completo as cliente,
+                c2.nombre_usuario as atendido_por,
+                CASE 
+                    WHEN p.tipo_pago = 2 THEN 'QR'
+                    WHEN p.tipo_pago = 1 THEN 'TARJETA'
+                    ELSE 'EFECTIVO'
+                END as tipo_pago,
+                p.importe as total_bruto,
+                p.importe_base as total_neto,
+                (p.importe - p.importe_base) as ganancia
+            ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
+            ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
+            ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
+            ->whereDate('vp.created_at', '=', $fecha)
+            ->orderByDesc('hora')
+            ->get();
+
+        $totalDia = DB::table('venta_productos as vp')
+            ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
+            ->whereDate('vp.created_at', $fecha)
+            ->selectRaw('
+                SUM(p.importe) as total_bruto,
+                SUM(p.importe_base) as total_neto,
+                (SUM(p.importe) - SUM(p.importe_base)) as ganancia,
+                (
+                    SELECT COUNT(*) FROM pagos 
+                    WHERE tipo_pago = 0 
+                    AND DATE(created_at) = ?
+                ) as total_efectivo,
+                (
+                    SELECT COUNT(*) FROM pagos 
+                    WHERE tipo_pago = 1 
+                    AND DATE(created_at) = ?
+                ) as total_tarjeta,
+                (
+                    SELECT COUNT(*) FROM pagos 
+                    WHERE tipo_pago = 2 
+                    AND DATE(created_at) = ?
+                ) as total_qr
+            ', [$fecha, $fecha, $fecha])
+            ->first();
+        $response = Response::json(['ventasPorDia' => $ventasPorDia, 'totalDia' => $totalDia], 200);
+        return $response;
+    }
 }

@@ -710,8 +710,6 @@ export default{
                 if(response.data.error == null){
                     //Guardar en venta_productos
                     if(response.data.data[0].registraproductosfunction == this.tablaProductosPedidos.length){
-                        //this.$store.dispatch('indicePedidosActiveAction', response.data.vprod.id_venta_producto)
-                        //this.$router.push({name: 'historial_pedidos', params: {obj: response.data.vprod}})
                         this.ventaProdObj = response.data.vprod
                         this.nroPedido_ticket = response.data.nro_pedido
                         this.limpiarPedido();

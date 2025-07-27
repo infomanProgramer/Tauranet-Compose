@@ -229,21 +229,31 @@
                         sub_menus: [
                             {
                                 id: 1,
-                                name_path: 'hoy',
-                                name: 'Hoy',
+                                name_path: 'ventaspordia',
+                                name: 'Ventas del día',
                             },
                             {
                                 id: 2,
+                                name_path: 'ventasporrangofecha',
+                                name: 'Ventas por rango de fecha',
+                            },
+                            // {
+                            //     id: 1,
+                            //     name_path: 'hoy',
+                            //     name: 'Hoy',
+                            // },
+                            {
+                                id: 3,
                                 name_path: 'detalleventas',
                                 name: 'Detalle Ventas',
                             },
                             {
-                                id: 3,
+                                id: 4,
                                 name_path: 'estadisticas',
                                 name: 'Estadísticas',
                             },
                             {
-                                id: 4,
+                                id: 5,
                                 name_path: 'cajareport',
                                 name: 'Cajas',
                             },

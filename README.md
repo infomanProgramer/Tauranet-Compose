@@ -157,6 +157,11 @@ pg_dump -F d -f /ruta/directorio_backup -U postgres -d midb
 
 La tabla **venta_productos** tiene el detalle del grupo de productos vendidos en una sola venta y la tabla **producto_vendidos** tiene detalle por producto como cantidad, precio, etc
 
+## Diccionario de datos - BD
+
+Tabla: pagos
+Campo: tipo_pago 0 -> efectivo, 1 -> tarjeta, 2 -> qr
+
 
 
 
