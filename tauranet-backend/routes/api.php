@@ -154,6 +154,7 @@ Route::group([
 
         //Nuevos reportes
         Route::get('getreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteController@getReportePerDay');
+        Route::get('exportarreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteController@exportReportePerDay');
     });
 
     //Rutas Administrador

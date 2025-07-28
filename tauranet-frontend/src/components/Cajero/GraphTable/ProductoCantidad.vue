@@ -2,11 +2,13 @@
     <div class="col-md-12">
         <div class="row">
             <div class="col-md-12">
-                <h4 class="sub-cajero">Producto vs Cantidad</h4>
+                <h4 class="mt-3 mb-2 font-weight-bold text-primary" style="font-size: 1.5rem; border-bottom: 3px solid #007bff; padding-bottom: 6px;">
+                    Cantidad por producto
+                </h4>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-3 d-flex justify-content-start align-items-end">
                 <div class="form-group">
                     <flat-pickr
                             v-model="fecha.ini"                                                       
@@ -17,8 +19,8 @@
                     <ListErrors :errores="errores.ini"></ListErrors>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
+            <div class="col-md-3 d-flex justify-content-start align-items-end">
+                <div class="form-group" v-if="!hasOneParameter">
                     <flat-pickr
                         v-model="fecha.fin"                                                       
                         class="form-control input-style"
@@ -29,18 +31,17 @@
                     <ListErrors :errores="errores.fin"></ListErrors>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 d-flex justify-content-start align-items-end">
                 <div class="form-group">
-                    <label for="">
-                        <select class="form-control input-style" v-model="comboCategorias">
-                            <option value="-1" selected>Categoria...</option>
-                            <option v-for="s in listaCategoria" v-bind:key="s.id_categoria_producto" :value="s.id_categoria_producto">{{s.nombre}}</option>
-                        </select>
-                    </label>
+                    <select class="form-control input-style" v-model="comboCategorias">
+                        <option value="-1" selected>Categoria...</option>
+                        <option v-for="s in listaCategoria" v-bind:key="s.id_categoria_producto" :value="s.id_categoria_producto">{{s.nombre}}</option>
+                    </select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <button @click="productoCantidadMethod()" class="btn btn-primary float-right" ref="btnBuscarRef">Buscar</button>
+            <div class="col-md-3 d-flex justify-content-end align-items-end">
+                <button @click="productoCantidadMethod()" class="btn btn-primary mr-2" ref="btnBuscarRef">Generar</button>
+                <button class="btn btn-success" @click="exportarExcel">Exportar a Excel</button>
             </div>
         </div>
         <div class="row" v-if="loaded">
@@ -87,6 +88,11 @@ export default{
         BarChart,
         Pagination,
         ListErrors
+    },
+    props: {
+        hasOneParameter: {
+            type: Boolean
+        }
     },
     data() {
         return {
@@ -137,6 +143,8 @@ export default{
             });
         },
         productoCantidadMethod(url) {
+            if(this.hasOneParameter)
+                this.fecha.fin = this.fecha.ini;   
             this.$Progress.start()
             this.$refs.btnBuscarRef.className = "btn btn-primary float-right disabled"
             url = url || this.$store.state.url_root+`api/auth/productocantidad/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}/fechaini/${this.fecha.ini}/fechafin/${this.fecha.fin}`
@@ -176,6 +184,10 @@ export default{
                 this.$Progress.fail()
                 this.$refs.btnBuscarRef.className = "btn btn-primary float-right"
             });
+        },
+
+        exportarExcel(){
+
         }
     },
 }

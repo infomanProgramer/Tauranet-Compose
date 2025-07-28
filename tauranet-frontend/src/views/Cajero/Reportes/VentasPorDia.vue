@@ -3,6 +3,13 @@
         <div class="container-fluid">
             <form @submit.prevent="getReportPerDay()">
                 <div class="row">
+                    <div class="col-md-12">
+                        <h4 class="mt-3 mb-2 font-weight-bold text-primary" style="font-size: 1.5rem; border-bottom: 3px solid #007bff; padding-bottom: 6px;">
+                            Detalle general
+                        </h4>
+                    </div>
+                </div>
+                <div class="row">
                         <div class="col-md-6 d-flex justify-content-start align-items-end">
                             <flat-pickr
                                 v-model="fecha"
@@ -14,12 +21,14 @@
                             <!-- <ListErrors :errores="fecha"></ListErrors> -->
                         </div>
                         <div class="col-md-6 d-flex justify-content-end align-items-end">
-                            <button type="submit" class="btn btn-primary">Buscar</button>
+                            <button type="submit" class="btn btn-primary mr-2">Generar</button>
+                            <button class="btn btn-success" @click="exportarExcel">Exportar a Excel</button>
                         </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="table-responsive">
+            </form>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive">
                         <table-component
                             :data="ventasPorDiaArray"
                             tableClass="table table-condensed table-bordered"
@@ -33,51 +42,61 @@
                             <table-column show="cliente" label="Cliente"></table-column>
                             <table-column show="atendido_por" label="Atendido Por:"></table-column>
                             <table-column show="tipo_pago" label="Tipo Pago" :sortable="false"></table-column> 
-                            <table-column show="total_bruto" label="Total Bruto" :sortable="false"></table-column>
-                            <table-column show="total_neto" label="Total Neto" :sortable="false"></table-column>
+                            <table-column show="importe" label="Importe" :sortable="false"></table-column>
+                            <table-column show="importe_neto" label="Importe Neto" :sortable="false"></table-column>
                             <table-column show="ganancia" label="Ganancia" :sortable="false"></table-column>
                         </table-component>
                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 table-responsive">
+                    <Pagination :pagination="pagination" v-on:funcion="getReportPerDay"></Pagination>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h4 class="mt-3 mb-2 font-weight-bold text-primary" style="font-size: 1.5rem; border-bottom: 3px solid #007bff; padding-bottom: 6px;">
+                        Total del día
+                    </h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-condensed">
+                            <tbody>
+                                <tr>
+                                    <td scope="col" class="subtituloPedidos">Importe total</td>
+                                    <td scope="col">{{totalDia.importe_total}}</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="subtituloPedidos">Importe neto total</td>
+                                    <td scope="col">{{totalDia.importe_neto_total}}</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="subtituloPedidos">Ganancia total</td>
+                                    <td scope="col">{{totalDia.ganancia_total}}</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="subtituloPedidos">Tipo pago - Efectivo</td>
+                                    <td scope="col">{{totalDia.total_efectivo}}</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="subtituloPedidos">Tipo pago - Tarjeta</td>
+                                    <td scope="col">{{totalDia.total_tarjeta}}</td>
+                                </tr>
+                                <tr>
+                                    <td scope="col" class="subtituloPedidos">Tipo pago - QR</td>
+                                    <td scope="col">{{totalDia.total_qr}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <h4 class="mt-3 mb-2 font-weight-bold text-primary" style="font-size: 1.5rem; border-bottom: 3px solid #007bff; padding-bottom: 6px;">
-                            Total del día
-                        </h4>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-condensed">
-                                <tbody>
-                                    <tr>
-                                        <td scope="col" class="subtituloPedidos">Total Bruto</td>
-                                        <td scope="col">{{totalDia.total_bruto}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td scope="col" class="subtituloPedidos">Total Neto</td>
-                                        <td scope="col">{{totalDia.total_neto}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td scope="col" class="subtituloPedidos">Total Ganancia</td>
-                                        <td scope="col">{{totalDia.ganancia}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td scope="col" class="subtituloPedidos">Tipo pago - Efectivo</td>
-                                        <td scope="col">{{totalDia.total_efectivo}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td scope="col" class="subtituloPedidos">Tipo pago - Tarjeta</td>
-                                        <td scope="col">{{totalDia.total_tarjeta}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td scope="col" class="subtituloPedidos">Tipo pago - QR</td>
-                                        <td scope="col">{{totalDia.total_qr}}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </form>
+            </div>
+            <div class="row">
+                <ProductoCantidad :hasOneParameter="true"></ProductoCantidad>
+            </div>
+            <div class="row">
+                <ProductoImporte :hasOneParameter="true"></ProductoImporte>
+            </div>
         </div>
     </Marco>
 </template>
@@ -86,17 +105,25 @@ const axios = require("axios");
 import Marco from '@/components/Layout/Marco';
 import {misMixins} from '@/mixins/misMixins.js';
 import flatPickr from 'vue-flatpickr-component';
+import ProductoCantidad from '@/components/Cajero/GraphTable/ProductoCantidad';
+import ProductoImporte from '@/components/Cajero/GraphTable/ProductoImporte';
+import Pagination from '@/components/Pagination/Pagination';
+
 export default{
     name: 'VentasPorDia',
     components: {
         Marco,
-        flatPickr
+        flatPickr,
+        ProductoCantidad,
+        ProductoImporte,
+        Pagination
     },
     data(){
         return {
             fecha: null,
             ventasPorDiaArray: [],
             totalDia: {},
+            pagination: {},
             config: {
                 wrap: true, // set wrap to true only when using 'input-group'
                 altFormat: 'j/n/Y',
@@ -113,16 +140,16 @@ export default{
     },
     mixins: [misMixins],
     methods: {
-        getReportPerDay(){
+        getReportPerDay(url){
             this.$Progress.start();
-            console.log(`data: id_restaurante = ${this.$store.state.id_restaurant} fecha = ${this.fecha}`);
-            let url = this.$store.state.url_root+`api/auth/getreporteperday/${this.$store.state.id_restaurant}/fecha/${this.fecha}`;
+            url = url || this.$store.state.url_root+`api/auth/getreporteperday/${this.$store.state.id_restaurant}/fecha/${this.fecha}`;
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.get(url)
             .then(response => {
                 //this.ListaClientes = response.data.data;
                 console.log(response.data.ventasPorDia);
-                this.ventasPorDiaArray = response.data.ventasPorDia;
+                this.ventasPorDiaArray = response.data.ventasPorDia.data;
+                this.pagination = response.data.ventasPorDia;
                 this.totalDia = response.data.totalDia;
                 this.$Progress.finish()
             })
@@ -131,6 +158,28 @@ export default{
                 this.$Progress.fail()
             });
 
+        },
+        exportarExcel() {
+            // Lógica para exportar a Excel
+            this.$Progress.start();
+            let url = this.$store.state.url_root+`api/auth/exportarreporteperday/${this.$store.state.id_restaurant}/fecha/${this.fecha}`;
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.get(url, { responseType: 'blob' })
+            .then(response => {
+                console.log(response.data);
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `reporte_ventas_${this.fecha}.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.$Progress.finish();
+            })
+            .catch(error => {
+                this.$toasted.show("Error al exportar a Excel: "+error, {type: 'error'})
+                this.$Progress.fail()
+            });
         },
     },
 }

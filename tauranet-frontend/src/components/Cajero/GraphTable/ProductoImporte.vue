@@ -1,8 +1,10 @@
 <template>
     <div class="col-md-12">
-        <div class="row">
+         <div class="row">
             <div class="col-md-12">
-                <h4 class="sub-cajero">Producto vs Importe</h4>
+                <h4 class="mt-3 mb-2 font-weight-bold text-primary" style="font-size: 1.5rem; border-bottom: 3px solid #007bff; padding-bottom: 6px;">
+                    Ganancia por producto
+                </h4>
             </div>
         </div>
         <div class="row">
@@ -18,7 +20,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="form-group" v-if="!hasOneParameter">
                     <flat-pickr
                         v-model="fecha.fin"                                                       
                         class="form-control input-style"
@@ -40,7 +42,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <button @click="productoImporteMethod()" class="btn btn-primary float-right" ref="btnBuscarRef">Buscar</button>
+                <button @click="productoImporteMethod()" class="btn btn-primary float-right" ref="btnBuscarRef">Generar</button>
             </div>
         </div>
         <div class="row" v-if="loaded">
@@ -61,6 +63,8 @@
                             <table-column show="nom_producto" label="Producto"></table-column>
                             <table-column show="nom_categoria" label="Categoría"></table-column>
                             <table-column show="importe" label="Importe"></table-column>
+                            <table-column show="importe_base" label="Neto"></table-column>
+                            <table-column show="ganancia" label="Ganancia"></table-column>
                         </table-component>
                     </div>
                 </div>
@@ -87,6 +91,11 @@ export default{
         BarChart,
         Pagination,
         ListErrors
+    },
+    props: {
+        hasOneParameter: {
+            type: Boolean
+        }
     },
     data() {
         return {
@@ -137,6 +146,8 @@ export default{
             });
         },
         productoImporteMethod(url) {
+             if(this.hasOneParameter)
+                this.fecha.fin = this.fecha.ini;  
             this.$Progress.start()
             this.$refs.btnBuscarRef.className = "btn btn-primary float-right disabled"
             url = url || this.$store.state.url_root+`api/auth/productoimporte/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}/fechaini/${this.fecha.ini}/fechafin/${this.fecha.fin}`
@@ -152,7 +163,7 @@ export default{
                     this.pagination = response.data.dataT
                     this.productoImporteArray.forEach(element => {
                         this.labels.push(element.nom_producto)
-                        this.importe.push(element.importe)
+                        this.importe.push(element.ganancia)
                     })
                     this.empleadoImporteCollection = {
                         labels: this.labels,
