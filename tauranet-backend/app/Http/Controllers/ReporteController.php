@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use DB;
-use Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -260,48 +258,7 @@ class ReporteController extends ApiController
             return $response;
         }
     }
-    public function productoCantidad($idRestaurante, $idCategoria,$fechaIni, $fechaFin){
-        if($fechaIni == 'null'){
-            $response = Response::json(['error' => ['ini' => ['Fecha ini es requerido']]], 200);
-            return $response;
-        }
-        if($fechaFin == 'null'){
-            $response = Response::json(['error' => ['fin' => ['Fecha fin es requerido']]], 200);
-            return $response;
-        }
-        if($fechaIni <= $fechaFin) {
-            //Chart
-            $productoCantidad = DB::table(DB::raw("function_producto_cantidad(" . $idRestaurante . ", " . $idCategoria . ",'" . $fechaIni . "', '" . $fechaFin . "')"))->get();
-            //Table
-            $productoCantidadTable = DB::table(DB::raw("function_producto_cantidad(" . $idRestaurante . ", " . $idCategoria . ", '" . $fechaIni . "', '" . $fechaFin . "')"))->paginate(6);
-            $response = Response::json(['data' => $productoCantidad, 'dataT' => $productoCantidadTable], 200);
-            return $response;
-        }else{
-            $response = Response::json(['error' => ['ini' => ['Fecha ini debe ser menor que Fecha fin']]], 200);
-            return $response;
-        }
-    }
-    public function productoImporte($idRestaurante, $idCategoria, $fechaIni, $fechaFin){
-        if($fechaIni == 'null'){
-            $response = Response::json(['error' => ['ini' => ['Fecha ini es requerido']]], 200);
-            return $response;
-        }
-        if($fechaFin == 'null'){
-            $response = Response::json(['error' => ['fin' => ['Fecha fin es requerido']]], 200);
-            return $response;
-        }
-        if($fechaIni <= $fechaFin) {
-            //Chart
-            $productoImporte = DB::table(DB::raw("function_producto_importe(" . $idRestaurante . ", " . $idCategoria . ",'" . $fechaIni . "', '" . $fechaFin . "')"))->get();
-            //Table
-            $productoImporteTable = DB::table(DB::raw("function_producto_importe(" . $idRestaurante . ", " . $idCategoria . ", '" . $fechaIni . "', '" . $fechaFin . "')"))->paginate(6);
-            $response = Response::json(['data' => $productoImporte, 'dataT' => $productoImporteTable], 200);
-            return $response;
-        }else{
-            $response = Response::json(['error' => ['ini' => ['Fecha ini debe ser menor que Fecha fin']]], 200);
-            return $response;
-        }
-    }
+    
     public function fechaPedidos($idRestaurante, $fechaIni, $fechaFin){
         if($fechaIni == 'null'){
             $response = Response::json(['error' => ['ini' => ['Fecha ini es requerido']]], 200);
@@ -368,116 +325,5 @@ class ReporteController extends ApiController
             return $response;
         }
 
-    }
-
-    //Nuevo reportes
-    //Reporte de ventas por día - probar con fecha '2025-07-15'
-    public function getReportePerDay($idRestaurante, $fecha){
-        \Log::info('getReportePerDay - idRestaurante: ' . $idRestaurante . ', fecha: ' . $fecha);
-        if($fecha == 'null'){
-            $response = Response::json(['error' => ['fecha' => ['Fecha es requerido']]], 200);
-            return $response;
-        }
-        $ventasPorDia = DB::table('venta_productos as vp')->selectRaw("
-                CAST(vp.created_at AS TIME) as hora,
-                vp.nro_venta as nro_pedido,
-                c.nombre_completo as cliente,
-                c2.nombre_usuario as atendido_por,
-                CASE 
-                    WHEN p.tipo_pago = 2 THEN 'QR'
-                    WHEN p.tipo_pago = 1 THEN 'TARJETA'
-                    ELSE 'EFECTIVO'
-                END as tipo_pago,
-                p.importe as importe,
-                p.importe_base as importe_neto,
-                (p.importe - p.importe_base) as ganancia
-            ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
-            ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
-            ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
-            ->whereDate('vp.created_at', '=', $fecha)
-            ->orderByDesc('hora')
-            ->paginate(10);
-
-        $totalDia = DB::table('venta_productos as vp')
-            ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
-            ->whereDate('vp.created_at', $fecha)
-            ->selectRaw('
-                SUM(p.importe) as importe_total,
-                SUM(p.importe_base) as importe_neto_total,
-                (SUM(p.importe) - SUM(p.importe_base)) as ganancia_total,
-                (
-                    SELECT COUNT(*) FROM pagos 
-                    WHERE tipo_pago = 0 
-                    AND DATE(created_at) = ?
-                ) as total_efectivo,
-                (
-                    SELECT COUNT(*) FROM pagos 
-                    WHERE tipo_pago = 1 
-                    AND DATE(created_at) = ?
-                ) as total_tarjeta,
-                (
-                    SELECT COUNT(*) FROM pagos 
-                    WHERE tipo_pago = 2 
-                    AND DATE(created_at) = ?
-                ) as total_qr
-            ', [$fecha, $fecha, $fecha])
-            ->first();
-        $response = Response::json(['ventasPorDia' => $ventasPorDia, 'totalDia' => $totalDia], 200);
-        return $response;
-    }
-
-    public function exportReportePerDay($idRestaurante, $fecha){
-        \Log::info('exportReportePerDay - idRestaurante: ' . $idRestaurante . ', fecha: ' . $fecha);
-        if($fecha == 'null'){
-            return response()->json(['error' => ['fecha' => ['Fecha es requerido']]], 200);
-        }
-
-        $ventasPorDiaXlsx = DB::table('venta_productos as vp')->selectRaw("
-                CAST(vp.created_at AS TIME) as hora,
-                vp.nro_venta as nro_pedido,
-                c.nombre_completo as cliente,
-                c2.nombre_usuario as atendido_por,
-                CASE 
-                    WHEN p.tipo_pago = 2 THEN 'QR'
-                    WHEN p.tipo_pago = 1 THEN 'TARJETA'
-                    ELSE 'EFECTIVO'
-                END as tipo_pago,
-                p.importe as importe,
-                p.importe_base as importe_neto,
-                (p.importe - p.importe_base) as ganancia
-            ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
-            ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
-            ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
-            ->whereDate('vp.created_at', '=', $fecha)
-            ->orderByDesc('hora')
-            ->get();
-
-        // Usar Maatwebsite\Excel para exportar
-        // Crear un array de arrays para exportar
-        $exportData = [];
-        foreach ($ventasPorDiaXlsx as $row) {
-            $exportData[] = [
-                'Hora' => $row->hora,
-                'Nro. Pedido' => $row->nro_pedido,
-                'Cliente' => $row->cliente,
-                'Atendido Por' => $row->atendido_por,
-                'Tipo Pago' => $row->tipo_pago,
-                'Total Bruto' => $row->total_bruto,
-                'Total Neto' => $row->total_neto,
-                'Ganancia' => $row->ganancia,
-            ];
-        }
-
-        // Crear una clase exportadora anónima
-        $export = new class($exportData) implements FromCollection, WithHeadings {
-            private $data;
-            public function __construct($data) { $this->data = $data; }
-            public function collection() { return collect($this->data); }
-            public function headings(): array {
-                return ['Hora', 'Nro. Pedido', 'Cliente', 'Atendido Por', 'Tipo Pago', 'Total Bruto', 'Total Neto', 'Ganancia'];
-            }
-        };
-
-        return Excel::download($export, 'reporte_ventas_'.$fecha.'.xlsx');
     }
 }

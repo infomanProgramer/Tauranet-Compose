@@ -148,13 +148,16 @@ Route::group([
         Route::get('empleadopedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@empleadoPedido');
         Route::get('fechaimporte/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaImporte');
         Route::get('fechapedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaPedidos');
-        Route::get('productocantidad/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@productoCantidad');
-        Route::get('productoimporte/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@productoImporte');
         Route::get('reportehoy/{idRestaurante}', 'ReporteController@getReportesHoy');
 
         //Nuevos reportes
-        Route::get('getreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteController@getReportePerDay');
-        Route::get('exportarreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteController@exportReportePerDay');
+        // Reporte de ventas por día
+        Route::get('getreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteVentasPorDiaController@getReportePerDay');
+        Route::get('exportarreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteVentasPorDiaController@getReportePerDayExcel');
+        Route::get('productocantidad/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoCantidad');
+        Route::get('productocantidadexcel/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoCantidadExcel');
+        Route::get('productoimporte/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoImporte');
+        Route::get('productoimportexcel/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoImportExcel');
     });
 
     //Rutas Administrador

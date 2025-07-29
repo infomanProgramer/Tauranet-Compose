@@ -146,7 +146,7 @@ export default{
             if(this.hasOneParameter)
                 this.fecha.fin = this.fecha.ini;   
             this.$Progress.start()
-            this.$refs.btnBuscarRef.className = "btn btn-primary float-right disabled"
+            this.$refs.btnBuscarRef.className = "btn btn-primary mr-2 disabled"
             url = url || this.$store.state.url_root+`api/auth/productocantidad/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}/fechaini/${this.fecha.ini}/fechafin/${this.fecha.fin}`
             this.labels = []
             this.cantidad = []
@@ -171,23 +171,42 @@ export default{
                         }]
                     }
                     this.loaded = true
-                    this.$refs.btnBuscarRef.className = "btn btn-primary float-right"
+                    this.$refs.btnBuscarRef.className = "btn btn-primary mr-2"
                     this.$Progress.finish()
                 }else{
                     this.errores = response.data.error
-                    this.$refs.btnBuscarRef.className = "btn btn-primary float-right"
+                    this.$refs.btnBuscarRef.className = "btn btn-primary mr-2"
                     this.$Progress.fail()
                 }
             })
             .catch (error => {
                 this.$toasted.show("ProductoCantidad.vue: "+error, {type: 'error'})
                 this.$Progress.fail()
-                this.$refs.btnBuscarRef.className = "btn btn-primary float-right"
+                this.$refs.btnBuscarRef.className = "btn btn-primary mr-2"
             });
         },
 
         exportarExcel(){
-
+            if(this.hasOneParameter)
+                this.fecha.fin = this.fecha.ini;   
+            this.$Progress.start();
+            let url = this.$store.state.url_root+`api/auth/productocantidadexcel/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}/fechaini/${this.fecha.ini}/fechafin/${this.fecha.fin}`
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.get(url, { responseType: 'blob' })
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `cantidadPorProducto_${this.fecha.fin}.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.$Progress.finish();
+            })
+            .catch(error => {
+                this.$toasted.show("Error al exportar a Excel: "+error, {type: 'error'})
+                this.$Progress.fail()
+            });
         }
     },
 }

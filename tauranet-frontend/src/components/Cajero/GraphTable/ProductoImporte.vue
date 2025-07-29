@@ -8,7 +8,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-3 d-flex justify-content-start align-items-end">
                 <div class="form-group">
                     <flat-pickr
                             v-model="fecha.ini"                                                       
@@ -19,7 +19,7 @@
                     <ListErrors :errores="errores.ini"></ListErrors>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 d-flex justify-content-start align-items-end">
                 <div class="form-group" v-if="!hasOneParameter">
                     <flat-pickr
                         v-model="fecha.fin"                                                       
@@ -31,18 +31,17 @@
                     <ListErrors :errores="errores.fin"></ListErrors>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 d-flex justify-content-start align-items-end">
                 <div class="form-group">
-                    <label for="">
-                        <select class="form-control input-style" v-model="comboCategorias">
-                            <option value="-1" selected>Categoria...</option>
-                            <option v-for="s in listaCategoria" v-bind:key="s.id_categoria_producto" :value="s.id_categoria_producto">{{s.nombre}}</option>
-                        </select>
-                    </label>
+                    <select class="form-control input-style" v-model="comboCategorias">
+                        <option value="-1" selected>Categoria...</option>
+                        <option v-for="s in listaCategoria" v-bind:key="s.id_categoria_producto" :value="s.id_categoria_producto">{{s.nombre}}</option>
+                    </select>
                 </div>
             </div>
-            <div class="col-md-3">
-                <button @click="productoImporteMethod()" class="btn btn-primary float-right" ref="btnBuscarRef">Generar</button>
+            <div class="col-md-3 d-flex justify-content-end align-items-end">
+                <button @click="productoImporteMethod()" class="btn btn-primary mr-2" ref="btnBuscarRef">Generar</button>
+                <button class="btn btn-success" @click="exportarExcel">Exportar a Excel</button>
             </div>
         </div>
         <div class="row" v-if="loaded">
@@ -149,7 +148,7 @@ export default{
              if(this.hasOneParameter)
                 this.fecha.fin = this.fecha.ini;  
             this.$Progress.start()
-            this.$refs.btnBuscarRef.className = "btn btn-primary float-right disabled"
+            this.$refs.btnBuscarRef.className = "btn btn-primary mr-2 disabled"
             url = url || this.$store.state.url_root+`api/auth/productoimporte/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}/fechaini/${this.fecha.ini}/fechafin/${this.fecha.fin}`
             this.labels = []
             this.importe = []
@@ -174,18 +173,40 @@ export default{
                         }]
                     }
                     this.loaded = true
-                    this.$refs.btnBuscarRef.className = "btn btn-primary float-right"
+                    this.$refs.btnBuscarRef.className = "btn btn-primary mr-2"
                     this.$Progress.finish()
                 }else{
                     this.errores = response.data.error
-                    this.$refs.btnBuscarRef.className = "btn btn-primary float-right"
+                    this.$refs.btnBuscarRef.className = "btn btn-primary mr-2"
                     this.$Progress.fail()
                 }
             })
             .catch (error => {
                 this.$toasted.show("ProductoImporte.vue: "+error, {type: 'error'})
                 this.$Progress.fail()
-                this.$refs.btnBuscarRef.className = "btn btn-primary float-right"
+                this.$refs.btnBuscarRef.className = "btn btn-primary mr-2"
+            });
+        },
+        exportarExcel(){
+            if(this.hasOneParameter)
+                this.fecha.fin = this.fecha.ini;   
+            this.$Progress.start();
+            let url = this.$store.state.url_root+`api/auth/productoimportexcel/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}/fechaini/${this.fecha.ini}/fechafin/${this.fecha.fin}`
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.get(url, { responseType: 'blob' })
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `gananciaPorProducto_${this.fecha.fin}.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.$Progress.finish();
+            })
+            .catch(error => {
+                this.$toasted.show("Error al exportar a Excel: "+error, {type: 'error'})
+                this.$Progress.fail()
             });
         }
     },
