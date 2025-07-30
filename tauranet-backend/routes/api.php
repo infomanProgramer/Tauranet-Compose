@@ -150,12 +150,18 @@ Route::group([
         Route::get('fechapedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaPedidos');
         Route::get('reportehoy/{idRestaurante}', 'ReporteController@getReportesHoy');
 
-        //Nuevos reportes
-        // Reporte de ventas por día
+        //NUEVOS REPORTES
+        // Reporte General de ventas por día
         Route::get('getreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteVentasPorDiaController@getReportePerDay');
-        Route::get('exportarreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteVentasPorDiaController@getReportePerDayExcel');
+        Route::get('getreporteperdayexcel/{idRestaurante}/fecha/{fecha}', 'ReporteVentasPorDiaController@getReportePerDayExcel');
+        Route::get('getreporteperdaypdf/{nom_restaurante}/fecha/{fecha}/sucursal/{sucursal}/caja/{caja}', 'ReporteVentasPorDiaController@getReportePerDayPDF');
+        
+        //Grafico Cantidad por producto
         Route::get('productocantidad/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoCantidad');
         Route::get('productocantidadexcel/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoCantidadExcel');
+        Route::post('productocantidadpdf', 'ReporteVentasPorDiaController@productoCantidadPDF');
+
+        //Grafico Ganancia por producto
         Route::get('productoimporte/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoImporte');
         Route::get('productoimportexcel/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoImportExcel');
     });

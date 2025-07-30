@@ -41,7 +41,8 @@
             </div>
             <div class="col-md-3 d-flex justify-content-end align-items-end">
                 <button @click="productoCantidadMethod()" class="btn btn-primary mr-2" ref="btnBuscarRef">Generar</button>
-                <button class="btn btn-success" @click="exportarExcel">Exportar a Excel</button>
+                <button class="btn btn-success mr-2" @click="exportarExcel">Exportar a Excel</button>
+                <button class="btn btn-danger" @click="exportarPDF">Exportar a PDF</button>
             </div>
         </div>
         <div class="row" v-if="loaded">
@@ -206,6 +207,37 @@ export default{
             .catch(error => {
                 this.$toasted.show("Error al exportar a Excel: "+error, {type: 'error'})
                 this.$Progress.fail()
+            });
+        },
+        exportarPDF() {
+            if(this.hasOneParameter)
+                this.fecha.fin = this.fecha.ini;
+            let datosPdf = {
+                idRestaurante: this.$store.state.id_restaurant,
+                idCategoria: this.comboCategorias,
+                fechaIni: this.fecha.ini,
+                fechaFin: this.fecha.fin,
+                restaurante: this.$store.state.restauranteData.restaurant,
+                sucursal: this.$store.state.restauranteData.sucursal,
+                caja: this.$store.state.restauranteData.caja
+            };
+            this.$Progress.start();
+            let url = this.$store.state.url_root + `api/auth/productocantidadpdf`;
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.post(url, datosPdf, { responseType: 'blob' })
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `cantidadPorProducto_${this.fecha.fin}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.$Progress.finish();
+            })
+            .catch(error => {
+                this.$toasted.show("Error al exportar a PDF: " + error, { type: 'error' });
+                this.$Progress.fail();
             });
         }
     },

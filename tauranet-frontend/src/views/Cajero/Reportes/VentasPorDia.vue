@@ -22,7 +22,8 @@
                         </div>
                         <div class="col-md-6 d-flex justify-content-end align-items-end">
                             <button type="submit" class="btn btn-primary mr-2">Generar</button>
-                            <button class="btn btn-success" @click="exportarExcel">Exportar a Excel</button>
+                            <button class="btn btn-success mr-2" @click="exportarExcel">Exportar a Excel</button>
+                            <button class="btn btn-danger" @click="exportarPDF">Exportar a PDF</button>
                         </div>
                 </div>
             </form>
@@ -162,7 +163,7 @@ export default{
         exportarExcel() {
             // Lógica para exportar a Excel
             this.$Progress.start();
-            let url = this.$store.state.url_root+`api/auth/exportarreporteperday/${this.$store.state.id_restaurant}/fecha/${this.fecha}`;
+            let url = this.$store.state.url_root+`api/auth/getreporteperdayexcel/${this.$store.state.id_restaurant}/fecha/${this.fecha}`;
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.get(url, { responseType: 'blob' })
             .then(response => {
@@ -181,6 +182,26 @@ export default{
                 this.$Progress.fail()
             });
         },
+        exportarPDF() {
+            this.$Progress.start();
+            let url = this.$store.state.url_root + `api/auth/getreporteperdaypdf/${this.$store.state.restauranteData.restaurant}/fecha/${this.fecha}/sucursal/${this.$store.state.restauranteData.sucursal}/caja/${this.$store.state.restauranteData.caja}`;
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.get(url, { responseType: 'blob' })
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `reporte_ventas_${this.fecha}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.$Progress.finish();
+            })
+            .catch(error => {
+                this.$toasted.show("Error al exportar a PDF: " + error, { type: 'error' });
+                this.$Progress.fail();
+            });
+        }
     },
 }
 </script>

@@ -8,6 +8,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Illuminate\Support\Facades\Log;
+//use Barryvdh\DomPDF\Facade\Pdf;
+use PDF;
+use Illuminate\Http\Request;
 
 
 class ReporteVentasPorDiaController extends ApiController
@@ -124,6 +127,71 @@ class ReporteVentasPorDiaController extends ApiController
         return Excel::download($export, 'reporte_ventas_'.$fecha.'.xlsx');
     }
 
+    //Exportar reporte de ventas por día a PDF
+    public function getReportePerDayPDF($nom_restaurante, $fecha, $sucursal, $caja){
+        if($fecha == 'null'){
+            return response()->json(['error' => ['fecha' => ['Fecha es requerido']]], 200);
+        }
+
+        $ventasPorDiaXlsx = DB::table('venta_productos as vp')->selectRaw("
+                CAST(vp.created_at AS TIME) as hora,
+                vp.nro_venta as nro_pedido,
+                c.nombre_completo as cliente,
+                c2.nombre_usuario as atendido_por,
+                CASE 
+                    WHEN p.tipo_pago = 2 THEN 'QR'
+                    WHEN p.tipo_pago = 1 THEN 'TARJETA'
+                    ELSE 'EFECTIVO'
+                END as tipo_pago,
+                p.importe as importe,
+                p.importe_base as importe_neto,
+                (p.importe - p.importe_base) as ganancia
+            ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
+            ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
+            ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
+            ->whereDate('vp.created_at', '=', $fecha)
+            ->orderByDesc('hora')
+            ->get();
+
+        //Obtiene totales
+
+        $totalDia = DB::table('venta_productos as vp')
+            ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
+            ->whereDate('vp.created_at', $fecha)
+            ->selectRaw('
+                SUM(p.importe) as importe_total,
+                SUM(p.importe_base) as importe_neto_total,
+                (SUM(p.importe) - SUM(p.importe_base)) as ganancia_total,
+                (
+                    SELECT COUNT(*) FROM pagos 
+                    WHERE tipo_pago = 0 
+                    AND DATE(created_at) = ?
+                ) as total_efectivo,
+                (
+                    SELECT COUNT(*) FROM pagos 
+                    WHERE tipo_pago = 1 
+                    AND DATE(created_at) = ?
+                ) as total_tarjeta,
+                (
+                    SELECT COUNT(*) FROM pagos 
+                    WHERE tipo_pago = 2 
+                    AND DATE(created_at) = ?
+                ) as total_qr
+            ', [$fecha, $fecha, $fecha])
+            ->first();
+
+        $pdf = PDF::loadView('reportes.ventas_por_dia.detalle_general', [
+            'nom_restaurante' => $nom_restaurante,
+            'sucursal' => $sucursal,
+            'caja' => $caja,
+            'ventasPorDia' => $ventasPorDiaXlsx,
+            'fecha' => $fecha,
+            'totalDia' => $totalDia,
+        ]);
+
+        return $pdf->download('ventas_por_dia_detelle_general'.$fecha.'.pdf');
+    }
+
     // Graficos
     public function productoCantidad($idRestaurante, $idCategoria,$fechaIni, $fechaFin){
         if($fechaIni == 'null'){
@@ -182,6 +250,50 @@ class ReporteVentasPorDiaController extends ApiController
             $response = Response::json(['error' => ['ini' => ['Fecha ini debe ser menor que Fecha fin']]], 200);
             return $response;
         }
+    }
+
+    public function productoCantidadPDF(Request $request){
+        $validated = $request->validate([
+            'idRestaurante' => 'required|integer|exists:restaurants,id_restaurant',
+            'fechaIni' => 'required|date',
+            'fechaFin' => 'required|date|after_or_equal:fechaIni',
+            'idCategoria' => 'required|integer',
+            'restaurante' => 'required|string',
+            'sucursal' => 'required|string',
+            'caja' => 'required|string',
+        ]);
+        if ($validated === false) {
+            return response()->json(['error' => ['validacion' => ['Error de validación de datos de entrada']]], 422);
+        }
+        Log::info('productoCantidadPDF - request:', $request->all());
+        $idRestaurante = $request->input('idRestaurante');
+        $fechaIni = $request->input('fechaIni');
+        $fechaFin = $request->input('fechaFin');
+        $idCategoria = $request->input('idCategoria');
+        $restaurante = $request->input('restaurante');
+        $sucursal = $request->input('sucursal');
+        $caja = $request->input('caja');
+
+        $productoCantidadPDF = DB::table(DB::raw("function_producto_cantidad(" . $idRestaurante . ", " . $idCategoria . ", '" . $fechaIni . "', '" . $fechaFin . "')"))->get();
+        $exportData = [];
+        foreach ($productoCantidadPDF as $row) {
+            $exportData[] = [
+                'Producto' => $row->nom_producto,
+                'Categoria' => $row->nom_categoria,
+                'Cantidad' => $row->cantidad,
+            ];
+        }
+
+        $pdf = PDF::loadView('reportes.ventas_por_dia.cantidad_producto', [
+            'nom_restaurante' => $restaurante,
+            'sucursal' => $sucursal,
+            'caja' => $caja,
+            'productoCantidadPDF' => $productoCantidadPDF,
+            'fechaIni' => $fechaIni,
+            'fechaFin' => $fechaFin
+        ]);
+
+        return $pdf->download('cantidadPorProducto_'.$fechaFin.'.pdf');
     }
 
     public function productoImporte($idRestaurante, $idCategoria, $fechaIni, $fechaFin){

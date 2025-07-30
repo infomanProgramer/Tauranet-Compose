@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c4db999c1f379cfe4515504f4b5fae47",
+    "content-hash": "34393a58f2de1132c1f24deef1cd2e80",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -123,35 +123,35 @@
         },
         {
             "name": "barryvdh/laravel-dompdf",
-            "version": "v0.8.5",
+            "version": "v0.8.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/barryvdh/laravel-dompdf.git",
-                "reference": "7393732b2f3a3ee357974cbb0c46c9b65b84dad1"
+                "reference": "30310e0a675462bf2aa9d448c8dcbf57fbcc517d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/barryvdh/laravel-dompdf/zipball/7393732b2f3a3ee357974cbb0c46c9b65b84dad1",
-                "reference": "7393732b2f3a3ee357974cbb0c46c9b65b84dad1",
+                "url": "https://api.github.com/repos/barryvdh/laravel-dompdf/zipball/30310e0a675462bf2aa9d448c8dcbf57fbcc517d",
+                "reference": "30310e0a675462bf2aa9d448c8dcbf57fbcc517d",
                 "shasum": ""
             },
             "require": {
                 "dompdf/dompdf": "^0.8",
-                "illuminate/support": "^5.5|^6",
+                "illuminate/support": "^5.5|^6|^7|^8",
                 "php": ">=7"
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-master": "0.8-dev"
-                },
                 "laravel": {
-                    "providers": [
-                        "Barryvdh\\DomPDF\\ServiceProvider"
-                    ],
                     "aliases": {
                         "PDF": "Barryvdh\\DomPDF\\Facade"
-                    }
+                    },
+                    "providers": [
+                        "Barryvdh\\DomPDF\\ServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-master": "0.8-dev"
                 }
             },
             "autoload": {
@@ -175,7 +175,7 @@
                 "laravel",
                 "pdf"
             ],
-            "time": "2019-08-23T14:30:33+00:00"
+            "time": "2020-09-07T11:50:18+00:00"
         },
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -4255,6 +4255,7 @@
                 "faker",
                 "fixtures"
             ],
+            "abandoned": true,
             "time": "2018-07-12T10:23:15+00:00"
         },
         {
@@ -4979,6 +4980,7 @@
             "keywords": [
                 "tokenizer"
             ],
+            "abandoned": true,
             "time": "2017-11-27T05:48:46+00:00"
         },
         {
@@ -5729,12 +5731,12 @@
             "version": "1.4.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozart/assert.git",
+                "url": "https://github.com/webmozarts/assert.git",
                 "reference": "83e253c8e0be5b0257b881e1827274667c5c17a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozart/assert/zipball/83e253c8e0be5b0257b881e1827274667c5c17a9",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/83e253c8e0be5b0257b881e1827274667c5c17a9",
                 "reference": "83e253c8e0be5b0257b881e1827274667c5c17a9",
                 "shasum": ""
             },
