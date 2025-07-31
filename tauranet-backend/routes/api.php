@@ -164,6 +164,7 @@ Route::group([
         //Grafico Ganancia por producto
         Route::get('productoimporte/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoImporte');
         Route::get('productoimportexcel/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoImportExcel');
+        Route::post('productoimportepdf', 'ReporteVentasPorDiaController@productoImportePDF');
     });
 
     //Rutas Administrador

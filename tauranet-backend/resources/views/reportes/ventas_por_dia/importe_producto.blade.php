@@ -39,15 +39,19 @@
             <tr>
                 <th>Producto</th>
                 <th>Categoria</th>
-                <th>Cantidad</th>
+                <th>Importe</th>
+                <th>Importe Neto</th>
+                <th>Ganancia</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($productoCantidadPDF as $item)
+            @foreach($productoImportePDF as $item)
                 <tr>
                     <td>{{ $item->nom_producto }}</td>
                     <td>{{ $item->nom_categoria }}</td>
-                    <td>{{ $item->cantidad }}</td>
+                    <td>{{ number_format($item->importe, 2) }}</td>
+                    <td>{{ number_format($item->importe_base, 2) }}</td>
+                    <td>{{ number_format($item->ganancia, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>

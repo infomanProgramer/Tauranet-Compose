@@ -41,13 +41,13 @@
             </div>
             <div class="col-md-3 d-flex justify-content-end align-items-end">
                 <button @click="productoCantidadMethod()" class="btn btn-primary mr-2" ref="btnBuscarRef">Generar</button>
-                <button class="btn btn-success mr-2" @click="exportarExcel">Exportar a Excel</button>
-                <button class="btn btn-danger" @click="exportarPDF">Exportar a PDF</button>
+                <button class="btn btn-success mr-2" @click="exportarExcel">Excel</button>
+                <button class="btn btn-danger" @click="exportarPDF">PDF</button>
             </div>
         </div>
         <div class="row" v-if="loaded">
             <div class="col-md-8 table-responsive">
-                <BarChart :chart-data="empleadoPedidoCollection" :options="options"></BarChart>
+                <BarChart ref="barChartRef" :chart-data="empleadoPedidoCollection" :options="options"></BarChart>
             </div>
             <div class="col-md-4">
                 <div class="row">
@@ -212,6 +212,16 @@ export default{
         exportarPDF() {
             if(this.hasOneParameter)
                 this.fecha.fin = this.fecha.ini;
+
+            // 1. Obtener el canvas del BarChart
+            let chartBase64 = null;
+            if (this.$refs.barChartRef && this.$refs.barChartRef.$el) {
+                const canvas = this.$refs.barChartRef.$el.querySelector('canvas');
+                if (canvas) {
+                    chartBase64 = canvas.toDataURL('image/png');
+                }
+            }
+
             let datosPdf = {
                 idRestaurante: this.$store.state.id_restaurant,
                 idCategoria: this.comboCategorias,
@@ -219,7 +229,8 @@ export default{
                 fechaFin: this.fecha.fin,
                 restaurante: this.$store.state.restauranteData.restaurant,
                 sucursal: this.$store.state.restauranteData.sucursal,
-                caja: this.$store.state.restauranteData.caja
+                caja: this.$store.state.restauranteData.caja,
+                chartBase64: chartBase64 // 2. Enviar la imagen
             };
             this.$Progress.start();
             let url = this.$store.state.url_root + `api/auth/productocantidadpdf`;

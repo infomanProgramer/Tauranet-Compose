@@ -273,6 +273,7 @@ class ReporteVentasPorDiaController extends ApiController
         $restaurante = $request->input('restaurante');
         $sucursal = $request->input('sucursal');
         $caja = $request->input('caja');
+        $chartBase64 = $request->input('chartBase64', null);
 
         $productoCantidadPDF = DB::table(DB::raw("function_producto_cantidad(" . $idRestaurante . ", " . $idCategoria . ", '" . $fechaIni . "', '" . $fechaFin . "')"))->get();
         $exportData = [];
@@ -285,12 +286,14 @@ class ReporteVentasPorDiaController extends ApiController
         }
 
         $pdf = PDF::loadView('reportes.ventas_por_dia.cantidad_producto', [
+            'titulo_reporte' => 'REPORTE DE CANTIDAD POR PRODUCTO',
             'nom_restaurante' => $restaurante,
             'sucursal' => $sucursal,
             'caja' => $caja,
             'productoCantidadPDF' => $productoCantidadPDF,
             'fechaIni' => $fechaIni,
-            'fechaFin' => $fechaFin
+            'fechaFin' => $fechaFin,
+            'chartBase64' => $chartBase64
         ]);
 
         return $pdf->download('cantidadPorProducto_'.$fechaFin.'.pdf');
@@ -357,5 +360,54 @@ class ReporteVentasPorDiaController extends ApiController
             $response = Response::json(['error' => ['ini' => ['Fecha ini debe ser menor que Fecha fin']]], 200);
             return $response;
         }
+    }
+
+    public function productoImportePDF(Request $request){
+        $validated = $request->validate([
+            'idRestaurante' => 'required|integer|exists:restaurants,id_restaurant',
+            'fechaIni' => 'required|date',
+            'fechaFin' => 'required|date|after_or_equal:fechaIni',
+            'idCategoria' => 'required|integer',
+            'restaurante' => 'required|string',
+            'sucursal' => 'required|string',
+            'caja' => 'required|string',
+        ]);
+        if ($validated === false) {
+            return response()->json(['error' => ['validacion' => ['Error de validación de datos de entrada']]], 422);
+        }
+        Log::info('productoImportePDF - request:', $request->all());
+        $idRestaurante = $request->input('idRestaurante');
+        $fechaIni = $request->input('fechaIni');
+        $fechaFin = $request->input('fechaFin');
+        $idCategoria = $request->input('idCategoria');
+        $restaurante = $request->input('restaurante');
+        $sucursal = $request->input('sucursal');
+        $caja = $request->input('caja');
+        $chartBase64 = $request->input('chartBase64', null);
+
+        $productoImportePDF = DB::table(DB::raw("function_producto_importe(" . $idRestaurante . ", " . $idCategoria . ", '" . $fechaIni . "', '" . $fechaFin . "')"))->get();
+        $exportData = [];
+        foreach ($productoImportePDF as $row) {
+            $exportData[] = [
+                'Producto' => $row->nom_producto,
+                'Categoria' => $row->nom_categoria,
+                'Importe' => $row->importe,
+                'Importe Neto' => $row->importe_base,
+                'Ganancia' => $row->ganancia,
+            ];
+        }
+
+        $pdf = PDF::loadView('reportes.ventas_por_dia.importe_producto', [
+            'titulo_reporte' => 'REPORTE DE GANANCIA POR PRODUCTO',
+            'nom_restaurante' => $restaurante,
+            'sucursal' => $sucursal,
+            'caja' => $caja,
+            'productoImportePDF' => $productoImportePDF,
+            'fechaIni' => $fechaIni,
+            'fechaFin' => $fechaFin,
+            'chartBase64' => $chartBase64
+        ]);
+
+        return $pdf->download('gananciaPorProducto_'.$fechaFin.'.pdf');
     }
 }

@@ -22,8 +22,8 @@
                         </div>
                         <div class="col-md-6 d-flex justify-content-end align-items-end">
                             <button type="submit" class="btn btn-primary mr-2">Generar</button>
-                            <button class="btn btn-success mr-2" @click="exportarExcel">Exportar a Excel</button>
-                            <button class="btn btn-danger" @click="exportarPDF">Exportar a PDF</button>
+                            <button class="btn btn-success mr-2" @click="exportarExcel">Excel</button>
+                            <button class="btn btn-danger" @click="exportarPDF">PDF</button>
                         </div>
                 </div>
             </form>
