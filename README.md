@@ -160,7 +160,10 @@ La tabla **venta_productos** tiene el detalle del grupo de productos vendidos en
 ## Diccionario de datos - BD
 
 Tabla: pagos
-Campo: tipo_pago 0 -> efectivo, 1 -> tarjeta, 2 -> qr
+Tipo_pago:
+- 0 -> efectivo, 
+- 1 -> tarjeta, 
+- 2 -> qr
 
 
 

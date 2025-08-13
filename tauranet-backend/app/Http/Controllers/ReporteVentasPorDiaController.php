@@ -8,7 +8,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Illuminate\Support\Facades\Log;
-//use Barryvdh\DomPDF\Facade\Pdf;
 use PDF;
 use Illuminate\Http\Request;
 
@@ -39,13 +38,21 @@ class ReporteVentasPorDiaController extends ApiController
             ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
             ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
             ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
+            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
+            ->join('cajas as cj', 'cj.id_caja', '=', 'h.id_caja')
+            ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', '=', $fecha)
+            ->where('s.id_restaurant', $idRestaurante)
             ->orderByDesc('hora')
             ->paginate(10);
 
         $totalDia = DB::table('venta_productos as vp')
             ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
+            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
+            ->join('cajas as cj', 'cj.id_caja', '=', 'h.id_caja')
+            ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', $fecha)
+            ->where('s.id_restaurant', $idRestaurante)
             ->selectRaw('
                 SUM(p.importe) as importe_total,
                 SUM(p.importe_base) as importe_neto_total,
@@ -94,7 +101,11 @@ class ReporteVentasPorDiaController extends ApiController
             ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
             ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
             ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
+            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
+            ->join('cajas as cj', 'cj.id_caja', '=', 'h.id_caja')
+            ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', '=', $fecha)
+            ->where('s.id_restaurant', $idRestaurante)
             ->orderByDesc('hora')
             ->get();
 
@@ -128,11 +139,25 @@ class ReporteVentasPorDiaController extends ApiController
     }
 
     //Exportar reporte de ventas por día a PDF
-    public function getReportePerDayPDF($nom_restaurante, $fecha, $sucursal, $caja){
-        if($fecha == 'null'){
-            return response()->json(['error' => ['fecha' => ['Fecha es requerido']]], 200);
+    public function getReportePerDayPDF(Request $request){
+        //$nom_restaurante, $fecha, $sucursal, $caja
+        $validated = $request->validate([
+            'idRestaurante' => 'required|integer|exists:restaurants,id_restaurant',
+            'nombre_restaurante' => 'required|string',
+            'fecha' => 'required|date',
+            'sucursal' => 'required|string',
+            'caja' => 'required|string',
+        ]);
+        if ($validated === false) {
+            return response()->json(['error' => ['validacion' => ['Error de validación de datos de entrada']]], 422);
         }
-
+        Log::info('getReportePerDayPDF - request:', $request->all());
+        $idRestaurante = $request->input('idRestaurante');
+        $nombre_restaurante = $request->input('nombre_restaurante');
+        $fecha = $request->input('fecha');
+        $sucursal = $request->input('sucursal');
+        $caja = $request->input('caja');
+        
         $ventasPorDiaXlsx = DB::table('venta_productos as vp')->selectRaw("
                 CAST(vp.created_at AS TIME) as hora,
                 vp.nro_venta as nro_pedido,
@@ -149,7 +174,11 @@ class ReporteVentasPorDiaController extends ApiController
             ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
             ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
             ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
+            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
+            ->join('cajas as cj', 'cj.id_caja', '=', 'h.id_caja')
+            ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', '=', $fecha)
+            ->where('s.id_restaurant', $idRestaurante)
             ->orderByDesc('hora')
             ->get();
 
@@ -157,7 +186,11 @@ class ReporteVentasPorDiaController extends ApiController
 
         $totalDia = DB::table('venta_productos as vp')
             ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
+            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
+            ->join('cajas as cj', 'cj.id_caja', '=', 'h.id_caja')
+            ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', $fecha)
+            ->where('s.id_restaurant', $idRestaurante)
             ->selectRaw('
                 SUM(p.importe) as importe_total,
                 SUM(p.importe_base) as importe_neto_total,
@@ -181,7 +214,7 @@ class ReporteVentasPorDiaController extends ApiController
             ->first();
 
         $pdf = PDF::loadView('reportes.ventas_por_dia.detalle_general', [
-            'nom_restaurante' => $nom_restaurante,
+            'nom_restaurante' => $nombre_restaurante,
             'sucursal' => $sucursal,
             'caja' => $caja,
             'ventasPorDia' => $ventasPorDiaXlsx,

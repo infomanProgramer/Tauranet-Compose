@@ -147,8 +147,6 @@ export default{
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.get(url)
             .then(response => {
-                //this.ListaClientes = response.data.data;
-                console.log(response.data.ventasPorDia);
                 this.ventasPorDiaArray = response.data.ventasPorDia.data;
                 this.pagination = response.data.ventasPorDia;
                 this.totalDia = response.data.totalDia;
@@ -184,9 +182,16 @@ export default{
         },
         exportarPDF() {
             this.$Progress.start();
-            let url = this.$store.state.url_root + `api/auth/getreporteperdaypdf/${this.$store.state.restauranteData.restaurant}/fecha/${this.fecha}/sucursal/${this.$store.state.restauranteData.sucursal}/caja/${this.$store.state.restauranteData.caja}`;
+            let datosPdf = {
+                idRestaurante: this.$store.state.id_restaurant,
+                nombre_restaurante: this.$store.state.restauranteData.restaurant,
+                fecha: this.fecha,
+                sucursal: this.$store.state.restauranteData.sucursal,
+                caja: this.$store.state.restauranteData.caja
+            };
+            let url = this.$store.state.url_root + `api/auth/getreporteperdaypdf`;
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-            axios.get(url, { responseType: 'blob' })
+            axios.post(url, datosPdf, { responseType: 'blob' })
             .then(response => {
                 const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
                 const link = document.createElement('a');

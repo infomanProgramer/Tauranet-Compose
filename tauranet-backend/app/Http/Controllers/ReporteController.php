@@ -280,27 +280,7 @@ class ReporteController extends ApiController
             return $response;
         }
     }
-    public function fechaImporte($idRestaurante, $fechaIni, $fechaFin){
-        if($fechaIni == 'null'){
-            $response = Response::json(['error' => ['ini' => ['Fecha ini es requerido']]], 200);
-            return $response;
-        }
-        if($fechaFin == 'null'){
-            $response = Response::json(['error' => ['fin' => ['Fecha fin es requerido']]], 200);
-            return $response;
-        }
-        if($fechaIni <= $fechaFin) {
-            //Chart
-            $fechaImporte = DB::table(DB::raw("function_fecha_importe(" . $idRestaurante . ",'" . $fechaIni . "', '" . $fechaFin . "')"))->get();
-            //Table
-            $fechaImporteTable = DB::table(DB::raw("function_fecha_importe(" . $idRestaurante . ", '" . $fechaIni . "', '" . $fechaFin . "')"))->paginate(6);
-            $response = Response::json(['data' => $fechaImporte, 'dataT' => $fechaImporteTable], 200);
-            return $response;
-        }else{
-            $response = Response::json(['error' => ['ini' => ['Fecha ini debe ser menor que Fecha fin']]], 200);
-            return $response;
-        }
-    }
+    
     public function aperturaCajas($idRestaurante, $idSucursal){
         if($idSucursal == -1){
             $aperturaCajas = DB::table('historial_caja as h')

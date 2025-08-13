@@ -146,15 +146,15 @@ Route::group([
         Route::get('cliente/restaurant/{idRestaurant}', 'ClienteController@getClientesByRestaurant');
         Route::get('detalleventas/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/sucursal/{idSucursal}/perfil/{idPerfil}', 'ReporteController@detalleVentas');
         Route::get('empleadopedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@empleadoPedido');
-        Route::get('fechaimporte/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaImporte');
+        //Route::get('fechaimporte/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaImporte');
         Route::get('fechapedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaPedidos');
         Route::get('reportehoy/{idRestaurante}', 'ReporteController@getReportesHoy');
 
-        //NUEVOS REPORTES
-        // Reporte General de ventas por día
+        //REPORTES DE VENTAS POR DIA
+        // Tabla detalle general
         Route::get('getreporteperday/{idRestaurante}/fecha/{fecha}', 'ReporteVentasPorDiaController@getReportePerDay');
         Route::get('getreporteperdayexcel/{idRestaurante}/fecha/{fecha}', 'ReporteVentasPorDiaController@getReportePerDayExcel');
-        Route::get('getreporteperdaypdf/{nom_restaurante}/fecha/{fecha}/sucursal/{sucursal}/caja/{caja}', 'ReporteVentasPorDiaController@getReportePerDayPDF');
+        Route::post('getreporteperdaypdf', 'ReporteVentasPorDiaController@getReportePerDayPDF');
         
         //Grafico Cantidad por producto
         Route::get('productocantidad/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoCantidad');
@@ -165,6 +165,20 @@ Route::group([
         Route::get('productoimporte/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoImporte');
         Route::get('productoimportexcel/{idRestaurante}/categoria/{idCategoria}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteVentasPorDiaController@productoImportExcel');
         Route::post('productoimportepdf', 'ReporteVentasPorDiaController@productoImportePDF');
+
+        //REPORTES DE VENTAS POR INTERVALO DE FECHA
+        // Tabla detalle general
+        Route::post('getreportbyinterval', 'ReporteVentasPorRangoFechaController@getReportByInterval');
+        Route::post('getreportbyintervalexcel', 'ReporteVentasPorRangoFechaController@getReportByIntervalExcel');
+        Route::post('getreportbyintervalpdf', 'ReporteVentasPorRangoFechaController@getReportByIntervalPDF');
+
+        //Ventas por fecha
+        Route::post('fechaimporte', 'ReporteVentasPorRangoFechaController@fechaImporte');
+        Route::post('fechaimporteexcel', 'ReporteVentasPorRangoFechaController@fechaImporteExcel');
+        Route::post('fechaimportepdf', 'ReporteVentasPorRangoFechaController@fechaImportePDF');
+
+        //Ventas por semana
+        Route::post('semanaimporte', 'ReporteVentasPorRangoFechaController@semanaImporte');
     });
 
     //Rutas Administrador

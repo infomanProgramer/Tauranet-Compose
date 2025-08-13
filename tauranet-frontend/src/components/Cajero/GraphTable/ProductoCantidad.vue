@@ -14,7 +14,7 @@
                             v-model="fecha.ini"                                                       
                             class="form-control input-style"
                             :config="config"
-                            placeholder="Fecha Ini">
+                            :placeholder="placeholderFecha">
                     </flat-pickr>
                     <ListErrors :errores="errores.ini"></ListErrors>
                 </div>
@@ -25,7 +25,7 @@
                         v-model="fecha.fin"                                                       
                         class="form-control input-style"
                         :config="config"
-                        placeholder="Fecha Fin"
+                        placeholder="Fecha Hasta"
                     >
                     </flat-pickr>
                     <ListErrors :errores="errores.fin"></ListErrors>
@@ -92,7 +92,8 @@ export default{
     },
     props: {
         hasOneParameter: {
-            type: Boolean
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -107,6 +108,7 @@ export default{
             labels: [],
             cantidad: [],
             errores: {},
+            placeholderFecha: this.hasOneParameter?"Seleccionar fecha":"Fecha desde",
             fecha: {
                 ini: null,
                 fin: null
