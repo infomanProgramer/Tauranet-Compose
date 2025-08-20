@@ -123,6 +123,12 @@
             <div class="row">
                 <SemanaImporte/>
             </div>
+            <div class="row">
+                <MesImporte/>
+            </div>
+            <div class="row">
+                <ProductoImporte :hasOneParameter="false"></ProductoImporte>
+            </div>
         </div>
     </Marco>
 </template>
@@ -134,6 +140,8 @@ import flatPickr from 'vue-flatpickr-component';
 import Pagination from '@/components/Pagination/Pagination';
 import FechaImporte from '@/components/Cajero/GraphTable/FechaImporte'
 import SemanaImporte from '@/components/Cajero/GraphTable/SemanaImporte'
+import MesImporte from '@/components/Cajero/GraphTable/MesImporte'
+import ProductoImporte from '@/components/Cajero/GraphTable/ProductoImporte'
 export default{
     name: 'VentasPorRangoFecha',
     components: {
@@ -141,7 +149,9 @@ export default{
         flatPickr,
         Pagination,
         FechaImporte,
-        SemanaImporte
+        SemanaImporte,
+        MesImporte,
+        ProductoImporte
     },
     data(){
         return {

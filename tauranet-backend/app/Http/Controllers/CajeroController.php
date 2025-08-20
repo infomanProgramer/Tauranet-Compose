@@ -217,4 +217,10 @@ class CajeroController extends ApiController
         $cajero = Cajero::find($id)->delete();
         return response()->json(['data' => $cajero], 201);
     }
+    public function getGestionesPagos(){
+        $anios = DB::table('pagos')
+            ->selectRaw('DISTINCT EXTRACT(YEAR FROM created_at) AS anio')
+            ->pluck('anio');
+        return response()->json(['data' => $anios], 201);
+    }
 }

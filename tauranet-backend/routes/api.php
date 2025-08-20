@@ -149,6 +149,7 @@ Route::group([
         //Route::get('fechaimporte/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaImporte');
         Route::get('fechapedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaPedidos');
         Route::get('reportehoy/{idRestaurante}', 'ReporteController@getReportesHoy');
+        Route::get('getgestionespagos', 'CajeroController@getGestionesPagos');
 
         //REPORTES DE VENTAS POR DIA
         // Tabla detalle general
@@ -179,6 +180,9 @@ Route::group([
 
         //Ventas por semana
         Route::post('semanaimporte', 'ReporteVentasPorRangoFechaController@semanaImporte');
+
+        //Ventas por mes
+        Route::post('mesimporte', 'ReporteVentasPorRangoFechaController@mesImporte');
     });
 
     //Rutas Administrador
