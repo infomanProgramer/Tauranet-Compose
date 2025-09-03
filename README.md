@@ -165,6 +165,15 @@ Tipo_pago:
 - 1 -> tarjeta, 
 - 2 -> qr
 
+## Ingresar como super administrador
+
+- Ingresar a la ruta: http://localhost:8085/superadmin
+- Ingresar con credenciales:
+    - Usuario: Jonathan
+    - Contraseña: jonathan
+  
+
+
 
 
 

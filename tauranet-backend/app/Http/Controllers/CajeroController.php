@@ -8,30 +8,34 @@ use App\Cajero;
 use Illuminate\Support\Facades\Hash;
 use Validator;
 use DB;
+use Log;
 
 class CajeroController extends ApiController
 {
     public function store(Request $request){
         $localRules = [
-            'id_administrador' => 'required|exists:administradors,id_administrador',
+            'id_administrador' => 'nullable|exists:administradors,id_administrador',
+            'id_superadministrador' => 'nullable|exists:superadministradors,id_superadministrador',
+            'id_restaurant' => 'required|not_in:-1|exists:restaurants,id_restaurant',
             'id_sucursal' => 'required|not_in:-1|exists:sucursals,id_sucursal',
             'id_caja' => 'required|not_in:-1|exists:cajas,id_caja',
-            'sueldo' => 'required|numeric|between:0,9999999.99',
-            //'sueldo' => 'required|digits_between:0,9',
+            function ($attribute, $value, $fail) {
+                if (!$this->has('id_administrador') && !$this->has('id_superadministrador')) {
+                    $fail('Debe ingresar al menos un campo entre id_administrador o id_superadministrador');
+                }
+            }
         ];
         $locaMessages = [
             'id_administrador.required' => 'El Administrador es requerido',
             'id_administrador.exists' => 'El Administrador no existe',
+            'id_superadministrador.required' => 'El Super Administrador es requerido',
+            'id_superadministrador.exists' => 'El Super Administrador no existe',
             'id_sucursal.required' => 'La Sucursal es requerida',
             'id_sucursal.exists' => 'La Sucursal no existe',
             'id_sucursal.not_in' => 'La Sucursal es requerida',
             'id_caja.required' => 'La Caja es requerida',
             'id_caja.not_in' => 'La Caja es requerida',
             'id_caja.exists' => 'La Caja no existe',
-            'sueldo.required' => 'El Sueldo es requerido',
-            'sueldo.numeric' => 'El sueldo tiene que ser de tipo numérico',
-            'sueldo.between' => 'El sueldo tiene que estar entre 0 y 9999999.99'
-            //'sueldo.digits_between' => 'El Sueldo solo tiene que tener digitos del 0 - 9'
         ];
         $allRules = (new UserRequest())->rules() + $localRules;
         $allMessages = (new UserRequest())->messages() + $locaMessages;
@@ -53,14 +57,6 @@ class CajeroController extends ApiController
             return ! empty( $input->materno );
         });
 
-        $validator->sometimes('celular', 'min:4|max:20|digits_between:0,9', function($input){
-            return ! empty( $input->celular );
-        });
-
-        $validator->sometimes('telefono', 'min:4|max:20|digits_between:0,9', function($input){
-            return ! empty( $input->telefono );
-        });
-
         if ($validator->fails()) {
             return response()->json(["error" => $validator->errors()], 201);
         }
@@ -70,47 +66,42 @@ class CajeroController extends ApiController
         $cajero->segundo_nombre = $request->get("segundo_nombre");
         $cajero->paterno = $request->get("paterno");
         $cajero->materno = $request->get("materno");
-        $cajero->email = $request->get("email");
-        $cajero->dni = $request->get("dni");
-        $cajero->sexo = $request->get("sexo");
-        $cajero->direccion = $request->get("direccion");
         $cajero->nombre_usuario = $request->get("nombre_usuario");
         $cajero->password = bcrypt($request->get("password"));
-        $cajero->fecha_nac = $request->get("fecha_nac");
-        $cajero->tipo_usuario = $request->get("tipo_usuario");
-        $cajero->celular = $request->get("celular");
-        $cajero->telefono = $request->get("telefono");
         $cajero->tipo_usuario = $request->get("tipo_usuario");
         //Campos correspondientes solo al Cajero
-        $cajero->id_sucursal = $request->get("id_sucursal");
-        $cajero->id_administrador = $request->get("id_administrador");
+        
+        if ($request->has("id_administrador")) {
+            $cajero->id_administrador = $request->get("id_administrador");
+        }
+        if ($request->has("id_superadministrador")) {
+            $cajero->id_superadministrador = $request->get("id_superadministrador");
+        }
+
         $cajero->id_caja = $request->get("id_caja");
-        $cajero->sueldo = $request->get("sueldo");
         $cajero->estado = true;
         $cajero->save();
         return response()->json(['data' => $cajero], 201);
     }
+
     public function update(Request $request, $id){
         \Log::info($request);
         $cajero = Cajero::find($id);
         $localRules = [
-            'id_administrador' => 'required|exists:administradors,id_administrador',
+            'id_superadministrador' => 'required|exists:superadministradors,id_superadministrador',
             'id_sucursal' => 'required|not_in:-1|exists:sucursals,id_sucursal',
-            'id_caja' => 'required|not_in:-1|exists:cajas,id_caja',
-            'sueldo' => 'required|numeric|between:0,9999999.99',
+            'id_restaurant' => 'required|not_in:-1|exists:restaurants,id_restaurant',
+            'id_caja' => 'required|not_in:-1|exists:cajas,id_caja'
         ];
         $locaMessages = [
-            'id_administrador.required' => 'El Administrador es requerido',
-            'id_administrador.exists' => 'El Administrador no existe',
+            'id_superadministrador.required' => 'El Super Administrador es requerido',
+            'id_superadministrador.exists' => 'El Super Administrador no existe',
             'id_sucursal.required' => 'La Sucursal es requerida',
             'id_sucursal.exists' => 'La Sucursal no existe',
             'id_sucursal.not_in' => 'La Sucursal es requerida',
             'id_caja.required' => 'La Caja es requerida',
             'id_caja.not_in' => 'La Caja es requerida',
-            'id_caja.exists' => 'La Caja no existe',
-            'sueldo.required' => 'El Sueldo es requerido',
-            'sueldo.numeric' => 'El sueldo tiene que ser de tipo numérico',
-            'sueldo.between' => 'El sueldo tiene que estar entre 0 y 9999999.99'
+            'id_caja.exists' => 'La Caja no existe'
         ];
         $allRules = (new UserRequest())->rulesUpdate($cajero->id_usuario) + $localRules;
         $allMessages = (new UserRequest())->messages() + $locaMessages;
@@ -132,14 +123,6 @@ class CajeroController extends ApiController
             return ! empty( $input->materno );
         });
 
-        $validator->sometimes('celular', 'min:4|max:20|digits_between:0,9', function($input){
-            return ! empty( $input->celular );
-        });
-
-        $validator->sometimes('telefono', 'min:4|max:20|digits_between:0,9', function($input){
-            return ! empty( $input->telefono );
-        });
-
         if ($validator->fails()) {
             return response()->json(["error" => $validator->errors()], 201);
         }
@@ -156,45 +139,18 @@ class CajeroController extends ApiController
         if($request->has('materno')) {
             $cajero->materno = $request->get("materno");
         }
-        if($request->has('email')) {
-            $cajero->email = $request->get("email");
-        }
-        if($request->has('dni')) {
-            $cajero->dni = $request->get("dni");
-        }
-        if($request->has('sexo')) {
-            $cajero->sexo = $request->get("sexo");
-        }
         if($request->has('estado')) {
             $cajero->estado = $request->get("estado");
-        }
-        if($request->has('direccion')) {
-            $cajero->direccion = $request->get("direccion");
         }
         if($request->has('nombre_usuario')) {
             $cajero->nombre_usuario = $request->get("nombre_usuario");
         }
-        if($request->has('fecha_nac')) {
-            $cajero->fecha_nac = $request->get("fecha_nac");
-        }
         if($request->has('tipo_usuario')) {
             $cajero->tipo_usuario = $request->get("tipo_usuario");
         }
-        if($request->has('celular')) {
-            $cajero->celular = $request->get("celular");
-        }
-        if($request->has('telefono')) {
-            $cajero->telefono = $request->get("telefono");
-        }
         //Campos correspondientes solo al Cajero
-        if($request->has('id_sucursal')) {
-            $cajero->id_sucursal = $request->get("id_sucursal");
-        }
-        if($request->has('id_administrador')) {
-            $cajero->id_administrador = $request->get("id_administrador");
-        }
-        if($request->has('sueldo')) {
-            $cajero->sueldo = $request->get("sueldo");
+        if($request->has('id_superadministrador')) {
+            $cajero->id_superadministrador = $request->get("id_superadministrador");
         }
         if($request->has('id_caja')) {
             $cajero->id_caja = $request->get("id_caja");
@@ -205,11 +161,36 @@ class CajeroController extends ApiController
         $cajero->save();
         return response()->json(['data' => $cajero], 201);
     }
-    public function show($id)
-    {
+    public function show($id){
+        Log::info("id cajero: ". $id);
         $cajero = DB::table('cajeros as c')
+                  ->join('cajas as ca', 'ca.id_caja', '=', 'c.id_caja')
+                  ->join('sucursals as s', 's.id_sucursal', '=', 'ca.id_sucursal')
                   ->where('id_cajero', '=', $id)
-                  ->select('id_cajero as id_usuario', 'paterno', 'materno', 'primer_nombre', 'dni', 'direccion', 'nombre_usuario', 'email', 'direccion', 'fecha_nac', 'sueldo', 'id_sucursal', 'id_administrador', 'tipo_usuario', 'id_caja', 'segundo_nombre', 'celular', 'telefono', 'sexo', 'estado')
+                  ->select(
+                    'c.id_cajero as id_usuario', 
+                    'c.paterno', 
+                    'c.materno', 
+                    'c.primer_nombre', 
+                    'c.dni', 
+                    'c.direccion', 
+                    'c.nombre_usuario', 
+                    'c.email', 
+                    'c.direccion', 
+                    'c.fecha_nac', 
+                    'c.sueldo', 
+                    'c.id_superadministrador', 
+                    'c.id_administrador', 
+                    'c.tipo_usuario', 
+                    'c.id_caja', 
+                    'ca.id_sucursal',
+                    's.id_restaurant',
+                    'c.segundo_nombre', 
+                    'c.celular', 
+                    'c.telefono', 
+                    'c.sexo', 
+                    'c.estado'
+                  )
                   ->get();
         return response()->json(['data' => $cajero], 201);
     }

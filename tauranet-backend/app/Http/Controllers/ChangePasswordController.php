@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Administrador;
 use App\Mozo;
+use App\Superadministrador;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
 use Illuminate\Support\Facades\Hash;
@@ -60,6 +61,18 @@ class ChangePasswordController extends ApiController
             }
             $administrador->save();
             return response()->json(['data' => $administrador], 201);
+        }else if($type_user == 3) {//Superadministrador
+            \Log::info("Cambiar contraseña superadministrador = ".$id);
+            $superadministrador = Superadministrador::find($id);
+            if(Hash::check($request->password_ant, $superadministrador->password)){
+                if($request->has('password')) {
+                    $superadministrador->password = Hash::make($request->password);
+                }
+            }else{
+                return response()->json(['error' => ['password_ant' => ['Password incorrecto']]], 201);
+            }
+            $superadministrador->save();
+            return response()->json(['data' => $superadministrador], 201);
         }else if($type_user == 4) {//Cocinero
             $cocinero = Cocinero::find($id);
             if(Hash::check($request->password_ant, $cocinero->password)){

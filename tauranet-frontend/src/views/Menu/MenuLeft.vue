@@ -84,23 +84,6 @@
                 menu_administrador: [
                     {
                         id: 1,
-                        name: 'Sucursal',
-                        icon: "fas fa-building",
-                        sub_menus: [
-                            {
-                                id: 1,
-                                name_path: 'sucursal',
-                                name: 'Sucursal',
-                            },
-                            {
-                                id: 2,
-                                name_path: 'caja',
-                                name: 'Caja',
-                            },
-                        ]
-                    },
-                    {
-                        id: 2,
                         name: 'Personal',
                         icon: "fas fa-users",
                         sub_menus: [
@@ -112,7 +95,7 @@
                         ]
                     },
                     {
-                        id: 3,
+                        id: 2,
                         name: 'Configuracion',
                         icon: "fas fa-wrench",
                         sub_menus: [
@@ -162,7 +145,7 @@
                         ]
                     },
                 ],
-                 menu_cocinero: [
+                menu_cocinero: [
                     {
                         id: 1,
                         name: 'Historial de pedidos',
@@ -289,10 +272,39 @@
                     },
                     {
                         id: 3,
-                        name: 'Administradores',
-                        name_path: 'administrador',
-                        icon: 'fas fa-user',
+                        name: 'Caja',
+                        name_path: 'caja',
+                        icon: 'fas fa-building',
                         sub_menus: []
+                    },
+                    {
+                        id: 4,
+                        name: 'Personal',
+                        icon: "fas fa-users",
+                        name_path: 'gestorempleados',
+                        sub_menus: []
+                    },
+                    {
+                        id: 5,
+                        name: 'Configuracion',
+                        icon: "fas fa-wrench",
+                        sub_menus: [
+                            // {
+                            //     id: 1,
+                            //     name_path: 'tipomoneda',
+                            //     name: 'Simbolo Moneda',
+                            // },
+                            {
+                                id: 1,
+                                name_path: 'password',
+                                name: 'Cambiar contraseña',
+                            }
+                            // {
+                            //     id: 3,
+                            //     name_path: 'configdni',
+                            //     name: 'Tipo identificación',
+                            // }
+                        ]
                     }
                 ]
             }
@@ -474,7 +486,7 @@
             background-color: #444; // Cambia el color de fondo al pasar el mouse
             >a {
                 color: #fff; // Cambia el color del texto al pasar el mouse
-            }
+            }   
             }
         }
     }

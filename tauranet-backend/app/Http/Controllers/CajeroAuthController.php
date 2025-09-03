@@ -18,6 +18,7 @@ class CajeroAuthController extends Controller
      */
     public function login(Request $request)
     {
+        \Log::info('Usuario cajero autenticado prueba de logs:');
         $validator = Validator::make($request->all(), [
             'nombre_usuario' => 'required',
             'password'=> 'required'
@@ -42,19 +43,50 @@ class CajeroAuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function me()
-    {
-        \Log::info('Usuario autenticado prueba de logs:');
-        return response()->json(auth('cajero')->user());
+    public function me(){
+        // \Log::info('Usuario autenticado prueba de logs:');
+        // return response()->json(auth('cajero')->user());
+
+        $user = \DB::table('cajeros as c')
+        ->join('cajas as ca', 'ca.id_caja', '=', 'c.id_caja')
+        ->join('sucursals as s', 's.id_sucursal', '=', 'ca.id_sucursal')
+        ->where('c.id_cajero', auth('cajero')->user()->id_cajero)
+        ->select(
+            'c.id_usuario',
+            'c.primer_nombre',
+            'c.paterno',
+            'c.materno',
+            'c.dni',
+            'c.direccion',
+            'c.nombre_usuario',
+            'c.email',
+            'c.fecha_nac',
+            'c.sexo',
+            'c.nombre_fotoperfil',
+            'c.tipo_usuario',
+            'c.api_token',
+            'c.segundo_nombre',
+            'c.celular',
+            'c.telefono',
+            'c.estado',
+            'c.id_cajero',
+            'c.sueldo',
+            'c.fecha_inicio',
+            'c.id_administrador',
+            'c.id_caja',
+            'c.id_superadministrador',
+            's.id_sucursal')
+        ->first();
+
+        return response()->json($user);
     }
 
     /**
      * Log the user out (Invalidate the token).
-     *
+     *<
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout()
-    {
+    public function logout(){
         auth('cajero')->logout();
 
         return response()->json(['message' => 'Successfully logged out']);

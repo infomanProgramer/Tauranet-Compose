@@ -43,12 +43,23 @@ class SucursalController extends ApiController
             return $response;
         }
     }
-    public function sucursalPorRestaurante($pag, $id){
+    // public function sucursalPorRestaurante($pag, $id){
+    //     $restaurant = DB::table('sucursals as s')
+    //         ->join('restaurants as r', function($join){
+    //             $join->on( 'r.id_restaurant', '=', 's.id_restaurant');
+    //         })
+    //         ->where('s.id_restaurant', '=', $id)
+    //         ->select('s.*', 'r.nombre as nombreRestaurante')
+    //         ->orderBy('s.created_at', 'desc')
+    //         ->paginate($pag);
+    //     $response = Response::json(['data' => $restaurant], 200);
+    //     return $response;
+    // }
+    public function sucursalPorRestaurante($pag){
         $restaurant = DB::table('sucursals as s')
             ->join('restaurants as r', function($join){
                 $join->on( 'r.id_restaurant', '=', 's.id_restaurant');
             })
-            ->where('s.id_restaurant', '=', $id)
             ->select('s.*', 'r.nombre as nombreRestaurante')
             ->orderBy('s.created_at', 'desc')
             ->paginate($pag);
@@ -87,11 +98,11 @@ class SucursalController extends ApiController
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|min:4|max:50|regex:/^[a-zA-Z0-9\s]+$/',
             'descripcion' => 'min:5|nullable',
-            'direccion' => 'required|min:5|nullable',
-            'telefono' => 'required_without_all:celular',
-            'celular' => 'required_without_all:telefono',
-            'ciudad' => 'required|min:3|max:20|nullable',
-            'pais' => 'required|min:3|max:20|nullable',
+            // 'direccion' => 'required|min:5|nullable',
+            // 'telefono' => 'required_without_all:celular',
+            // 'celular' => 'required_without_all:telefono',
+            // 'ciudad' => 'required|min:3|max:20|nullable',
+            // 'pais' => 'required|min:3|max:20|nullable',
             'id_superadministrador' => 'required|exists:superadministradors,id_superadministrador',
             'id_restaurant' => 'required|not_in:-1|exists:restaurants,id_restaurant'
         ],
@@ -136,11 +147,11 @@ class SucursalController extends ApiController
         $sucursal = new Sucursal();
         $sucursal->nombre = $request->get("nombre");
         $sucursal->descripcion = $request->get("descripcion");
-        $sucursal->direccion = $request->get("direccion");
-        $sucursal->celular = $request->get("celular");
-        $sucursal->telefono = $request->get("telefono");
-        $sucursal->pais = $request->get("pais");
-        $sucursal->ciudad = $request->get("ciudad");
+        // $sucursal->direccion = $request->get("direccion");
+        // $sucursal->celular = $request->get("celular");
+        // $sucursal->telefono = $request->get("telefono");
+        // $sucursal->pais = $request->get("pais");
+        // $sucursal->ciudad = $request->get("ciudad");
         $sucursal->id_superadministrador = $request->get("id_superadministrador");
         $sucursal->id_restaurant = $request->get("id_restaurant");
         $sucursal->save();
@@ -183,11 +194,11 @@ class SucursalController extends ApiController
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|min:4|max:50|regex:/^[a-zA-Z0-9\s]+$/',
             'descripcion' => 'min:5|nullable',
-            'direccion' => 'required|min:5|nullable',
-            'telefono' => 'required_without_all:celular',
-            'celular' => 'required_without_all:telefono',
-            'ciudad' => 'required|min:3|max:20|nullable',
-            'pais' => 'required|min:3|max:20|nullable',
+            // 'direccion' => 'required|min:5|nullable',
+            // 'telefono' => 'required_without_all:celular',
+            // 'celular' => 'required_without_all:telefono',
+            // 'ciudad' => 'required|min:3|max:20|nullable',
+            // 'pais' => 'required|min:3|max:20|nullable',
             'id_superadministrador' => 'required|exists:superadministradors,id_superadministrador',
             'id_restaurant' => 'required|not_in:-1|exists:restaurants,id_restaurant'
 

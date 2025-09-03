@@ -69,46 +69,6 @@ export default new Router({
       },
       children: [
         //Rutas Administrador
-        {
-          name: "configdni",
-          path: "configdni",
-          component: ConfigDni,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
-        {
-          name: "tipomoneda",
-          path: "tipomoneda",
-          component: TipoMoneda,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
-        {
-          name: "sucursal",
-          path: "sucursal",
-          component: Sucursal,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
-        {
-          name: "caja",
-          path: "caja",
-          component: Caja,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
-        {
-          name: "gestorempleados",
-          path: "gestorempleados",
-          component: GestorEmpleados,
-          meta: {
-            requiresRolAdministrador: true
-          }
-        },
         //Rutas Cajero
         {
           name: "nuevopedido",
@@ -244,7 +204,48 @@ export default new Router({
             requiresAuth: true,
             requiresSuperAdmin: true
           }
-        }
+        },
+        //Ex rutas de Administrador
+        {
+          name: "sucursal",
+          path: "sucursal",
+          component: Sucursal,
+          meta: {
+            requiresSuperAdmin: true
+          }
+        },
+        {
+          name: "caja",
+          path: "caja",
+          component: Caja,
+          meta: {
+            requiresSuperAdmin: true
+          }
+        },
+        {
+          name: "configdni",
+          path: "configdni",
+          component: ConfigDni,
+          meta: {
+            requiresSuperAdmin: true
+          }
+        },
+        {
+          name: "tipomoneda",
+          path: "tipomoneda",
+          component: TipoMoneda,
+          meta: {
+            requiresSuperAdmin: true
+          }
+        },
+        {
+          name: "gestorempleados",
+          path: "gestorempleados",
+          component: GestorEmpleados,
+          meta: {
+            requiresSuperAdmin: true
+          }
+        },
       ]
     }
   ]

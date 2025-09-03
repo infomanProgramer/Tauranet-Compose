@@ -26,7 +26,7 @@
                         </div>
                         <ListErrors :errores="errores.password"></ListErrors>
                     </div>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="type_user" v-model="type_user" id="checkMozo" value="0" checked>
                             <label class="form-check-label" for="exampleRadios1">
@@ -52,7 +52,7 @@
                             </label>
                         </div>
                         <ListErrors :errores="errores.type_user"></ListErrors>
-                    </div>
+                    </div> -->
                     <div class="form-group d-flex justify-content-center">
                         <button type="submit" class="btn-login" ref="botonLogin">Ingresar</button>
                     </div>
@@ -76,7 +76,7 @@
                 password: '',
                 errores: {},
                 advertenciaLogin: '',
-                type_user: null,
+                type_user: 1,
                 uploadPercentage: 0
             }
         },
@@ -100,10 +100,9 @@
                                 this.$router.push({name: 'nuevopedido'})
                                 this.$Progress.finish()
                             }else if(this.type_user == 2){//Administrador
-                                this.$router.push({name: 'sucursal'})
+                                this.$router.push({name: 'gestorempleados'})
                                 this.$Progress.finish()
                             }else if(this.type_user == 4){//Cocinero
-                                console.log("cocinero autenticado")
                                 this.$router.push({name: 'cocinapedidos'})
                                 this.$Progress.finish()
                             }

@@ -29,7 +29,7 @@
                     <BoxMessage :message="nuevoRestaurante" :cod="'su'" icono="fas fa-check"></BoxMessage>
                     <div class="table-responsive">
                         <table-component
-                            :data="listaRetaurantes"
+                            :data="listOfAllRestaurants"
                             tableClass="table"
                             theadClass="head-table"
                             filterPlaceholder="Buscar..."
@@ -50,7 +50,7 @@
                             <table-column show="nombre_usuario" label="Super Admin"></table-column>
                             <table-column label="Acciones" :sortable="false" :filterable="false">
                                 <template slot-scope="row">
-                                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalEditaRestaurante" @click="getDatosRestaurant(row.id_restaurant)"><i class="fas fa-edit"></i></button>
+                                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalEditaRestaurante" @click="getInfoRestaurantById(row.id_restaurant)"><i class="fas fa-edit"></i></button>
                                 </template>
                             </table-column>
                         </table-component>
@@ -60,20 +60,20 @@
             <!-- Pagination -->
             <div class="row">
                 <div class="col-md-12 table-responsive">
-                    <Pagination :pagination="pagination" v-on:funcion="datosrestaurant"></Pagination>
+                    <Pagination :pagination="pagination" v-on:funcion="getAllRestaurants"></Pagination>
                 </div>
             </div>
             <!-- Ventanas Modales -->
             <div class="row">
                 <!-- Modal Nuevo Restaurante         -->
-                <form @submit.prevent="nuevoRestaurant">
+                <form @submit.prevent="addNewRestaurant">
                     <Modal titulo="Registro Restaurante" idModal="modalNuevoRestaurante" icono="fas fa-plus">
                         <template v-slot:body>
                             <div class="container-fluid">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="restaurant.nombre" placeholder="Nombre">
+                                            <input type="text" class="form-control input-style" v-model="infoRestaurant.nombre" placeholder="Nombre">
                                             <ListErrors :errores="errores.nombre"></ListErrors>
                                         </div>
                                     </div>
@@ -81,24 +81,7 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <input type="hidden" v-model="restaurant.estado" value="true">
-                                            <input type="text" class="form-control input-style" id="exampleFormControlTextarea1" rows="3" v-model="restaurant.descripcion" placeholder="Descripción">
-                                            <ListErrors :errores="errores.descripcion"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" id="exampleFormControlTextarea1" rows="3" v-model="restaurant.observacion" placeholder="Observación">
-                                            <ListErrors :errores="errores.observacion"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <select class="form-control input-style" v-model="restaurant.id_suscripcion">
+                                            <select class="form-control input-style" v-model="infoRestaurant.id_suscripcion">
                                                 <option value="-1" selected>Suscripción...</option>
                                                 <option v-for="suscripcion in Suscripciones" v-bind:key="suscripcion.id_suscripcion" :value="suscripcion.id_suscripcion">{{suscripcion.tipo_suscripcion}}</option>
                                             </select>
@@ -106,16 +89,49 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control input-style" id="exampleFormControlTextarea2" rows="3" v-model="infoRestaurant.tipo_moneda" placeholder="Tipo Moneda">
+                                            <ListErrors :errores="errores.tipo_moneda"></ListErrors>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control input-style" id="exampleFormControlTextarea3" rows="3" v-model="infoRestaurant.identificacion" placeholder="Identificación">
+                                            <ListErrors :errores="errores.identificacion"></ListErrors>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="hidden" v-model="infoRestaurant.estado" value="true">
+                                            <input type="text" class="form-control input-style" id="exampleFormControlTextarea1" rows="3" v-model="infoRestaurant.descripcion" placeholder="Descripción">
+                                            <ListErrors :errores="errores.descripcion"></ListErrors>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control input-style" id="exampleFormControlTextarea4" rows="3" v-model="infoRestaurant.observacion" placeholder="Observación">
+                                            <ListErrors :errores="errores.observacion"></ListErrors>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </template>
                         <template v-slot:footer>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="limpiaRestaurant">Cerrar</button>
-                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="cleanInfoRestaurant">Cerrar</button>
+                            <button type="submit" class="btn btn-primary" ref="nuevoRestauranteBtn">Guardar</button>
                         </template>
                     </Modal>
                 </form>
                 <!-- Modal edita datos restaurante -->
-                <form @submit.prevent="editaRestaurant(restaurant.id_restaurant)">
+                <form @submit.prevent="updateInfoRestaurantById(infoRestaurant.id_restaurant)">
                     <Modal titulo="Edita Restaurante" idModal="modalEditaRestaurante" icono="fas fa-edit">
                         <template v-slot:body>
                             <div class="container-fluid">
@@ -124,7 +140,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="" class="label-style">Nombre</label>
-                                            <input type="text" class="form-control input-style" v-model="restaurant.nombre">
+                                            <input type="text" class="form-control input-style" v-model="infoRestaurant.nombre">
                                             <ListErrors :errores="errores.nombre"></ListErrors>
                                         </div>
                                     </div>
@@ -132,26 +148,8 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="" class="label-style">Descripción</label>
-                                            <textarea class="form-control input-style" id="exampleFormControlTextarea1" rows="3" v-model="restaurant.descripcion"></textarea>
-                                            <ListErrors :errores="errores.descripcion"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Observación</label>
-                                            <textarea class="form-control input-style" id="exampleFormControlTextarea1" rows="3" v-model="restaurant.observacion"></textarea>
-                                            <ListErrors :errores="errores.observacion"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
                                             <label for="" class="label-style">Suscripción</label>
-                                            <select class="form-control input-style" v-model="restaurant.id_suscripcion">
+                                            <select class="form-control input-style" v-model="infoRestaurant.id_suscripcion">
                                                 <option value="-1" selected>Seleccionar...</option>
                                                 <option v-for="suscripcion in Suscripciones" v-bind:key="suscripcion.id_suscripcion" :value="suscripcion.id_suscripcion">{{suscripcion.tipo_suscripcion}}</option>
                                             </select>
@@ -160,18 +158,58 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-6 label-style">Estado</div>
+                                    <div class="col-md-6 label-style">
+                                        <div class="form-group">Estado</div>
+                                    </div>
                                     <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" checked v-model="restaurant.estado" @click="cambiaEstado" ref="estadoRestaurant">
+                                        <div class="form-group">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" checked v-model="infoRestaurant.estado" @click="cambiaEstado" ref="estadoRestaurant">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="" class="label-style">Tipo de moneda</label>
+                                            <input type="text" class="form-control input-style" id="exampleFormControlTextarea5" rows="3" v-model="infoRestaurant.tipo_moneda" placeholder="Tipo Moneda">
+                                            <ListErrors :errores="errores.tipo_moneda"></ListErrors>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="" class="label-style">Identificación</label>
+                                            <input type="text" class="form-control input-style" id="exampleFormControlTextarea6" rows="3" v-model="infoRestaurant.identificacion" placeholder="Identificación">
+                                            <ListErrors :errores="errores.identificacion"></ListErrors>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="" class="label-style">Descripción</label>
+                                            <input type="text" class="form-control input-style" v-model="infoRestaurant.descripcion">
+                                            <ListErrors :errores="errores.descripcion"></ListErrors>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="" class="label-style">Observación</label>
+                                            <input type="text" class="form-control input-style" v-model="infoRestaurant.observacion">
+                                            <ListErrors :errores="errores.observacion"></ListErrors>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </template>
                         <template v-slot:footer>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="limpiaRestaurant">Cerrar</button>
-                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="cleanInfoRestaurant">Cerrar</button>
+                            <button type="submit" class="btn btn-primary" ref="editaRestauranteBtn">Guardar</button>
                         </template>
                     </Modal>
                 </form>
@@ -198,7 +236,7 @@ export default{
     },
     mixins: [misMixins],
     created () {
-        this.datosrestaurant();
+        this.getAllRestaurants();
         this.getAllSuscriciones();
         this.getDataUser(3).then(response => {
             this.data_usr = response.data;
@@ -208,12 +246,8 @@ export default{
     },
     data() {
         return {
-            listaRetaurantes: [],
-            restaurant: {
-                nombre: null,
-                descripcion: null,
-                observacion: null,
-                estado: null,
+            listOfAllRestaurants: [],
+            infoRestaurant: {
                 id_suscripcion: -1,
             },
             Suscripciones: [],
@@ -229,7 +263,7 @@ export default{
     },
     computed: {
         filterdRestaurnates() {
-            return this.listaRetaurantes.filter((item)=>{
+            return this.listOfAllRestaurants.filter((item)=>{
                 if(this.obj != null)
                 {
                     if(this.obj.ide == 1){
@@ -247,81 +281,85 @@ export default{
         }
     },
     methods: {
-        datosrestaurant(url) {
-            this.listaRetaurantes = [];
+        getAllRestaurants(url) {
+            this.listOfAllRestaurants = [];
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.defaults.headers.common["Content-Type"] = 'application/json';
             url = url || this.$store.state.url_root+`api/auth/restaurant/page/${this.nro_page}/${this.restaurantesActivos}`;
             axios.get(url)
             .then(response => {
-                this.listaRetaurantes = response.data.data.data;
+                this.listOfAllRestaurants = response.data.data.data;
                 this.pagination = response.data.data;
             })
             .catch (error => {
                 alert("restaurantes.vue: "+error)
             });
         },
-        limpiaRestaurant(){
-            this.restaurant.nombre = null;
-            this.restaurant.descripcion = null;
-            this.restaurant.observacion = null;
-            this.restaurant.id_suscripcion = -1,
-            //this.restaurant.id_superadministrador = null;
+        cleanInfoRestaurant(){
+            this.infoRestaurant = {
+                id_suscripcion: -1,
+            };
             this.nuevoRestaurante = '';
             this.datosRepetidos = '';
             this.errores = {};
             this.$refs.estadoRestaurant.checked = false;
         },
-        nuevoRestaurant(){
+        addNewRestaurant(){
             this.errores = {}
+            this.$refs.nuevoRestauranteBtn.disabled = true;
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-            this.restaurant.estado = true
-            this.restaurant.id_superadministrador = this.data_usr.id_superadministrador;
-            axios.post(this.$store.state.url_root+"api/auth/restaurant", this.restaurant)
+            this.infoRestaurant.estado = true
+            this.infoRestaurant.id_superadministrador = this.data_usr.id_superadministrador;
+            axios.post(this.$store.state.url_root+"api/auth/restaurant", this.infoRestaurant)
             .then(response => {
                 if(response.data.error == null){
-                    this.datosrestaurant();
+                    this.getAllRestaurants();
                     window.$("#modalNuevoRestaurante").modal('hide');
-                    this.limpiaRestaurant();
+                    this.cleanInfoRestaurant();
                     this.nuevoRestaurante = `El restaurante <strong>${response.data.data.nombre}</strong> se creo correctamente`
+                    this.$refs.nuevoRestauranteBtn.disabled = false;
                 }else{
                     this.errores = response.data.error
+                    this.$refs.nuevoRestauranteBtn.disabled = false;
                 }
             })
             .catch (error => {
                 alert("restaurantes.vue: "+error)
             });
         },
-        getDatosRestaurant(id){
-            this.limpiaRestaurant();
+        getInfoRestaurantById(id){
+            this.cleanInfoRestaurant();
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.get(this.$store.state.url_root+"api/auth/restaurant/"+id)
             .then(response => {
-                this.restaurant = response.data.data;
-                this.restaurant.id_suscripcion == null? this.restaurant.id_suscripcion = -1: this.restaurant.id_suscripcion
-                this.$refs.estadoRestaurant.checked = this.restaurant.estado;
+                this.infoRestaurant = response.data.data;
+                this.infoRestaurant.id_suscripcion == null? this.infoRestaurant.id_suscripcion = -1: this.infoRestaurant.id_suscripcion
+                this.$refs.estadoRestaurant.checked = this.infoRestaurant.estado;
             })
             .catch (error => {
                 alert("restaurantes.vue: "+error)
             });
         },
-        editaRestaurant(id){
+        updateInfoRestaurantById(id){
             this.errores = {}
+            this.$refs.editaRestauranteBtn.disabled = true;
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-            this.restaurant.id_superadministrador = this.data_usr.id_superadministrador;
-            axios.put(this.$store.state.url_root+"api/auth/restaurant/"+id, this.restaurant)
+            this.infoRestaurant.id_superadministrador = this.data_usr.id_superadministrador;
+            axios.put(this.$store.state.url_root+"api/auth/restaurant/"+id, this.infoRestaurant)
             .then(response => {
                 if(response.data.error == null){
-                    this.datosrestaurant(this.$store.state.url_root+`api/auth/restaurant/page/${this.nro_page}/${this.restaurantesActivos}?page=${this.pagination.current_page}`);
+                    this.getAllRestaurants(this.$store.state.url_root+`api/auth/restaurant/page/${this.nro_page}/${this.restaurantesActivos}?page=${this.pagination.current_page}`);
                     window.$("#modalEditaRestaurante").modal('hide');
-                    this.limpiaRestaurant();
+                    this.cleanInfoRestaurant();
                     this.nuevoRestaurante = `El restaurante <strong>${response.data.data.nombre}</strong> se actualizo correctamente`
-                }else{
+                    this.$refs.editaRestauranteBtn.disabled = false;
+                    }else{
                     if(response.data.error.valores != null){
                         this.datosRepetidos = response.data.error.valores;
                     }else{
                         this.errores = response.data.error;
                     }
+                    this.$refs.editaRestauranteBtn.disabled = false;
                 }
             })
             .catch (error => {
@@ -337,7 +375,7 @@ export default{
         },
         cambiaOption(){
             this.nro_page = this.$refs.nroEntradas.value
-            this.datosrestaurant();
+            this.getAllRestaurants();
         },
         eventInputCheckbox_RestaurantesActivos(){
             if(this.$refs.refInputCheckbox_RestaurantesActivos.checked){
@@ -345,7 +383,7 @@ export default{
             }else{
                 this.restaurantesActivos = 0
             }
-            this.datosrestaurant(this.$store.state.url_root+`api/auth/restaurant/page/${this.nro_page}/${this.restaurantesActivos}?page=${this.pagination.current_page}`);
+            this.getAllRestaurants(this.$store.state.url_root+`api/auth/restaurant/page/${this.nro_page}/${this.restaurantesActivos}?page=${this.pagination.current_page}`);
         },
         getAllSuscriciones(){
             this.Suscripciones = [];

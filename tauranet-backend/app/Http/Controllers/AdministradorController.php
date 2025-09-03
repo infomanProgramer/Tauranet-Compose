@@ -111,17 +111,17 @@ class AdministradorController extends ApiController
         $administrador->segundo_nombre = $request->get("segundo_nombre");
         $administrador->paterno = $request->get("paterno");
         $administrador->materno = $request->get("materno");
-        $administrador->email = $request->get("email");
-        $administrador->dni = $request->get("dni");
-        $administrador->sexo = $request->get("sexo");
-        $administrador->direccion = $request->get("direccion");
+        //$administrador->email = $request->get("email");
+        //$administrador->dni = $request->get("dni");
+        //$administrador->sexo = $request->get("sexo");
+        //$administrador->direccion = $request->get("direccion");
         $administrador->nombre_usuario = $request->get("nombre_usuario");
         $administrador->password = bcrypt($request->get("password"));
-        $administrador->fecha_nac = $request->get("fecha_nac");
+        //$administrador->fecha_nac = $request->get("fecha_nac");
         $administrador->tipo_usuario = $request->get("tipo_usuario");
-        $administrador->nombre_fotoperfil = $request->get("nombre_fotoperfil");
-        $administrador->celular = $request->get("celular");
-        $administrador->telefono = $request->get("telefono");
+        //$administrador->nombre_fotoperfil = $request->get("nombre_fotoperfil");
+        //$administrador->celular = $request->get("celular");
+        //$administrador->telefono = $request->get("telefono");
         $administrador->tipo_usuario = $request->get("tipo_usuario");
         //Campos correspondientes solo al Administrador
         $administrador->id_restaurant = $request->get("id_restaurant");
@@ -195,13 +195,13 @@ class AdministradorController extends ApiController
             return ! empty( $input->materno );
         });
 
-        $validator->sometimes('celular', 'min:4|max:20|digits_between:0,9', function($input){
-            return ! empty( $input->celular );
-        });
+        // $validator->sometimes('celular', 'min:4|max:20|digits_between:0,9', function($input){
+        //     return ! empty( $input->celular );
+        // });
 
-        $validator->sometimes('telefono', 'min:4|max:20|digits_between:0,9', function($input){
-            return ! empty( $input->telefono );
-        });
+        // $validator->sometimes('telefono', 'min:4|max:20|digits_between:0,9', function($input){
+        //     return ! empty( $input->telefono );
+        // });
 
         if ($validator->fails()) {
             return response()->json(["error" => $validator->errors()], 201);
@@ -219,30 +219,30 @@ class AdministradorController extends ApiController
         if($request->has('materno')){
             $administrador->materno = $request->materno;
         }
-        if($request->has('email')){
-            $administrador->email = $request->email;
-        }
-        if($request->has('dni')){
-            $administrador->dni = $request->dni;
-        }
-        if($request->has('sexo')){
-            $administrador->sexo = $request->sexo;
-        }
-        if($request->has('direccion')){
-            $administrador->direccion = $request->direccion;
-        }
+        // if($request->has('email')){
+        //     $administrador->email = $request->email;
+        // }
+        // if($request->has('dni')){
+        //     $administrador->dni = $request->dni;
+        // }
+        // if($request->has('sexo')){
+        //     $administrador->sexo = $request->sexo;
+        // }
+        // if($request->has('direccion')){
+        //     $administrador->direccion = $request->direccion;
+        //}
         if($request->has('nombre_usuario')){
             $administrador->nombre_usuario = $request->nombre_usuario;
         }
-        if($request->has('fecha_nac')){
-            $administrador->fecha_nac = $request->fecha_nac;
-        }
-        if($request->has('celular')) {
-            $administrador->celular = $request->celular;
-        }
-        if($request->has('telefono')) {
-            $administrador->telefono = $request->telefono;
-        }
+        // if($request->has('fecha_nac')){
+        //     $administrador->fecha_nac = $request->fecha_nac;
+        //}
+        // if($request->has('celular')) {
+        //     $administrador->celular = $request->celular;
+        //}
+        // if($request->has('telefono')) {
+        //     $administrador->telefono = $request->telefono;
+        //}
         if($request->has('tipo_usuario')) {
             $administrador->tipo_usuario = $request->tipo_usuario;
         }
@@ -253,9 +253,9 @@ class AdministradorController extends ApiController
         if($request->has('id_superadministrador')) {
             $administrador->id_superadministrador = $request->id_superadministrador; //Se tiene que insertar segun el usuario que lo este registrando
         }
-        if($request->has('nombre_fotoperfil')) {
-            $administrador->nombre_fotoperfil = $request->nombre_fotoperfil;
-        }
+        // if($request->has('nombre_fotoperfil')) {
+        //     $administrador->nombre_fotoperfil = $request->nombre_fotoperfil;
+        // }
         if(!$administrador->isDirty()){
             return $this->errorResponse(['valores' => 'Se debe modificar al menos un valor para poder actualizar'], 201);
         }

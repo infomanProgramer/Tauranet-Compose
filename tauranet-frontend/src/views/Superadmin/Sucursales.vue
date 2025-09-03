@@ -92,47 +92,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.direccion" placeholder="Dirección">
-                                            <ListErrors :errores="errores.direccion"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.telefono" placeholder="Telefono">
-                                            <ListErrors :errores="errores.telefono"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.celular" placeholder="Celular">
-                                            <ListErrors :errores="errores.celular"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.pais" placeholder="País">
-                                            <ListErrors :errores="errores.pais"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.ciudad" placeholder="Ciudad">
-                                            <ListErrors :errores="errores.ciudad"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </template>
                         <template v-slot:footer>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="limpiaSucursal">Cerrar</button>
-                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="submit" class="btn btn-primary" ref="nuevaSucursalBtn">Guardar</button>
                         </template>
                     </Modal>
                 </form>
@@ -172,48 +136,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Dirección</label>
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.direccion">
-                                            <ListErrors :errores="errores.direccion"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.telefono" placeholder="Telefono">
-                                            <ListErrors :errores="errores.telefono"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.celular" placeholder="Celular">
-                                            <ListErrors :errores="errores.celular"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.pais" placeholder="País">
-                                            <ListErrors :errores="errores.pais"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="Sucursal.ciudad" placeholder="Ciudad">
-                                            <ListErrors :errores="errores.ciudad"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </template>
                         <template v-slot:footer>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="limpiaSucursal">Cerrar</button>
-                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="submit" class="btn btn-primary" ref="editaSucursalBtn">Guardar</button>
                         </template>
                     </Modal>
                 </form>
@@ -299,6 +226,7 @@ export default{
         },
         nuevoSucursal(){
             this.errores = {}
+            this.$refs.nuevaSucursalBtn.className = "btn btn-primary disabled"
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             this.Sucursal.id_superadministrador = this.data_usr.id_superadministrador;
             axios.post(this.$store.state.url_root+"api/auth/sucursal", this.Sucursal)
@@ -308,8 +236,10 @@ export default{
                     window.$("#modalNuevoSucursal").modal('hide');
                     this.limpiaSucursal();
                     this.nuevoSucursalMsg = `La sucursal <strong>${response.data.data.nombre}</strong> se creo correctamente`
+                    this.$refs.nuevaSucursalBtn.className = "btn btn-primary"
                 }else{
                     this.errores = response.data.error
+                    this.$refs.nuevaSucursalBtn.className = "btn btn-primary"
                 }
             })
             .catch (error => {
@@ -329,6 +259,7 @@ export default{
         },
         editaSucursal(id){
             this.errores = {}
+            this.$refs.editaSucursalBtn.className = "btn btn-primary disabled"
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             this.Sucursal.id_superadministrador = this.data_usr.id_superadministrador;
             axios.put(this.$store.state.url_root+"api/auth/sucursal/"+id, this.Sucursal)
@@ -338,12 +269,14 @@ export default{
                     window.$("#modalEditaSucursal").modal('hide');
                     this.limpiaSucursal();
                     this.nuevoSucursalMsg = `La sucursal <strong>${response.data.data.nombre}</strong> se actualizo correctamente`
+                    this.$refs.editaSucursalBtn.className = "btn btn-primary"
                 }else{
                     if(response.data.error.valores != null){
                         this.datosRepetidos = response.data.error.valores;
                     }else{
                         this.errores = response.data.error;
                     }
+                    this.$refs.editaSucursalBtn.className = "btn btn-primary"
                 }
             })
             .catch (error => {

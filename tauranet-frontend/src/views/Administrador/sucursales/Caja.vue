@@ -17,28 +17,29 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-12">
+                <!-- <div class="col-md-12">
                     <label for="">
                             Sucursal
-                            <select id="nroEntradas" @change="mostrarPorSucursal" ref="refListaSucursal">
+                            <select id="nroEntradas" @change="getAllCajas" ref="refListaSucursal">
                                 <option value="-1" selected>Seleccionar...</option>
                                 <option v-for="s in listaSucursales" v-bind:key="s.id_sucursal" :value="s.id_sucursal">{{s.nombre}}</option>
                             </select>
                     </label>
-                </div>
+                </div> -->
             </div>
             <div class="row">
                 <div class="col-md-12">
                     <BoxMessage :message="nuevaCajaMsg" :cod="cod" :icono="icono"></BoxMessage>
                     <div class="table-responsive">
                         <table-component
-                            :data="listaCajas"
+                            :data="listOfAllCajas"
                             tableClass="table"
                             theadClass="head-table"
                             filterPlaceholder="Buscar..."
                             filter-input-class="inputSearchText"
                             :show-caption=false
                             >
+                            <table-column show="nombreRestaurante" label="Restaurante"></table-column>
                             <table-column show="nombreSucursal" label="Sucursal"></table-column>
                             <table-column show="nombre" label="Caja"></table-column>
                             <table-column label="Editar" :sortable="false" :filterable="false">
@@ -58,7 +59,7 @@
             <!-- Pagination -->
             <div class="row">
                 <div class="col-md-12 table-responsive">
-                    <Pagination :pagination="pagination" v-on:funcion="mostrarPorSucursalPagination"></Pagination>
+                    <Pagination :pagination="pagination" v-on:funcion="getAllCajas"></Pagination>
                 </div>
             </div>
             <!-- Ventanas modales -->
@@ -79,10 +80,22 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
+                                        <label for="" class="label-style">* Restaurante</label>
+                                        <select class="form-control input-style" v-model="Caja.id_restaurant" @change="getAllSucursalesByRestaurant()">
+                                            <option value="-1" selected>Restaurante...</option>
+                                            <option v-for="s in listOfAllRestaurantes" v-bind:key="s.id_restaurant" :value="s.id_restaurant">{{s.nombre}}</option>
+                                        </select>
+                                        <ListErrors :errores="errores.id_restaurant"></ListErrors>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
                                         <label for="" class="label-style">* Sucursal</label>
                                         <select id="hol" class="form-control input-style" v-model="Caja.id_sucursal">
                                             <option value="-1" selected>Sucursal...</option>
-                                            <option v-for="lista in listaSucursales" v-bind:key="lista.id_sucursal" :value="lista.id_sucursal">{{lista.nombre}}</option>
+                                            <option v-for="lista in listOfSucursalesByRestaurant" v-bind:key="lista.id_sucursal" :value="lista.id_sucursal">{{lista.nombre}}</option>
                                         </select>
                                         <ListErrors :errores="errores.id_sucursal"></ListErrors>
                                     </div>
@@ -122,10 +135,22 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
+                                        <label for="" class="label-style">* Restaurante</label>
+                                        <select class="form-control input-style" v-model="Caja.id_restaurant" @change="getAllSucursalesByRestaurant()">
+                                            <option value="-1" selected>Restaurante...</option>
+                                            <option v-for="s in listOfAllRestaurantes" v-bind:key="s.id_restaurant" :value="s.id_restaurant">{{s.nombre}}</option>
+                                        </select>
+                                        <ListErrors :errores="errores.id_restaurant"></ListErrors>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
                                         <label for="" class="label-style">* Sucursal</label>
                                         <select id="hol" class="form-control input-style" v-model="Caja.id_sucursal">
                                             <option value="-1" selected>Sucursal...</option>
-                                            <option v-for="lista in listaSucursales" v-bind:key="lista.id_sucursal" :value="lista.id_sucursal">{{lista.nombre}}</option>
+                                            <option v-for="lista in listOfSucursalesByRestaurant" v-bind:key="lista.id_sucursal" :value="lista.id_sucursal">{{lista.nombre}}</option>
                                         </select>
                                         <ListErrors :errores="errores.id_sucursal"></ListErrors>
                                     </div>
@@ -169,9 +194,11 @@ export default{
         BoxMessage
     },
     created () {
-        this.listaSucursalesMethod();
+        this.getAllCajas();
+        this.getAllSucursales();
+        this.getAllRestaurantes();
         this.$Progress.start()
-        this.getDataUser(2).then(response => {
+        this.getDataUser(3).then(response => {
             this.data_usr = response.data;
             this.$Progress.finish()
         }).catch(error => {
@@ -182,10 +209,11 @@ export default{
     data() {
         return {
             listaSucursales: [],
-            listaCajas: [],
+            listOfAllCajas: [],
             pagination: {},
             Caja: {
-                id_sucursal: -1
+                id_sucursal: -1,
+                id_restaurant: -1
             },
             data_usr: {},
             errores: {},
@@ -193,32 +221,34 @@ export default{
             nuevaCajaMsg: '',
             datosRepetidos: '',
             cod: 'su',
-            icono: 'fas fa-check'
+            icono: 'fas fa-check',
+            listOfAllRestaurantes: [],
+            listOfAllSucursales: [],
+            listOfAllCajas: [],
+            listOfSucursalesByRestaurant: [],
         }
     },
     mixins: [misMixins],
     methods: {
-        listaSucursalesMethod() {
-            this.$Progress.start()
-            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                axios.get(this.$store.state.url_root+`api/auth/sucursalcombo/${this.$store.state.id_restaurant}`)
-            .then(response => {
-                this.listaSucursales = response.data.data;
-                this.$Progress.finish()
-            })
-            .catch (error => {
-                this.$toasted.show("Caja.vue: "+error, {type: 'error'})
-                this.$Progress.fail()
-            });
+        resetData(){
+            this.Caja = {
+                id_sucursal: -1,
+                id_restaurant: -1
+            }
+            // this.errores = {}
+            // this.nuevaCajaMsg = ''
+            // this.datosRepetidos = ''
+            // this.cod = 'su'
+            // this.icono = 'fas fa-check'
         },
-        mostrarPorSucursal(){
+        getAllCajas(url){
             this.$Progress.start()
-            this.listaCajas = []
-            let url = this.$store.state.url_root+`api/auth/caja/sucursal/${this.$refs.refListaSucursal.value}/page/${this.nro_page}`
+            this.listOfAllCajas = []
+            url = url || this.$store.state.url_root+`api/auth/getallcajas/${this.nro_page}`
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.get(url)
             .then(response => {
-                this.listaCajas = response.data.data.data;
+                this.listOfAllCajas = response.data.data.data;
                 this.pagination = response.data.data;
                 this.$Progress.finish()
             })
@@ -227,25 +257,36 @@ export default{
                 this.$Progress.fail()
             });
         },
-        mostrarPorSucursalPagination(url){
+        getAllSucursales(){
             this.$Progress.start()
-            this.listaCajas = []
-            url = url || this.$store.state.url_root+`api/auth/caja/sucursal/${this.$refs.refListaSucursal.value}/page/${this.nro_page}`
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                axios.get(url)
+                axios.get(this.$store.state.url_root+`api/auth/sucursalcombo`)
             .then(response => {
-                this.listaCajas = response.data.data.data;
-                this.pagination = response.data.data;
+                this.listOfAllSucursales = response.data.data;
                 this.$Progress.finish()
             })
             .catch (error => {
-                this.$toasted.show("Caja.vue: "+error, {type: 'error'})
+                this.$toasted.show("GestorEmpleados.vue: "+error, {type: 'error'})
                 this.$Progress.fail()
+            });
+        },
+        getAllSucursalesByRestaurant(){
+            this.Caja.id_sucursal = -1;
+            this.listOfSucursalesByRestaurant = this.listOfAllSucursales.filter(sucursal => sucursal.id_restaurant == this.Caja.id_restaurant);
+        },
+        getAllRestaurantes(){
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.get(this.$store.state.url_root+`api/auth/restaurantall`)
+            .then(response => {
+                this.listOfAllRestaurantes = response.data.data;
+            })
+            .catch (error => {
+                alert("GestorEmpleados.vue: "+error)
             });
         },
         cambiaOption(){
             this.nro_page = this.$refs.nroEntradas.value
-            this.mostrarPorSucursalPagination()
+            this.getAllCajas()
         },
         getDatosCaja(id){
             this.$Progress.start()
@@ -254,6 +295,7 @@ export default{
             axios.get(this.$store.state.url_root+"api/auth/caja/"+id)
             .then(response => {
                 this.Caja = response.data.data;
+                this.listOfSucursalesByRestaurant = this.listOfAllSucursales.filter(sucursal => sucursal.id_restaurant == this.Caja.id_restaurant);
                 this.$Progress.finish()
             })
             .catch (error => {
@@ -264,15 +306,16 @@ export default{
         nuevoCaja(){
             this.$refs.nuevaCajaBtn.className = "btn btn-primary disabled"
             this.$Progress.start()
-            this.Caja.id_administrador = this.data_usr.id_administrador
+            this.Caja.id_superadministrador = this.data_usr.id_superadministrador
              axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.post(this.$store.state.url_root+`api/auth/caja`, this.Caja)
             .then(response => {
                 if(response.data.error == null){
-                    this.mostrarPorSucursal();
+                    this.getAllCajas();
                     window.$("#modalNuevoCaja").modal('hide');
                     this.limpiaCaja();
                     this.nuevaCajaMsg = `La caja <strong>${response.data.data.nombre}</strong> se creo correctamente`
+                    this.resetData();
                     this.$Progress.finish()
                     this.$refs.nuevaCajaBtn.className = "btn btn-primary"
                 }else{
@@ -292,14 +335,19 @@ export default{
             });
         },
         editaCaja(id){
+            console.log("editaCaja ---->");
             this.$Progress.start()
             this.$refs.editaCajaBtn.className = "btn btn-primary disabled"
-            this.Caja.id_administrador = this.data_usr.id_administrador
+            this.Caja.id_superadministrador = this.data_usr.id_superadministrador
+
+            console.log("this.Caja", this.Caja);
+            console.log("this.data_usr", this.data_usr);
+            
              axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.put(this.$store.state.url_root+`api/auth/caja/${id}`, this.Caja)
             .then(response => {
                 if(response.data.error == null){
-                    this.mostrarPorSucursalPagination(this.$store.state.url_root+`api/auth/caja/sucursal/${this.$refs.refListaSucursal.value}/page/${this.nro_page}?page=${this.pagination.current_page}`);
+                    this.getAllCajas(this.$store.state.url_root+`api/auth/getallcajas/${this.nro_page}?page=${this.pagination.current_page}`);
                     window.$("#modalEditaCaja").modal('hide');
                     this.limpiaCaja();
                     this.nuevaCajaMsg = `La caja <strong>${response.data.data.nombre}</strong> se actualizo correctamente`
@@ -322,7 +370,10 @@ export default{
             });
         },
         limpiaCaja(){
-            this.Caja = {id_sucursal: -1}
+            this.Caja = {
+                id_sucursal: -1,
+                id_restaurant: -1
+            }
             this.nuevaCajaMsg = ''
             this.errores = {},
             this.datosRepetidos = '';
@@ -336,7 +387,7 @@ export default{
                 axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.delete(this.$store.state.url_root+`api/auth/caja/${idCaja}`)
                 .then(response => {
-                    this.mostrarPorSucursalPagination(this.$store.state.url_root+`api/auth/caja/sucursal/${this.$refs.refListaSucursal.value}/page/${this.nro_page}?page=${this.pagination.current_page}`);
+                    this.getAllCajas(this.$store.state.url_root+`api/auth/getallcajas/${this.nro_page}?page=${this.pagination.current_page}`);
                     this.limpiaCaja();
                     if(response.data.data.error != null){
                         this.nuevaCajaMsg = `No se puede eliminar la caja <strong>${nombreCaja}</strong>, existen cajeros asignados`

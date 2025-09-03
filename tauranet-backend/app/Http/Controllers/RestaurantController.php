@@ -15,8 +15,7 @@ class RestaurantController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($pag, $act)
-    {
+    public function index($pag, $act){
         if($act == 1){//Muestra solo restaurantes activos
             $restaurant = DB::table('restaurants as r')
                 ->join('superadministradors as s', 'r.id_superadministrador', '=', 's.id_superadministrador')
@@ -39,7 +38,6 @@ class RestaurantController extends ApiController
             return $response;
         }
     }
-
     public function getallrestaurants(){
         $restaurant = DB::table('restaurants as r')
             ->select('*')
@@ -49,29 +47,11 @@ class RestaurantController extends ApiController
         $response = Response::json(['data' => $restaurant], 200);
         return $response;
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
+    public function store(Request $request){
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|min:4|max:50|regex:/^[a-zA-Z0-9\s]+$/|unique:restaurants',
-            //'descripcion' => 'required',
-            //'observacion' => 'required',
+            'tipo_moneda' => 'required|max:5|min:1',
+            'identificacion' => 'required|max:10|min:1',
             'estado' => 'required|boolean',
             'id_superadministrador' => 'required|exists:superadministradors,id_superadministrador',
             'id_suscripcion' => 'required|not_in:-1|exists:suscripcions,id_suscripcion'
@@ -84,8 +64,6 @@ class RestaurantController extends ApiController
             'nombre.regex' => 'El Nombre tiene que tener solo caracteres y números',
             'estado.required' => 'El Estado es requerido',
             'estado.boolean' => 'El Estado debe ser booleano',
-            'descripcion.required' => 'La Descripción es requerido',
-            'observacion.required' => 'La Observacion es requerido',
             'id_superadministrador.required' => 'El Super Admin es requerido',
             'id_superadministrador.exists' => 'El Super Admin no existe',
             'id_suscripcion.required' => 'El tipo de suscripción es requerido',
@@ -101,51 +79,23 @@ class RestaurantController extends ApiController
         $restaurant->descripcion = $request->get("descripcion");
         $restaurant->observacion = $request->get("observacion");
         $restaurant->id_superadministrador = $request->get("id_superadministrador");
-        $restaurant->tipo_moneda = '$';
-        $restaurant->identificacion = 'DNI';
+        $restaurant->tipo_moneda = $request->get("tipo_moneda");
+        $restaurant->identificacion = $request->get("identificacion");
         $restaurant->id_suscripcion = $request->get("id_suscripcion");
         $restaurant->save();
         return response()->json(['data' => $restaurant], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
+    public function show($id){
         $restaurant = Restaurant::find($id);
         return response()->json(['data' => $restaurant], 201);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id){
         $restaurant = Restaurant::find($id);
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|min:4|max:50|regex:/^[a-zA-Z0-9\s]+$/|unique:restaurants,nombre,'.$restaurant->id_restaurant.',id_restaurant',
-//            'descripcion' => 'required',
-//            'observacion' => 'required',
             'estado' => 'required|boolean',
+            'tipo_moneda' => 'required|max:5|min:1',
+            'identificacion' => 'required|max:10|min:1',
             'id_superadministrador' => 'required|exists:superadministradors,id_superadministrador',
             'id_suscripcion' => 'required|not_in:-1|exists:suscripcions,id_suscripcion'
         ],
@@ -185,6 +135,12 @@ class RestaurantController extends ApiController
         }
         if($request->has('id_suscripcion')){
             $restaurant->id_suscripcion = $request->id_suscripcion;
+        }
+        if($request->has('tipo_moneda')){
+            $restaurant->tipo_moneda = $request->tipo_moneda;
+        }
+        if($request->has('identificacion')){
+            $restaurant->identificacion = $request->identificacion;
         }
         if(!$restaurant->isDirty()){
             return $this->errorResponse(['valores' => 'Se debe modificar al menos un valor para poder actualizar'], 201);
@@ -239,17 +195,6 @@ class RestaurantController extends ApiController
         $response = Response::json(['data' => $restaurant], 200);
         return $response;
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
     public function getDatosRestauranteSucursal($id, $type_user){
         if($type_user == 0){//Mozo
             $datosResSuc = DB::table('mozos as m')
@@ -263,7 +208,7 @@ class RestaurantController extends ApiController
         }else if($type_user == 1){//Cajero
             $datosResSuc = DB::table('cajeros as c')
                 ->join('cajas as j', 'j.id_caja', '=', 'c.id_caja')
-                ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
+                ->join('sucursals as s', 's.id_sucursal', '=', 'j.id_sucursal')
                 ->join('restaurants as r', 'r.id_restaurant', '=', 's.id_restaurant')
                 ->select('s.nombre as sucursal', 'r.nombre as restaurant', 'j.nombre as caja', 'r.tipo_moneda', 'r.identificacion', 's.ciudad', 's.pais', 's.direccion', 's.telefono', 's.celular')
                 ->where('c.id_cajero', '=', $id)

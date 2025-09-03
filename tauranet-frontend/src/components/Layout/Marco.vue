@@ -44,7 +44,7 @@
                     id = this.data_usr.id_administrador
                 }else if(this.$store.state.type_user == 3){//super administrador
                     id = this.data_usr.id_superadministrador
-                }else if(this.$store.state.type_user == 4){//super administrador
+                }else if(this.$store.state.type_user == 4){//cocinero
                     id = this.data_usr.id_cocinero
                 }
                 if((this.$store.state.type_user == 0) || (this.$store.state.type_user == 1) || (this.$store.state.type_user == 2) || (this.$store.state.type_user == 4)){

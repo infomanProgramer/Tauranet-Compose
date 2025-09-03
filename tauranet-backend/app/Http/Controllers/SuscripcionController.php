@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use App\Suscripcion;
+use Illuminate\Support\Facades\Log;
 
 class SuscripcionController extends Controller
 {
@@ -15,6 +16,7 @@ class SuscripcionController extends Controller
      */
     public function index()
     {
+        Log::info('SuscripcionController@index');
         $suscripcion = Suscripcion::all();
         return response()->json(['data' => $suscripcion], 201);
     }

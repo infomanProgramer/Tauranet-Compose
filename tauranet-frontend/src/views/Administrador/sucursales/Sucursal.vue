@@ -65,7 +65,8 @@ export default{
         datosSucursal(url) {
             this.$Progress.start()
             this.listaSucursales = [];
-            url = url || this.$store.state.url_root+`api/auth/sucursal/restaurant/${this.nro_page}/${this.$store.state.id_restaurant}`
+            // url = url || this.$store.state.url_root+`api/auth/sucursal/restaurant/${this.nro_page}/${this.$store.state.id_restaurant}`
+            url = url || this.$store.state.url_root+`api/auth/sucursal/restaurant/${this.nro_page}`
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.get(url)
             .then(response => {

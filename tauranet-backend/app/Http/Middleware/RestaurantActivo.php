@@ -37,7 +37,8 @@ class RestaurantActivo
             $verifica = DB::table('cajeros')->where('nombre_usuario', '=', $request->nombre_usuario)->get();
             if(sizeof($verifica)>0){
                 $req = DB::table('cajeros as c')
-                    ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
+                    ->join('cajas as j', 'j.id_caja', '=', 'c.id_caja')
+                    ->join('sucursals as s', 's.id_sucursal', '=', 'j.id_sucursal')
                     ->join('restaurants as r', 'r.id_restaurant', '=', 's.id_restaurant')
                     ->where('c.nombre_usuario', '=', $request->nombre_usuario)
                     ->select('r.id_restaurant', 'r.estado')->first();

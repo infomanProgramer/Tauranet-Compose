@@ -81,6 +81,8 @@ export default{
                 idUsuario = this.data_usr.id_cajero
             }else if(this.$store.state.type_user == 2){
                 idUsuario = this.data_usr.id_administrador
+            }else if(this.$store.state.type_user == 3){
+                idUsuario = this.data_usr.id_superadministrador
             }else if(this.$store.state.type_user == 4){
                 idUsuario = this.data_usr.id_cocinero
             }

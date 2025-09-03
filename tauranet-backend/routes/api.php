@@ -79,11 +79,25 @@ Route::group([
         Route::post('imageupload', 'PerfilimagenController@uploadImagePerfil');
         Route::delete('imageupload/{id}', 'PerfilimagenController@destroy');
         Route::put('imageupload/{idImg}/usuario/{idUsr}/tipo/{tipo}', 'PerfilimagenController@updateImagePerfil');
+        Route::get('getallcajas/{pag}', 'CajaController@index');
+
+        //CRUD de Caja
+        Route::get('caja/{id}', 'CajaController@show');
+        Route::post('caja', 'CajaController@store');
+        Route::put('caja/{id}', 'CajaController@update');
+        Route::delete('caja/{id}', 'CajaController@destroy');
+        
+        //CRUD de Cajero
+        Route::post('cajero', 'CajeroController@store');
+        Route::get('cajero/{id}', 'CajeroController@show');
+        Route::put('cajero/{id}', 'CajeroController@update');
+        Route::delete('cajero/{id}', 'CajeroController@destroy');
+        Route::get('getallcajeros/{id_restaurant}/{id_sucursal}', 'PersonalController@getAllCajeros');
     });
 
     //Rutas Administrador, SuperAdministrador
     Route::group(['middleware' => 'auth:sadmin,admin'], function () {
-        Route::get('sucursal/restaurant/{pag}/{id}/', 'SucursalController@sucursalPorRestaurante');
+        Route::get('sucursal/restaurant/{pag}/', 'SucursalController@sucursalPorRestaurante');
         Route::get('restaurant/{id}', 'RestaurantController@show');
     });
 
@@ -91,7 +105,6 @@ Route::group([
     Route::group(['middleware' => 'auth:mozo,admin,cajero,cocinero'], function () {
         Route::get('restaurantedatos/user/{id}/type/{type_useempleadoPedidor}', 'RestaurantController@getDatosRestauranteSucursal');
         Route::get('productovendido/pedido/{idVentaProducto}', 'ProductoVendidoController@index');
-        Route::post('changepassword/usuario/{id}/typeuser/{type_user}', 'ChangePasswordController@changePassword');
     });
 
     //Rutas Administrador, Mozo, Cajero
@@ -101,8 +114,17 @@ Route::group([
         Route::get('cliente/sucursal/{idSucursal}/identificador/{dni}', 'ClienteController@index');
         Route::post('cliente', 'ClienteController@store')->middleware('pedidos_habilitados');
         Route::post('productovendido', 'ProductoVendidoController@store');
-        Route::get('allcajas/{idSucursal}', 'CajaController@allcajas');
         Route::get('ventaproductos/pedido/{idPedido}', 'VentaProductoController@getPedido');
+    });
+
+    //Rutas Administrador, SuperAdministrador, Mozo, Cajero
+    Route::group(['middleware' => 'auth:mozo,admin,cajero,sadmin'], function () {
+        //Route::get('sucursalcombo/{idRestaurant}', 'CajaController@sucursalPerRestaurant');
+        Route::get('sucursalcombo', 'CajaController@sucursalPerRestaurant');
+        Route::get('personal/{idRestaurant}/page/{pag}/sucursal/{idSucursal}', 'PersonalController@filtra_personal');
+        Route::get('allcajas/{idSucursal}', 'CajaController@allcajas');
+        Route::get('allcajas', 'CajaController@allallcajas');
+        Route::post('changepassword/usuario/{id}/typeuser/{type_user}', 'ChangePasswordController@changePassword');
     });
 
     //Mozo Routes
@@ -125,9 +147,9 @@ Route::group([
         Route::post('pago', 'PagoController@store');
         Route::get('calculamonto/{iventaproductosdHistorialCaja}', 'HistorialCajaController@calculaMontoFinal');
         Route::put('updatemonto/{id}', 'HistorialCajaController@updateMontoFinal');
-        Route::post('clientepago', 'ClienteController@storePago')->middleware('pedidos_habilitados');
+        //Route::post('clientepago', 'ClienteController@storePago')->middleware('pedidos_habilitados');
+        Route::post('clientepago', 'ClienteController@storePago');
         //Ex rutas de Administrador (Categoría Productos)
-        Route::get('sucursalcombo/{idRestaurant}', 'CajaController@sucursalPerRestaurant');
         Route::get('cproducto/{id}', 'CategoriaProductoController@show');
         Route::post('cproducto', 'CategoriaProductoController@store');
         Route::put('cproducto/{id}', 'CategoriaProductoController@update');
@@ -187,20 +209,8 @@ Route::group([
 
     //Rutas Administrador
     Route::group(['middleware' => 'auth:admin'], function () {
-        Route::get('caja/sucursal/{idSucursal}/page/{pag}', 'CajaController@index');
-        Route::post('caja', 'CajaController@store')->middleware('cajas_habilitados');
-        Route::get('caja/{id}', 'CajaController@show');
-        Route::put('caja/{id}', 'CajaController@update');
-        Route::delete('caja/{id}', 'CajaController@destroy');
-
-        Route::get('personal/{idRestaurant}/page/{pag}/sucursal/{idSucursal}/perfil/{perfil}', 'PersonalController@filtra_personal');
+        //Route::post('caja', 'CajaController@store')->middleware('cajas_habilitados');
         Route::get('personal/{idRestaurant}/sucursal/{idSucursal}/perfil/{perfil}', 'PersonalController@filtra_personal_all');
-
-        Route::post('cajero', 'CajeroController@store')->middleware('cajeros_habilitados');
-        Route::get('cajero/{id}', 'CajeroController@show');
-        Route::put('cajero/{id}', 'CajeroController@update');
-        Route::delete('cajero/{id}', 'CajeroController@destroy');
-
         Route::post('mozo', 'MozoController@store')->middleware('mozos_habilitados');
         Route::get('mozo/{id}', 'MozoController@show');
         Route::put('mozo/{id}', 'MozoController@update');

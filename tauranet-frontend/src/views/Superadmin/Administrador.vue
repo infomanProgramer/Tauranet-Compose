@@ -124,52 +124,6 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="administrador.direccion" placeholder="Direcciön">
-                                            <ListErrors :errores="errores.direccion"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <flat-pickr
-                                                    v-model="administrador.fecha_nac"                                                       
-                                                    class="form-control input-style"
-                                                    :config="config"
-                                                    placeholder="Fecha Nacimiento"
-                                                    >
-                                            </flat-pickr>
-                                            <ListErrors :errores="errores.fecha_nac"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="email" class="form-control input-style" v-model="administrador.email" placeholder="Email">
-                                            <ListErrors :errores="errores.email"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Sexo</label>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="sexo" v-model="administrador.sexo" id="checkMozo" value="1" :checked=true>
-                                                <label class="form-check-label" for="exampleRadios1">
-                                                    Masculino
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="sexo" v-model="administrador.sexo" id="checkCajero" value="0">
-                                                <label class="form-check-label" for="exampleRadios1">
-                                                    Femenino
-                                                </label>
-                                            </div>
-                                            <ListErrors :errores="errores.sexo"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
                                             <select class="form-control input-style" v-model="administrador.id_restaurant">
                                                 <option value="-1" selected>Restaurante...</option>
                                                 <option v-for="restaurante in Restaurantes" v-bind:key="restaurante.id_restaurant" :value="restaurante.id_restaurant">{{restaurante.nombre}}</option>
@@ -178,52 +132,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="administrador.dni" placeholder="DNI">
-                                            <ListErrors :errores="errores.dni"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="administrador.celular" placeholder="Celular">
-                                            <ListErrors :errores="errores.celular"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control input-style" v-model="administrador.telefono" placeholder="Telefono">
-                                            <ListErrors :errores="errores.telefono"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Foto Perfil</label>
-                                            <input type="file" :class="{disabled: fotoPerfilPreview!=null}" class="form-control-file input-style" @change="imageChanged" ref="fileImage">
-                                            <ListErrors :errores="errores.nombre_fotoperfil"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 my-auto">
-                                        <div class="progress" v-if="uploadPercentage!=0">
-                                            <div class="progress-bar progress-bar-striped bg-info" role="progressbar" :style="'width: '+uploadPercentage+'%'" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">{{uploadPercentage}}%</div>
-                                        </div>
-                                        <a v-if="fotoPerfilPreview!=null" href="#" class="btnEliminarImagen" @click="deleteImage(fotoPerfilPreview.id_perfilimagen)"><i class="fas fa-times"></i></a>
-                                        <img v-if="fotoPerfilPreview!=null" :src="ruta_publica+'imgPerfilUsuarios/'+fotoPerfilPreview.nombre" alt="sin imagen" class="img-thumbnail fotoPerfil">
-                                        <input type="hidden" v-model="administrador.nombre_fotoperfil">
-                                    </div>
-                                </div>
                             </div>
                         </template>
                         <template v-slot:footer>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="cerrarVentanaNuevoUsuario(fotoPerfilPreview.id_perfilimagen)">Cerrar</button>
-                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="submit" class="btn btn-primary" ref="nuevoAdministradorBtn">Guardar</button>
                         </template>
                     </Modal>
                 </form>
@@ -275,55 +188,6 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="" class="label-style">Dirección</label>
-                                            <input type="text" class="form-control input-style" v-model="administrador.direccion">
-                                            <ListErrors :errores="errores.direccion"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Fecha Nacimiento</label>
-                                            <!-- <input type="date" class="form-control" v-model="administrador.fecha_nac"> -->
-                                            <flat-pickr
-                                                    v-model="administrador.fecha_nac"                                                       
-                                                    class="form-control input-style"
-                                                    :config="config"
-                                                    >
-                                            </flat-pickr>
-                                            <ListErrors :errores="errores.fecha_nac"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Email</label>
-                                            <input type="email" class="form-control input-style" v-model="administrador.email">
-                                            <ListErrors :errores="errores.email"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Sexo</label>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="sexo" v-model="administrador.sexo" value="1" ref="sexoMasculino">
-                                                <label class="form-check-label" for="exampleRadios1">
-                                                    Masculino
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="sexo" v-model="administrador.sexo" value="0" ref="sexoFemenino">
-                                                <label class="form-check-label" for="exampleRadios1">
-                                                    Femenino
-                                                </label>
-                                            </div>
-                                            <ListErrors :errores="errores.sexo"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
                                             <label for="" class="label-style">Restaurante</label>
                                             <select class="form-control input-style" v-model="administrador.id_restaurant">
                                                 <option value="-1" selected>Seleccionar...</option>
@@ -333,56 +197,11 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">DNI</label>
-                                            <input type="text" class="form-control input-style" v-model="administrador.dni">
-                                            <ListErrors :errores="errores.dni"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Celular</label>
-                                            <input type="text" class="form-control input-style" v-model="administrador.celular">
-                                            <ListErrors :errores="errores.celular"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Telefono</label>
-                                            <input type="text" class="form-control input-style" v-model="administrador.telefono">
-                                            <ListErrors :errores="errores.telefono"></ListErrors>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="" class="label-style">Foto Perfil</label>
-                                            <input type="file" :class="{disabled: fotoPerfilPreview!=null}" class="form-control-file input-style" @change="imageChanged" ref="fileImage">
-                                            <ListErrors :errores="errores.nombre_fotoperfil"></ListErrors>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 my-auto">
-                                        <!-- Edita imagen -->
-                                        <div class="progress" v-if="uploadPercentage!=0">
-                                            <div class="progress-bar progress-bar-striped bg-info" role="progressbar" :style="'width: '+uploadPercentage+'%'" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">{{uploadPercentage}}%</div>
-                                        </div>
-                                        <a v-if="fotoPerfilPreview!=null" href="#" class="btnEliminarImagen" @click="deleteImage(fotoPerfilPreview.id_perfilimagen)"><i class="fas fa-times"></i></a>
-                                        <img v-if="fotoPerfilPreview!=null" :src="ruta_publica+'imgPerfilUsuarios/'+fotoPerfilPreview.nombre" alt="sin imagen" class="img-thumbnail fotoPerfil">
-                                        <input type="hidden" v-model="administrador.nombre_fotoperfil">
-                                    </div>
-                                </div>
                             </div>
                         </template>
                         <template v-slot:footer>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="limpiaAdministrador">Cerrar</button>
-                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="submit" class="btn btn-primary" ref="editaAdministradorBtn">Guardar</button>
                         </template>
                     </Modal>
                 </form>
@@ -480,35 +299,20 @@ export default{
             //this.nuevoAdministradorMsg = '';
             this.datosRepetidos = '';
             this.errores = {};
-            this.$refs.sexoMasculino.checked = false;
-            this.$refs.sexoFemenino.checked = false;
-            if(this.fotoPerfilPreview != null){
-                this.fotoPerfilPreview = null
-            }
         },
         nuevoAdministrador(){
             this.$Progress.start()
+            this.$refs.nuevoAdministradorBtn.disabled = true;
             this.errores = {}
             this.administrador.id_superadministrador = this.data_usr.id_superadministrador;
             this.administrador.tipo_usuario = '2';
-            this.administrador.nombre_fotoperfil = this.fotoPerfilPreview!=null? this.fotoPerfilPreview.nombre: null;
+            //this.administrador.nombre_fotoperfil = this.fotoPerfilPreview!=null? this.fotoPerfilPreview.nombre: null;
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.post(this.$store.state.url_root+"api/auth/administrador", this.administrador)
             .then(response => {
                 if(response.data.error == null){
-                    //Cargar la imagen de perfil
-                    if(this.fotoPerfilPreview != null){
-                        axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                        axios.put(this.$store.state.url_root+`api/auth/imageupload/${this.fotoPerfilPreview.id_perfilimagen}/usuario/${response.data.data.id_administrador}/tipo/0`)
-                        .then(response => {
-                            console.log(response.data.data);
-                        })
-                        .catch (error => {
-                            this.$Progress.fail()
-                            alert("Administrador.vue: "+error)
-                        });
-                    }
                     this.datosAdministrador();
+                    this.$refs.nuevoAdministradorBtn.disabled = false;
                     window.$("#modalNuevoAdministrador").modal('hide');
                     this.limpiaAdministrador();
                     this.nuevoAdministradorMsg = `El Administrador <strong>${response.data.data.nombre_usuario}</strong> se guardo correctamente`
@@ -529,23 +333,6 @@ export default{
             axios.get(this.$store.state.url_root+"api/auth/administrador/"+id)
             .then(response => {
                 this.administrador = response.data.data;
-                if(this.administrador.nombre_fotoperfil != null){
-                    axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                    axios.get(this.$store.state.url_root+`api/auth/imageupload/${this.administrador.id_administrador}/tipo/0`)
-                    .then(response => {
-                        if(response.data.data!=0){
-                            this.fotoPerfilPreview = response.data.data
-                        }
-                    })
-                    .catch(error => {
-                        alert('Administrador.vue: '+error)
-                    })
-                }
-                if(this.administrador.sexo){
-                    this.$refs.sexoMasculino.checked = true;
-                }else{
-                    this.$refs.sexoFemenino.checked = true;
-                }
                 this.$Progress.finish()
             })
             .catch (error => {
@@ -555,6 +342,7 @@ export default{
         },
         editaAdministrador(id){
             this.$Progress.start()
+            this.$refs.editaAdministradorBtn.disabled = true;
             this.errores = {}
             this.administrador.nombre_fotoperfil = this.fotoPerfilPreview!=null? this.fotoPerfilPreview.nombre: null;
             this.administrador.id_superadministrador = this.data_usr.id_superadministrador;
@@ -564,22 +352,13 @@ export default{
             .then(response => {
                 if(response.data.error == null){
                     //Cargar la imagen de perfil
-                    if(this.fotoPerfilPreview != null){
-                        axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                        axios.put(this.$store.state.url_root+`api/auth/imageupload/${this.fotoPerfilPreview.id_perfilimagen}/usuario/${response.data.data.id_administrador}/tipo/0`)
-                        .then(response => {
-                            console.log(response.data.data);
-                        })
-                        .catch (error => {
-                            this.$Progress.fail()
-                            alert("Administrador.vue: "+error)
-                        });
-                    }
                     this.datosAdministrador(this.$store.state.url_root+`api/auth/administrador/page/${this.nro_page}?page=${this.pagination.current_page}`);
+                    this.$refs.editaAdministradorBtn.disabled = false;
                     window.$("#modalEditaAdministrador").modal('hide');
                     this.limpiaAdministrador();
                     this.nuevoAdministradorMsg = `El administrador <strong>${response.data.data.nombre_usuario}</strong> se actualizo correctamente`
                 }else{
+                    this.$refs.editaAdministradorBtn.disabled = false;
                     if(response.data.error.valores != null){
                         this.datosRepetidos = response.data.error.valores;
                     }else{
