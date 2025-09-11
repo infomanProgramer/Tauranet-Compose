@@ -49,23 +49,12 @@ class ClienteController extends ApiController
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request){
         $clienteIsNull = !($request->has('nombre_completo')&&$request->has('dni'));
         if($request->id_caja != -1) {
             $hcaja = DB::table('historial_caja as h')
@@ -134,13 +123,6 @@ class ClienteController extends ApiController
                     return response()->json(["error" => $validator->errors()], 201);
                 }
                 if (!$request->isNewCustomer && !$clienteIsNull) {
-                    //\Log::info('Cliente nuevo 2');
-                    //Almacena datos del cliente
-//                    $idRestaurant = DB::table('sucursals')
-//                        ->where('id_sucursal', '=', $request->id_sucursal)
-//                        ->select('id_restaurant')
-//                        ->first();
-                    //$data= json_decode( json_encode($idRestaurant), true);
                     $cliente = new Cliente();
                     $cliente->nombre_completo = $request->get("nombre_completo");
                     $cliente->dni = $request->get("dni");
@@ -162,10 +144,8 @@ class ClienteController extends ApiController
                 $vproducto->id_historial_caja = $hcaja[0]->id_historial_caja;
                 if(!$clienteIsNull){
                     if (!$request->isNewCustomer) {
-                        //\Log::info('Cliente nuevo 3');
                         $vproducto->id_cliente = $cliente->id_cliente;
                     }else {
-                        //\Log::info('Cliente antiguo 3');
                         $vproducto->id_cliente = $request->get("id_cliente");
                     }
                 }
@@ -192,14 +172,12 @@ class ClienteController extends ApiController
         }
     }
 
-
-    public function storePago(Request $request)
-    {
+    public function storePago(Request $request){
         \Log::info('Request data:', $request->all());
         $hcaja = DB::table('historial_caja as h')
             ->where("h.id_caja", "=", $request->id_caja)
             ->where("h.estado", "=","true")->get();
-        if(sizeof($hcaja)>0) {
+        if(sizeof($hcaja)>0) {//Validacion si tiene cajas aperturada
             $validacionArray = [];
             if (!$request->isNewCustomer) {//antiguo cliente
                 \Log::info('Cliente antiguo 1');
@@ -225,6 +203,7 @@ class ClienteController extends ApiController
                     'id_sucursal' => 'required|exists:sucursals,id_sucursal',
                     'importe' => 'required|numeric|between:0,9999999.99',
                     'importe_base' => 'required|numeric|between:0,9999999.99',
+                    'tipo_servicio' => 'required|numeric|between:0,2',//0=mesa, 1=delivery, 2=take away
                     'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
                     'estado_venta' => 'required',
                     'listaProductos' => 'required',
@@ -323,6 +302,7 @@ class ClienteController extends ApiController
                 $pago->id_venta_producto = $vproducto->id_venta_producto;
                 $pago->id_cajero = $request->get("id_cajero");
                 $pago->tipo_pago = $request->get("tipo_pago");
+                $pago->tipo_servicio = $request->get("tipo_servicio");
                 $pago->save();
                 //Saca el nro de pedido
                 $listaProd = DB::table(DB::raw("registraProductosFunction('" . $request->listaProductos . "', " . $vproducto->id_venta_producto . ")"))->get();
@@ -330,57 +310,17 @@ class ClienteController extends ApiController
                 $ult_vproducto = VentaProducto::find($vproducto->id_venta_producto);
                 $ult_vproducto->nro_venta = $nro_pedido;
                 $ult_vproducto->save();
-                return response()->json(['data' => $listaProd, 'vprod' => $vproducto, 'nro_pedido' => $nro_pedido], 201);
+                return response()->json([
+                    'data' => $listaProd,
+                    'vprod' => $vproducto,
+                    'nro_pedido' => $nro_pedido,
+                    'pago' => $pago
+                ], 201);
             }else{
                 return $this->errorResponse(['efectivo_mayor' => 'El efectivo tiene que ser mayor o igual al total'], 201);
             }
         }else{
             return $this->errorResponse(['apertura_caja' => 'La caja aún no fue aperturada'], 201);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

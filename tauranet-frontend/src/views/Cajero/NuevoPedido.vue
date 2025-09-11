@@ -7,67 +7,182 @@
                         <div class="col-md-9 alineacion-botones">
                             <button class="btn btn-primary" ref="btnNuevoCliente" @click="addNewClient()"><i class="far fa-save"></i> Ciente Nuevo</button>
                             <button class="btn btn-primary" @click="limpiarPedido()"><i class="fas fa-broom"></i> Limpiar</button>
-                            <button class="btn btn-primary" @click="printTicket()" :class="{disabled: ventaProdObj==null}"><i class="fas fa-print"></i> Imprimir</button>
+                            <button class="btn btn-danger" @click="printTicket()" v-if="IsEnablePrintBtn" style="background-color: #800080; border-color: #800080;"><i class="fas fa-print"></i> Imprimir</button>
                         </div>
                         <div class="col-md-3">
-                            <div class="form-check" v-if="btnClientePrint">
+                            <div class="form-check" v-if="IsEnablePrintBtn">
                             <label class="form-check-label">
-                                <input type="checkbox" class="form-check-input" @click="chengeStatePrint" ref="statePrint">Ticket Cliente
+                                <input type="checkbox" class="form-check-input" @click="changeStateIsForCustomer" ref="statePrint">Para Cliente
                             </label>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <BoxMessage :message="nuevoPedidoMsg" :cod="'da'" icono="fas fa-exclamation-circle"></BoxMessage>
-                            <h4 class="sub-cajero">Datos Cliente</h4>
-                            <div class="row">
-                                <div class="col-md-2 style-datos-cliente align-self-center">
-                                    <label for="validationCustom04">Nombre</label>
-                                </div>
-                                <div class="col-md-10">
-                                    <input v-if="isNewCustomer" type="text" class="caja_texto" v-model="cliente.nombre_completo" >
-                                    <input
-                                        type="text"
-                                        class="caja_texto"
-                                        v-model="cliente.nombre_completo"
-                                        v-else
-                                        disabled
-                                        style="background-color: #f5f5f5; color: #888; cursor: not-allowed; opacity: 1;"
-                                    >
-                                    
-                                    <ListErrors :errores="errores.nombre_completo"></ListErrors>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-2 style-datos-cliente align-self-center">
-                                    <label for="validationCustom04">{{getIdentificacion}}</label>
-                                </div>
-                                <div class="col-md-10">
-                                    <form @submit.prevent="getListaClientes()">
-                                    <div class="enlinea caja_texto">                                        
-                                        <!-- <input type="number" v-model="cliente.dni" v-if="isNewCustomer" disabled> -->
-                                        <input type="number" v-model="cliente.dni">
-                                        <button type="submit" class="btn" data-toggle="modal" data-target="#modalListaClientes" v-if="!isNewCustomer"><i class="fas fa-search"></i></button>
+                    <!-- Acá empieza el form -->
+                    <form @submit.prevent="addNuevoPedidoPago()">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <BoxMessage :message="nuevoPedidoMsg" :cod="'da'" icono="fas fa-exclamation-circle"></BoxMessage>
+                                <h4 class="sub-cajero">Datos Cliente</h4>
+                                <div class="row">
+                                    <div class="col-md-2 style-datos-cliente align-self-center">
+                                        <label for="validationCustom04">Nombre</label>
                                     </div>
-                                    <ListErrors :errores="errores.dni"></ListErrors>
-                                    </form>
-                                    <a href="#" class="style-limpiar" @click="habilitaCamposCliente()">Limpiar</a>
+                                    <div class="col-md-10">
+                                        <input v-if="isNewCustomer" type="text" class="caja_texto" v-model="cliente.nombre_completo" >
+                                        <input
+                                            type="text"
+                                            class="caja_texto"
+                                            v-model="cliente.nombre_completo"
+                                            v-else
+                                            disabled
+                                            style="background-color: #f5f5f5; color: #888; cursor: not-allowed; opacity: 1;"
+                                        >
+                                        
+                                        <ListErrors :errores="errores.nombre_completo"></ListErrors>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2 style-datos-cliente align-self-center">
+                                        <label for="validationCustom04">{{getIdentificacion}}</label>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <div class="enlinea caja_texto">                                        
+                                            <!-- <input type="number" v-model="cliente.dni" v-if="isNewCustomer" disabled> -->
+                                            <input type="number" v-model="cliente.dni">
+                                            <button type="button" @click="getListaClientes()" class="btn" data-toggle="modal" data-target="#modalListaClientes" v-if="!isNewCustomer"><i class="fas fa-search"></i></button>
+                                        </div>
+                                        <ListErrors :errores="errores.dni"></ListErrors>
+                                        <a href="#" class="style-limpiar" @click="habilitaCamposCliente()">Limpiar</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row caja-style" v-if="type_user == 0">
-                        <div class="col-md-12">
-                            <!-- <h4 class="sub-cajero">Seleccionar Caja</h4> -->
-                            <div class="form-check" v-for="item in cajasArray" v-bind:key="item.id_caja">
-                                <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" v-model="cajaCheck" :value="item.id_caja">
-                                <label class="form-check-label" for="exampleRadios1">
-                                    {{item.nombre}}
-                                </label>
+                        <div class="row caja-style" v-if="type_user == 0">
+                            <div class="col-md-12">
+                                <!-- <h4 class="sub-cajero">Seleccionar Caja</h4> -->
+                                <div class="form-check" v-for="item in cajasArray" v-bind:key="item.id_caja">
+                                    <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" v-model="cajaCheck" :value="item.id_caja">
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        {{item.nombre}}
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                        <div class="row" v-if="type_user==1">
+                            <div class="col-md-12">
+                                <!-- Modulo de pagos -->
+                                <BoxMessage :message="pedidoMsg" :cod="'da'" icono="fas fa-exclamation-circle"></BoxMessage>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped table-condensed">
+                                        <tbody>
+                                            <tr>
+                                                <td scope="col">Seleccione el método de pago</td>
+                                                <td>
+                                                    <ul class="mb-0 mt-0" style="list-style: none;">
+                                                        <li class="li-horizontal">
+                                                            <i class="far fa-money-bill-alt"></i>
+                                                            <input class="form-check-input" type="radio" name="tipo_pago" v-model="infoPayment.tipo_pago" id="checkEfectivo" :value=formaDePago.efectivo>
+                                                            <label class="form-check-label" for="checkEfectivo">Efectivo</label>
+                                                        </li>
+                                                        <li class="li-horizontal">
+                                                            <i class="fas fa-qrcode"></i>
+                                                            <input class="form-check-input" type="radio" name="tipo_pago" v-model="infoPayment.tipo_pago" id="checkQR" :value="formaDePago.qr">
+                                                            <label class="form-check-label" for="checkQR">Pago QR</label>
+                                                        </li>
+                                                        <li class="li-horizontal">
+                                                            <i class="fab fa-cc-visa"></i>
+                                                            <input class="form-check-input" type="radio" name="tipo_pago" v-model="infoPayment.tipo_pago" id="checkTarjeta" :value=formaDePago.tarjeta>
+                                                            <label class="form-check-label" for="checkTarjeta">Tarjeta</label>
+                                                        </li>
+                                                    </ul>
+                                                    <ListErrors :errores="errores.tipo_pago"></ListErrors>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="col">Seleccione el tipo de servicio</td>
+                                                <td>
+                                                    <ul class="mb-0 mt-0" style="list-style: none;">
+                                                        <li class="li-horizontal">
+                                                            <input class="form-check-input" type="radio" name="tipo_servicio" v-model="infoPayment.tipo_servicio" id="checkMesa" :value=tipoDeServicio.mesa>
+                                                            <label class="form-check-label" for="checkMesa">Mesa</label>
+                                                        </li>
+                                                        <li class="li-horizontal">
+                                                            <input class="form-check-input" type="radio" name="tipo_servicio" v-model="infoPayment.tipo_servicio" id="checkDelivery" :value=tipoDeServicio.delivery>
+                                                            <label class="form-check-label" for="checkDelivery">Delivery</label>
+                                                        </li>
+                                                        <li class="li-horizontal">
+                                                            <input class="form-check-input" type="radio" name="tipo_servicio" v-model="infoPayment.tipo_servicio" id="checkTakeAway" :value=tipoDeServicio.take_away>
+                                                            <label class="form-check-label" for="checkTakeAway">Para llevar</label>
+                                                        </li>
+                                                    </ul>
+                                                    <ListErrors :errores="errores.tipo_servicio"></ListErrors>
+                                                </td>
+                                            </tr>
+                                            <tr v-if="infoPayment.tipo_pago == 0">
+                                                <td scope="col"><i class="far fa-money-bill-alt"></i> Monto entregado por el cliente ({{tipoMoneda}})</td>
+                                                <td>
+                                                    <input type="number" class="form-control" v-model="infoPayment.efectivo">
+                                                    <ListErrors :errores="errores.efectivo"></ListErrors>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td scope="col"><i class="fas fa-money-bill-wave"></i> Importe ({{tipoMoneda}})</td>
+                                                <td>
+                                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                        <input
+                                                            v-if="!editarImporte"
+                                                            type="number"
+                                                            class="form-control"
+                                                            v-model="calculaImporte"
+                                                            style="margin-bottom: 0;"
+                                                            disabled
+                                                            id="importeField"
+                                                        />
+                                                        <input
+                                                            v-else
+                                                            type="number"
+                                                            class="form-control"
+                                                            v-model="infoPayment.importeRecalculado"
+                                                            style="margin-bottom: 0;"
+                                                            id="importeFieldEdit"
+                                                        />
+                                                        <button
+                                                            v-if="!editarImporte"
+                                                            class="btn btn-primary"
+                                                            type="button"
+                                                            @click="editImporteField()"
+                                                            ref="editarBtn"
+                                                        >Editar</button>
+                                                        <button
+                                                            v-else
+                                                            class="btn btn-primary"
+                                                            type="button"
+                                                            @click="recalcularImporte()"
+                                                            ref="recalcularBtn"
+                                                        >Reestablecer</button>
+                                                    </div>
+                                                    <ListErrors :errores="errores.importe"></ListErrors>
+                                                </td>
+                                            </tr>
+                                            <tr v-if="infoPayment.tipo_pago == 0">
+                                                <td scope="col"><i class="fas fa-hand-holding-usd"></i> Cambio ({{tipoMoneda}})</td>
+                                                <td>
+                                                    <input type="number" class="form-control" disabled :value="calculaCambio">
+                                                    <ListErrors :errores="errores.cambio"></ListErrors>    
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div> 
+                            </div>
+                        </div>
+                        <div class="row" v-if="type_user==1">
+                            <div class="col-md-12 d-flex justify-content-end">
+                                <button class="btn btn-success" type="submit" ref="pagarPedidoBtn"><i class="fas fa-comment-dollar"></i> Pagar</button>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- Acá finaliza el form -->
                     <div class="row">
                         <div class="col-md-12">
                             <h4 class="sub-cajero">Detalles</h4>
@@ -89,99 +204,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    </div>
-                    <div class="row" v-if="type_user==1">
-                        <div class="col-md-12 alineacion-botones">
-                            <button class="btn btn-primary" @click="addNuevoPedidoPago()" ref="pagarPedidoBtn"><i class="fas fa-comment-dollar"></i> Pagar</button>
-                        </div>
-                    </div>
-                    <div class="row" v-if="type_user==1">
-                        <div class="col-md-12">
-                            <!-- Modulo de pagos -->
-                            <BoxMessage :message="pedidoMsg" :cod="'da'" icono="fas fa-exclamation-circle"></BoxMessage>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-condensed">
-                                    <tbody>
-                                        <tr>
-                                            <td scope="col">Seleccione el método de pago</td>
-                                            <td>
-                                                <ul class="mb-0 mt-0" style="list-style: none;">
-                                                    <li class="li-horizontal">
-                                                        <i class="far fa-money-bill-alt"></i>
-                                                        <input class="form-check-input" type="radio" name="tipo_pago" v-model="reg.tipo_pago" id="checkEfectivo" :value=formaDePago.efectivo>
-                                                        <label class="form-check-label" for="checkEfectivo">
-                                                            Efectivo
-                                                        </label>
-                                                    </li>
-                                                    <li class="li-horizontal">
-                                                        <i class="fas fa-qrcode"></i>
-                                                        <input class="form-check-input" type="radio" name="tipo_pago" v-model="reg.tipo_pago" id="checkQR" :value="formaDePago.qr">
-                                                        <label class="form-check-label" for="checkQR">Pago QR</label>
-                                                    </li>
-                                                    <li class="li-horizontal">
-                                                        <i class="fab fa-cc-visa"></i>
-                                                        <input class="form-check-input" type="radio" name="tipo_pago" v-model="reg.tipo_pago" id="checkTarjeta" :value=formaDePago.tarjeta>
-                                                        <label class="form-check-label" for="checkTarjeta">
-                                                            Tarjeta
-                                                        </label>
-                                                    </li>
-                                                </ul>
-                                                <ListErrors :errores="errores.tipo_pago"></ListErrors>
-                                            </td>
-                                        </tr>
-                                        <tr v-if="reg.tipo_pago == 0">
-                                            <td scope="col"><i class="far fa-money-bill-alt"></i> Monto entregado por el cliente ({{tipoMoneda}})</td>
-                                            <td>
-                                                <input type="number" class="form-control" v-model="reg.efectivo">
-                                                <ListErrors :errores="errores.efectivo"></ListErrors>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td scope="col"><i class="fas fa-money-bill-wave"></i> Importe ({{tipoMoneda}})</td>
-                                            <td>
-                                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                    <input
-                                                        v-if="!editarImporte"
-                                                        type="number"
-                                                        class="form-control"
-                                                        v-model="calculaImporte"
-                                                        style="margin-bottom: 0;"
-                                                        disabled
-                                                    />
-                                                    <input
-                                                        v-if="editarImporte"
-                                                        type="number"
-                                                        class="form-control"
-                                                        v-model="reg.importeRecalculado"
-                                                        style="margin-bottom: 0;"
-                                                    />
-                                                    <button
-                                                        v-if="!editarImporte"
-                                                        class="btn btn-primary"
-                                                        @click="editImporteField"
-                                                        ref="editarBtn"
-                                                    >Editar</button>
-                                                    <button
-                                                        v-if="editarImporte"
-                                                        class="btn btn-primary"
-                                                        @click="recalcularImporte"
-                                                        ref="recalcularBtn"
-                                                    >Recalcular</button>
-                                                </div>
-                                                <ListErrors :errores="errores.importe"></ListErrors>
-                                            </td>
-                                        </tr>
-                                        <tr v-if="reg.tipo_pago == 0">
-                                            <td scope="col"><i class="fas fa-hand-holding-usd"></i> Cambio ({{tipoMoneda}})</td>
-                                            <td>
-                                                <input type="number" class="form-control" disabled :value="calculaCambio">
-                                                <ListErrors :errores="errores.cambio"></ListErrors>    
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div> 
                         </div>
                     </div>    
                 </div>
@@ -272,22 +294,21 @@
                     </template>
                 </Modal>
             </form>
-
             <!-- Modal Factura -->
-             <facturaCocina :nro_pedido="nroPedido_ticket" :cliente="cliente_ticket" :productosArray="productosArray_ticket" :esFactura="esFactura" :detallePago="detallePago"></facturaCocina>
+            <!-- <facturaCocina :nro_pedido="nroPedido_ticket" :cliente="datosCliente" :productosArray="productosArray_ticket" :isForCustomer="isForCustomer" :detallePago="detallePago"></facturaCocina> -->
         </div>
     </Marco>
 </template>
 <script>
 const axios = require("axios");
 import Marco from '@/components/Layout/Marco';
-import facturaCocina from '@/components/Invoices/facturaCocina';
+//import facturaCocina from '@/components/Invoices/facturaCocina';
+//import comandaCliente from '@/components/Invoices/comandaCliente';
 import Modal from '@/components/Modal/Modal';
 import BoxMessage from '@/components/Messages/BoxMessage';
 import ListErrors from '@/components/Messages/ListErrors';
 import {misMixins} from '@/mixins/misMixins.js';
 import TableCondensed from '@/components/Table/TableCondensed';
-import * as jsPDF from 'jspdf';
 export default{
     name: 'NuevoPedido',
     components: {
@@ -296,7 +317,8 @@ export default{
         TableCondensed,
         Modal,
         ListErrors,
-        facturaCocina
+        //facturaCocina,
+        //comandaCliente
     },
     data() {
         return {
@@ -321,17 +343,18 @@ export default{
             pedidoObj: {},
             subTotal: 0,
             listaClientes: [],
-            // cliente: {
-            //     nombre_completo: '',
-            //     dni: ''
-            // },
             formaDePago: {
                 efectivo: 0,
                 tarjeta: 1,
                 qr: 2
             }, //0 efectivo, 1 tarjeta, 2 qr
+            tipoDeServicio: {
+                mesa: 0,
+                delivery: 1,
+                take_away: 2
+            }, //0 mesa, 1 delivery, 2 para llevar
             cliente: {},
-            cliente_ticket: {
+            datosCliente: {
                 nombre_completo: '',
                 dni: ''
             },
@@ -340,14 +363,11 @@ export default{
             isNewCustomer: false,
             errores: {},
             nuevoPedidoMsg: '',
-            reg: {
+            infoPayment: {
                 efectivo: 0,
-                importe: 0,
                 importeRecalculado: 0,
-                pago_qr: 0,
-                tarjeta: 0,
-                cambio: 0,
                 tipo_pago: 0, //0 efectivo, 1 tarjeta, 2 qr
+                tipo_servicio: 0 //0 mesa, 1 delivery, 2 para llevar
             },
             pedidoMsg: '',
             type_user: this.$store.state.type_user,
@@ -356,10 +376,12 @@ export default{
             notaVerified: '',
             ventaProdObj: null,
             mostrarFactura: true,
-            esFactura: false,
+            isForCustomer: false,
             detallePago: {},
-            btnClientePrint: false,
+            IsEnablePrintBtn: false,
             editarImporte: false,
+            listOfProductsSold: [],
+            paymentDetails: {}
         }
     },
     computed: {
@@ -390,14 +412,14 @@ export default{
         },
         //eliminacion de funcion calculaTotal
         calculaCambio: function() {
-            //return parseFloat(this.reg.efectivo-this.reg.importe).toFixed(2)
+            //return parseFloat(this.infoPayment.efectivo-this.infoPayment.importe).toFixed(2)
             if(!this.editarImporte){
                 console.log("No se edito el importe ");
-                return parseFloat(this.reg.efectivo-this.calculaImporte).toFixed(2)
+                return parseFloat(this.infoPayment.efectivo-this.calculaImporte).toFixed(2)
             }
             else{
                 console.log("Se edito el importe");
-                return parseFloat(this.reg.efectivo-this.reg.importeRecalculado).toFixed(2)
+                return parseFloat(this.infoPayment.efectivo-this.infoPayment.importeRecalculado).toFixed(2)
             }
                 
         },
@@ -635,12 +657,12 @@ export default{
             this.isNewCustomer = false;
             this.errores = {};
             this.pedidoMsg = '';
-            this.reg = {
+            this.infoPayment = {
                         efectivo: 0, //Monto entregado por el cliente
-                        importe: 0, //El monto que debe pagar el cliente
                         importeRecalculado: null, //El monto que debe pagar el cliente
                         tipo_pago: 0, //0 efectivo, 1 tarjeta, 2 qr
                         cambio: 0,
+                        tipo_servicio: 0 //0 delivery, 1 domicilio, 2 retirar
                     }
             this.nuevoPedidoMsg = '';
             this.cajaCheck = -1;
@@ -652,7 +674,7 @@ export default{
         },
         editImporteField(){
             this.editarImporte = true;
-            this.reg.importeRecalculado = this.calculaImporte;
+            this.infoPayment.importeRecalculado = this.calculaImporte;
         },
         addNewClient(){
             this.isNewCustomer = true;
@@ -670,40 +692,40 @@ export default{
         },
         addNuevoPedidoPago(){
             //Guardar datos cliente
-            this.$refs.pagarPedidoBtn.className = "btn btn-primary disabled"
+            this.$refs.pagarPedidoBtn.className = "btn btn-success disabled"
             this.$Progress.start()
             this.cliente.id_cajero = this.data_usr.id_cajero //verficar si es cajero o mozo
             this.cliente.id_sucursal = this.data_usr.id_sucursal
-            this.cliente.importe = !this.editarImporte? this.calculaImporte:this.reg.importeRecalculado
+            this.cliente.importe = !this.editarImporte? this.calculaImporte:this.infoPayment.importeRecalculado
             this.cliente.importe_base = this.calculaImporteBase
             this.cliente.estado_venta = 'P'
             this.cliente.id_caja = this.data_usr.id_caja
             this.cliente.isNewCustomer = this.isNewCustomer //true antiguo cliente
-            this.cliente.efectivo = this.reg.tipo_pago == 0 ? this.reg.efectivo : null
-            this.cliente.tipo_pago = this.reg.tipo_pago
-            //this.cliente.importe = this.reg.importe
+            this.cliente.efectivo = this.infoPayment.tipo_pago == 0 ? this.infoPayment.efectivo : null
+            this.cliente.tipo_pago = this.infoPayment.tipo_pago
             this.cliente.id_sucursal = this.data_usr.id_sucursal
-            this.cliente.cambio = this.reg.tipo_pago == 0 ? this.calculaCambio : null
+            this.cliente.cambio = this.infoPayment.tipo_pago == 0 ? this.calculaCambio : null
             this.cliente.id_restaurant = this.$store.state.id_restaurant
             //Pasando datos al componente factura
-            this.cliente_ticket.nombre_completo = this.cliente.nombre_completo
-            this.cliente_ticket.dni = this.cliente.dni
-//            this.detallePago.sub_total = this.cliente.importe
+            this.datosCliente.nombre_completo = this.cliente.nombre_completo
+            this.datosCliente.dni = this.cliente.dni
+            this.cliente.tipo_servicio = this.infoPayment.tipo_servicio
             this.detallePago.efectivo = this.cliente.efectivo
-            this.detallePago.cambio = this.cliente.cambio
+            this.detallePago.cambio = this.cliente.cambio//eliminar
             this.productosArray_ticket = this.tablaProductosPedidos
 
             let i = 0
             let cad = "";
             this.tablaProductosPedidos.forEach(element => {
                 if(i == this.tablaProductosPedidos.length-1){
-                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+"|"+element.p_base+"|"+element.importe_base
+                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+"|"+element.p_base+"|"+element.importe_base+"|"+element.detalle
                 }else{
-                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+"|"+element.p_base+"|"+element.importe_base+":"
+                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+"|"+element.p_base+"|"+element.importe_base+"|"+element.detalle+":" 
                 }
                 i++
             });
-            this.cliente.listaProductos = cad
+            this.cliente.listaProductos = cad;
+            this.listOfProductsSold = cad;
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.post(this.$store.state.url_root+`api/auth/clientepago`, this.cliente)
             .then(response => {
@@ -714,9 +736,10 @@ export default{
                         this.nroPedido_ticket = response.data.nro_pedido
                         this.limpiarPedido();
                         this.$toasted.show('Se realizo el pago del pedido correctamente', {type: 'success'})
-                        this.btnClientePrint = true
+                        this.IsEnablePrintBtn = true
                         this.$Progress.finish()
-                        this.$refs.pagarPedidoBtn.className = "btn btn-primary"
+                        this.$refs.pagarPedidoBtn.className = "btn btn-success"
+                        this.paymentDetails = response.data.pago
                     }
                 }else{
                     if(response.data.error.limite_pedidos == null){
@@ -738,27 +761,127 @@ export default{
                         this.nuevoPedidoMsg = response.data.error.limite_pedidos
                     }
                     this.$Progress.fail()
-                    this.$refs.pagarPedidoBtn.className = "btn btn-primary"
+                    this.$refs.pagarPedidoBtn.className = "btn btn-success"
                 }
             })
             .catch (error => {
                 this.$toasted.show("NuevoPedido: "+error, {type: 'error'})
                 this.$Progress.fail()
-                this.$refs.pagarPedidoBtn.className = "btn btn-primary"
+                this.$refs.pagarPedidoBtn.className = "btn btn-success"
             });
         },
-        chengeStatePrint(){
+        changeStateIsForCustomer(){
             if(this.$refs.statePrint.checked){
-                this.esFactura = true
+                this.isForCustomer = true
             }else{
-                this.esFactura = false
+                this.isForCustomer = false
             }
         },
         printTicket(){
-            window.print()
+            // Crear o mostrar el contenedor del PDF
+            let pdfContainer = document.getElementById('pdfPreviewContainer');
+            if (!pdfContainer) {
+                pdfContainer = document.createElement('div');
+                pdfContainer.id = 'pdfPreviewContainer';
+                pdfContainer.style.position = 'fixed';
+                pdfContainer.style.top = '0';
+                pdfContainer.style.left = '0';
+                pdfContainer.style.width = '100%';
+                pdfContainer.style.height = '100%';
+                //pdfContainer.style.height = 'auto';
+                pdfContainer.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                pdfContainer.style.zIndex = '9999';
+                pdfContainer.style.display = 'flex';
+                pdfContainer.style.justifyContent = 'center';
+                pdfContainer.style.alignItems = 'center';
+                
+                // Crear iframe para mostrar el PDF
+                const iframe = document.createElement('iframe');
+                iframe.id = 'pdfIframe';
+                iframe.style.width = '80%';
+                iframe.style.height = '90%';
+                //iframe.style.height = 'auto';
+                iframe.style.border = 'none';
+                iframe.style.borderRadius = '8px';
+                iframe.style.backgroundColor = '#fff';
+                
+                // Botón para cerrar
+                const closeBtn = document.createElement('button');
+                closeBtn.innerHTML = '&times;';
+                closeBtn.style.position = 'absolute';
+                closeBtn.style.top = '20px';
+                closeBtn.style.right = '20px';
+                closeBtn.style.background = '#ff4444';
+                closeBtn.style.color = 'white';
+                closeBtn.style.border = 'none';
+                closeBtn.style.borderRadius = '50%';
+                closeBtn.style.width = '40px';
+                closeBtn.style.height = '40px';
+                closeBtn.style.fontSize = '20px';
+                closeBtn.style.cursor = 'pointer';
+                closeBtn.onclick = function() {
+                    document.body.removeChild(pdfContainer);
+                };
+                
+                // Botón para imprimir
+                const printBtn = document.createElement('button');
+                printBtn.innerHTML = 'Imprimir';
+                printBtn.style.position = 'absolute';
+                printBtn.style.bottom = '20px';
+                printBtn.style.left = '50%';
+                printBtn.style.transform = 'translateX(-50%)';
+                printBtn.style.padding = '10px 20px';
+                printBtn.style.background = '#4CAF50';
+                printBtn.style.color = 'white';
+                printBtn.style.border = 'none';
+                printBtn.style.borderRadius = '4px';
+                printBtn.style.cursor = 'pointer';
+                printBtn.onclick = function() {
+                    iframe.contentWindow.print();
+                };
+                
+                pdfContainer.appendChild(closeBtn);
+                pdfContainer.appendChild(printBtn);
+                pdfContainer.appendChild(iframe);
+                document.body.appendChild(pdfContainer);
+            } else {
+                // Si el contenedor ya existe, mostrarlo
+                pdfContainer.style.display = 'flex';
+            }
+            
+            // Obtener el PDF
+            const loadingToast = this.$toasted.show('Cargando comprobante...', { 
+                type: 'info',
+                duration: null // No se cierra automáticamente
+            });
+
+            let dataForOrderTicket = {
+                nombre_restaurant: this.$store.state.restauranteData.restaurant,
+                sucursal: this.$store.state.restauranteData.sucursal,
+                caja: this.$store.state.restauranteData.caja,
+                listaProductos: this.listOfProductsSold,
+                paymentDetails: this.paymentDetails,
+                nro_pedido: this.nroPedido_ticket,
+                datosCliente: this.datosCliente,
+                identificacion: this.getIdentificacion,
+                isForCustomer: this.isForCustomer
+            }
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.post(this.$store.state.url_root + 'api/auth/printcomanda', dataForOrderTicket, { responseType: 'blob' })
+            .then(response => {
+                const file = new Blob([response.data], { type: 'application/pdf' });
+                const fileURL = URL.createObjectURL(file);
+                const iframe = document.getElementById('pdfIframe');
+                iframe.src = fileURL;
+                loadingToast.goAway(0); // Cerrar mensaje de carga
+            })
+            .catch (error => {
+                this.$toasted.show("NuevoPedido: "+error, {type: 'error'})
+            });
+
         },
         recalcularImporte() {
-            this.reg.importeRecalculado = this.calculaImporte;
+            this.infoPayment.importeRecalculado = this.calculaImporte;
             this.editarImporte = false;
         },
     },

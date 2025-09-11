@@ -145,10 +145,10 @@ export default{
     computed: {
         cliente_computed() {
             if(this.cliente.nombre_completo == null){
-                this.cliente.nombre_completo = 'GENERAL'
+                this.cliente.nombre_completo = 'ANÓNIMO'
             }
             if(this.cliente.dni == null){
-                this.cliente.dni = 'GENERAL'
+                this.cliente.dni = 'ANÓNIMO'
             }
             return this.cliente 
         },

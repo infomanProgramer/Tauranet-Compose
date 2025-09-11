@@ -147,7 +147,6 @@ Route::group([
         Route::post('pago', 'PagoController@store');
         Route::get('calculamonto/{iventaproductosdHistorialCaja}', 'HistorialCajaController@calculaMontoFinal');
         Route::put('updatemonto/{id}', 'HistorialCajaController@updateMontoFinal');
-        //Route::post('clientepago', 'ClienteController@storePago')->middleware('pedidos_habilitados');
         Route::post('clientepago', 'ClienteController@storePago');
         //Ex rutas de Administrador (Categoría Productos)
         Route::get('cproducto/{id}', 'CategoriaProductoController@show');
@@ -205,6 +204,9 @@ Route::group([
 
         //Ventas por mes
         Route::post('mesimporte', 'ReporteVentasPorRangoFechaController@mesImporte');
+
+        //Comanda
+        Route::post('printcomanda', 'ComandaController@verComanda');
     });
 
     //Rutas Administrador
