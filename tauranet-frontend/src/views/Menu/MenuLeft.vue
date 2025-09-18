@@ -229,17 +229,17 @@
                                 id: 3,
                                 name_path: 'detalleventas',
                                 name: 'Detalle Ventas',
-                            },
-                            {
-                                id: 4,
-                                name_path: 'estadisticas',
-                                name: 'Estadísticas',
-                            },
-                            {
-                                id: 5,
-                                name_path: 'cajareport',
-                                name: 'Cajas',
-                            },
+                            }
+                            // {
+                            //     id: 4,
+                            //     name_path: 'estadisticas',
+                            //     name: 'Estadísticas',
+                            // },
+                            // {
+                            //     id: 5,
+                            //     name_path: 'cajareport',
+                            //     name: 'Cajas',
+                            // },
                         ]
                     },
                     {

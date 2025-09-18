@@ -207,6 +207,9 @@ Route::group([
 
         //Comanda
         Route::post('printcomanda', 'ComandaController@verComanda');
+
+        //Ventas
+        Route::post('updateventaproducto', 'VentaProductoController@updateVentaProducto');
     });
 
     //Rutas Administrador

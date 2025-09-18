@@ -19,8 +19,7 @@ class ClienteController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($idSucursal, $dni)
-    {
+    public function index($idSucursal, $dni){
         $response = null;
         $listaClientes = DB::table('clientes as cl')
             ->join('restaurants as r', 'r.id_restaurant', '=', 'cl.id_restaurant')
@@ -47,13 +46,6 @@ class ClienteController extends ApiController
         $response = Response::json(['data' => $listaClientes], 200);
         return $response;
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request){
         $clienteIsNull = !($request->has('nombre_completo')&&$request->has('dni'));
         if($request->id_caja != -1) {
@@ -171,13 +163,15 @@ class ClienteController extends ApiController
             return $this->errorResponse(['apertura_caja' => 'No se selecciono ninguna caja'], 201);
         }
     }
-
     public function storePago(Request $request){
-        \Log::info('Request data:', $request->all());
         $hcaja = DB::table('historial_caja as h')
             ->where("h.id_caja", "=", $request->id_caja)
             ->where("h.estado", "=","true")->get();
-        if(sizeof($hcaja)>0) {//Validacion si tiene cajas aperturada
+        if(sizeof($hcaja)>0 && sizeof($hcaja)<2) {//Validacion si tiene cajas aperturada
+            $now = date('Y-m-d');
+            if($hcaja[0]->fecha != $now){
+                return $this->errorResponse(['apertura_caja' => 'No hay caja aperturada para '.$now], 201);
+            }
             $validacionArray = [];
             if (!$request->isNewCustomer) {//antiguo cliente
                 \Log::info('Cliente antiguo 1');
@@ -189,9 +183,7 @@ class ClienteController extends ApiController
                     'importe_base' => 'required',
                     'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
                     'estado_venta' => 'required',
-                    'listaProductos' => 'required',
-                    //'efectivo' => 'required|numeric|between:1,99999999.99', // Solo cuando el pago es en efectivo y no puede ser cero
-                    //'cambio' => 'required|numeric|between:0,99999999.99'
+                    'listaProductos' => 'required'
                 ];
             } else {
                 \Log::info('Cliente nuevo 1');
@@ -206,9 +198,7 @@ class ClienteController extends ApiController
                     'tipo_servicio' => 'required|numeric|between:0,2',//0=mesa, 1=delivery, 2=take away
                     'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
                     'estado_venta' => 'required',
-                    'listaProductos' => 'required',
-                    //'efectivo' => 'required|numeric|between:1,99999999.99',//Solo cuando el pago es en efectivo
-                    // 'cambio' => 'required|numeric|between:0,99999999.99'
+                    'listaProductos' => 'required'
                 ];
             }
             $validator = Validator::make($request->all(), $validacionArray,

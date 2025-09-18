@@ -18,30 +18,26 @@ class ProductoVendidoController extends ApiController
     public function index($idVentaProducto)
     {
         $pvendidos = DB::table('producto_vendidos as p')
+                        ->join('venta_productos as vp', 'vp.id_venta_producto', '=', 'p.id_venta_producto')
                         ->join('productos as r', 'r.id_producto', '=', 'p.id_producto')
                         ->where('p.id_venta_producto', '=', $idVentaProducto)
+                        ->where('vp.estado_venta', '=', "P")
                         ->select('p.*', 'r.nombre as detalle')
                         ->get();
         $vproducto = DB::table('venta_productos as v')
                         ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
                         ->where('v.id_venta_producto', '=', $idVentaProducto)
-                        ->select('v.*', DB::raw("CASE WHEN c.nombre_completo isNull THEN 'GENERAL' ELSE c.nombre_completo END AS nombre_completo"), DB::raw("CASE WHEN c.dni isNull THEN 0 ELSE c.dni END as dni"))
+                        ->where('v.estado_venta', '=', "P")
+                        ->select('v.*', DB::raw("CASE WHEN c.nombre_completo isNull THEN NULL ELSE c.nombre_completo END AS nombre_completo"), DB::raw("CASE WHEN c.dni isNull THEN NULL ELSE c.dni END as dni"))
                         ->get();
-        $pago = DB::table('pagos')
-                        ->where('id_venta_producto', '=', $idVentaProducto)
+        $pago = DB::table('pagos as p')
+                        ->join('venta_productos as vp', 'vp.id_venta_producto', '=', 'p.id_venta_producto')
+                        ->where('p.id_venta_producto', '=', $idVentaProducto)
+                        ->where('vp.estado_venta', '=', "P")
+                        ->select('p.*')
                         ->get();
         $response = Response::json(['data' => $pvendidos, 'vprod' => $vproducto, 'vpag' => $pago], 200);
         return $response;
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**

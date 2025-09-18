@@ -12,9 +12,11 @@
                 </label>
             </div>
             <span>Fecha:</span> {{pedidoObj.created_at}}<br>
-            <span>Cod:</span> 00{{pedidoObj.id_venta_producto}}<br>
-            <span>Cliente:</span> {{nombreClienteComputed}}<br> <!--Nombre Completo Cliente-->
-            <span>{{getIdentificacion}}:</span> {{dniClienteComputed}}<br>  <!--Dni cliente-->
+            <!-- <span>Cod:</span> 00{{pedidoObj.id_venta_producto}}<br> -->
+            <!--<span>Cliente:</span> {{nombreClienteComputed}}<br> -->
+            <!--<span>{{getIdentificacion}}:</span> {{dniClienteComputed}}<br>  -->
+            <span v-if="nombreClienteComputed">Cliente: {{nombreClienteComputed}}</span><br v-if="nombreClienteComputed">
+            <span v-if="dniClienteComputed">{{getIdentificacion}}: {{dniClienteComputed}}</span><br v-if="dniClienteComputed">
             <span>{{rol}}:</span> {{nombre_empleado}}<br>
             <span v-if="type_user == 0">{{pedidoObj.nombre_caja}}</span>
         </div>
@@ -54,17 +56,17 @@ export default{
             }
         },
         nombreClienteComputed(){
-            if(this.pedidoObj.nombre_completo == null){
-                return 'GENERAL'
-            }else{
+            if(this.pedidoObj.nombre_completo){
                 return this.pedidoObj.nombre_completo
+            }else{
+                return null;
             }
         },
         dniClienteComputed(){
-            if(this.pedidoObj.dni_cliente == null){
-                return 'GENERAL'
-            }else{
+            if(this.pedidoObj.dni_cliente){
                 return this.pedidoObj.dni_cliente
+            }else{
+                return null;
             }
         },
         getIndicePedido(){

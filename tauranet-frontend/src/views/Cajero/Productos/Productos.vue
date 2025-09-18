@@ -453,7 +453,7 @@ export default{
             this.producto.id_caja = -1;            
         },
         eliminarProducto(idProducto, nomProducto){
-            let sw = confirm(`Desea eliminar el usuario ${nomProducto}`)
+            let sw = confirm(`Desea eliminar el producto ${nomProducto}`)
             if(sw){
                 this.$Progress.start()
                 let url = this.$store.state.url_root+`api/auth/producto/${idProducto}`//ok

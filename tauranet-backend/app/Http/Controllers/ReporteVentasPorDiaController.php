@@ -43,6 +43,7 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', '=', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
+            ->where('vp.estado_venta', '=', 'P')
             ->orderByDesc('hora')
             ->paginate(10);
 
@@ -53,6 +54,7 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
+            ->where('vp.estado_venta', '=', 'P')
             ->selectRaw('
                 SUM(p.importe) as importe_total,
                 SUM(p.importe_base) as importe_neto_total,
@@ -106,6 +108,7 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', '=', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
+            ->where('vp.estado_venta', '=', 'P')
             ->orderByDesc('hora')
             ->get();
 
@@ -179,6 +182,7 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', '=', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
+            ->where('vp.estado_venta', '=', 'P')
             ->orderByDesc('hora')
             ->get();
 
@@ -191,6 +195,7 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
+            ->where('vp.estado_venta', '=', 'P')
             ->selectRaw('
                 SUM(p.importe) as importe_total,
                 SUM(p.importe_base) as importe_neto_total,

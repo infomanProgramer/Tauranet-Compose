@@ -302,13 +302,12 @@
 <script>
 const axios = require("axios");
 import Marco from '@/components/Layout/Marco';
-//import facturaCocina from '@/components/Invoices/facturaCocina';
-//import comandaCliente from '@/components/Invoices/comandaCliente';
 import Modal from '@/components/Modal/Modal';
 import BoxMessage from '@/components/Messages/BoxMessage';
 import ListErrors from '@/components/Messages/ListErrors';
 import {misMixins} from '@/mixins/misMixins.js';
 import TableCondensed from '@/components/Table/TableCondensed';
+import {renderFrameComanda, listOfProductsToString} from '@/utils/printcomandas.js';
 export default{
     name: 'NuevoPedido',
     components: {
@@ -316,9 +315,7 @@ export default{
         BoxMessage,
         TableCondensed,
         Modal,
-        ListErrors,
-        //facturaCocina,
-        //comandaCliente
+        ListErrors
     },
     data() {
         return {
@@ -667,6 +664,7 @@ export default{
             this.nuevoPedidoMsg = '';
             this.cajaCheck = -1;
             this.editarImporte = false;
+            this.IsEnablePrintBtn = false;
         },
         habilitaCamposCliente(){
             this.isNewCustomer = false;
@@ -713,19 +711,8 @@ export default{
             this.detallePago.efectivo = this.cliente.efectivo
             this.detallePago.cambio = this.cliente.cambio//eliminar
             this.productosArray_ticket = this.tablaProductosPedidos
-
-            let i = 0
-            let cad = "";
-            this.tablaProductosPedidos.forEach(element => {
-                if(i == this.tablaProductosPedidos.length-1){
-                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+"|"+element.p_base+"|"+element.importe_base+"|"+element.detalle
-                }else{
-                    cad = cad+element.id_producto+"|"+element.cantidad+"|"+element.p_unit+"|"+element.importe+"|"+element.nota+"|"+element.p_base+"|"+element.importe_base+"|"+element.detalle+":" 
-                }
-                i++
-            });
-            this.cliente.listaProductos = cad;
-            this.listOfProductsSold = cad;
+            this.cliente.listaProductos = listOfProductsToString(this.tablaProductosPedidos);
+            this.listOfProductsSold = listOfProductsToString(this.tablaProductosPedidos);
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.post(this.$store.state.url_root+`api/auth/clientepago`, this.cliente)
             .then(response => {
@@ -778,83 +765,6 @@ export default{
             }
         },
         printTicket(){
-            // Crear o mostrar el contenedor del PDF
-            let pdfContainer = document.getElementById('pdfPreviewContainer');
-            if (!pdfContainer) {
-                pdfContainer = document.createElement('div');
-                pdfContainer.id = 'pdfPreviewContainer';
-                pdfContainer.style.position = 'fixed';
-                pdfContainer.style.top = '0';
-                pdfContainer.style.left = '0';
-                pdfContainer.style.width = '100%';
-                pdfContainer.style.height = '100%';
-                //pdfContainer.style.height = 'auto';
-                pdfContainer.style.backgroundColor = 'rgba(0,0,0,0.8)';
-                pdfContainer.style.zIndex = '9999';
-                pdfContainer.style.display = 'flex';
-                pdfContainer.style.justifyContent = 'center';
-                pdfContainer.style.alignItems = 'center';
-                
-                // Crear iframe para mostrar el PDF
-                const iframe = document.createElement('iframe');
-                iframe.id = 'pdfIframe';
-                iframe.style.width = '80%';
-                iframe.style.height = '90%';
-                //iframe.style.height = 'auto';
-                iframe.style.border = 'none';
-                iframe.style.borderRadius = '8px';
-                iframe.style.backgroundColor = '#fff';
-                
-                // Botón para cerrar
-                const closeBtn = document.createElement('button');
-                closeBtn.innerHTML = '&times;';
-                closeBtn.style.position = 'absolute';
-                closeBtn.style.top = '20px';
-                closeBtn.style.right = '20px';
-                closeBtn.style.background = '#ff4444';
-                closeBtn.style.color = 'white';
-                closeBtn.style.border = 'none';
-                closeBtn.style.borderRadius = '50%';
-                closeBtn.style.width = '40px';
-                closeBtn.style.height = '40px';
-                closeBtn.style.fontSize = '20px';
-                closeBtn.style.cursor = 'pointer';
-                closeBtn.onclick = function() {
-                    document.body.removeChild(pdfContainer);
-                };
-                
-                // Botón para imprimir
-                const printBtn = document.createElement('button');
-                printBtn.innerHTML = 'Imprimir';
-                printBtn.style.position = 'absolute';
-                printBtn.style.bottom = '20px';
-                printBtn.style.left = '50%';
-                printBtn.style.transform = 'translateX(-50%)';
-                printBtn.style.padding = '10px 20px';
-                printBtn.style.background = '#4CAF50';
-                printBtn.style.color = 'white';
-                printBtn.style.border = 'none';
-                printBtn.style.borderRadius = '4px';
-                printBtn.style.cursor = 'pointer';
-                printBtn.onclick = function() {
-                    iframe.contentWindow.print();
-                };
-                
-                pdfContainer.appendChild(closeBtn);
-                pdfContainer.appendChild(printBtn);
-                pdfContainer.appendChild(iframe);
-                document.body.appendChild(pdfContainer);
-            } else {
-                // Si el contenedor ya existe, mostrarlo
-                pdfContainer.style.display = 'flex';
-            }
-            
-            // Obtener el PDF
-            const loadingToast = this.$toasted.show('Cargando comprobante...', { 
-                type: 'info',
-                duration: null // No se cierra automáticamente
-            });
-
             let dataForOrderTicket = {
                 nombre_restaurant: this.$store.state.restauranteData.restaurant,
                 sucursal: this.$store.state.restauranteData.sucursal,
@@ -866,8 +776,16 @@ export default{
                 identificacion: this.getIdentificacion,
                 isForCustomer: this.isForCustomer
             }
+            renderFrameComanda();
+             // Obtener el PDF
+            const loadingToast = this.$toasted.show('Cargando comprobante...', { 
+                type: 'info',
+                duration: null // No se cierra automáticamente
+            });
+
+            let _dataForOrderTicket = dataForOrderTicket;
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-            axios.post(this.$store.state.url_root + 'api/auth/printcomanda', dataForOrderTicket, { responseType: 'blob' })
+            axios.post(this.$store.state.url_root + 'api/auth/printcomanda', _dataForOrderTicket, { responseType: 'blob' })
             .then(response => {
                 const file = new Blob([response.data], { type: 'application/pdf' });
                 const fileURL = URL.createObjectURL(file);
@@ -878,7 +796,6 @@ export default{
             .catch (error => {
                 this.$toasted.show("NuevoPedido: "+error, {type: 'error'})
             });
-
         },
         recalcularImporte() {
             this.infoPayment.importeRecalculado = this.calculaImporte;

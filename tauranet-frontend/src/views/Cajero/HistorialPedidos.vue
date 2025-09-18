@@ -16,7 +16,7 @@
                             <button class="btn btn-primary" v-if="nro_pedido!=0" @click="printTicket()"><i class="fas fa-print"></i> Imprimir</button>
                             <div class="form-check">
                             <label class="form-check-label" v-if="!(pagoObj == null) && (nro_pedido!=0) && (type_user == 1)">
-                                <input type="checkbox" class="form-check-input" @click="chengeStatePrint" ref="statePrint">Ticket Cliente
+                                <input type="checkbox" class="form-check-input" @click="changeStateIsForCustomer" ref="statePrint">Para Cliente
                             </label>
                             </div>
                         </div>
@@ -36,7 +36,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="prod in productosArray" v-bind:key="prod.id_producto">
+                                        <tr v-for="prod in listOfProductsInTheOrder" v-bind:key="prod.id_producto">
                                             <td>{{prod.id_producto}}</td>
                                             <td>{{prod.cantidad}}</td>
                                             <td>{{prod.detalle}}</td>
@@ -53,17 +53,12 @@
                                             <th scope="col">Importe total</th>
                                             <th>{{ reg.importe?parseFloat(reg.importe).toFixed(2):"" }} {{ reg.importe?tipoMoneda:"" }}</th>
                                         </tr>
-                                        <!-- <tr>
-                                            <th scope="col">Efectivo</th>
-                                            <th>{{ parseFloat(reg.efectivo).toFixed(2) }} {{ tipoMoneda }}</th>
-                                        </tr>
-                                        <tr>
-                                            <th scope="col">Cambio</th>
-                                            <th>{{ parseFloat(reg.cambio).toFixed(2) }} {{tipoMoneda}}</th>
-                                        </tr> -->
                                     </thead>
                                 </table>
                             </div>
+                            
+                            <button type="button" class="btn btn-danger" v-if="nro_pedido!=0 && type_user == 1" @click="cancelarPedidoMethod(ventaProductoObj)">Cancelar Pedido</button>
+
                         </div>
                         <div class="col-md-6">
                             <h5 class="sub-cajero">Cliente</h5>
@@ -87,7 +82,7 @@
                                 <table class="table table-bordered table-striped table-condensed">
                                     <tbody>
                                         <tr>
-                                            <td scope="col" class="subtituloPedidos">Resumen</td>
+                                            <td scope="col" class="subtituloPedidos">Tipo de pago</td>
                                             <td class="subtituloPedidos"></td>
                                         </tr>
                                         <tr>
@@ -115,6 +110,34 @@
                                                 </ul>
                                                 <!-- fin tipo de pago -->
                                         </tr>
+                                        <tr>
+                                            <td scope="col" class="subtituloPedidos">Tipo de servicio</td>
+                                            <td class="subtituloPedidos"></td>
+                                        </tr>
+                                        <tr>
+                                            <!-- inicio tipo de servicio -->
+                                                <ul class="mb-0 mt-0" style="list-style: none;">
+                                                    <li class="li-horizontal">
+                                                        <input class="form-check-input" type="radio" name="tipo_servicio" v-model="pagoObj.tipo_servicio" id="checkMesa" :value=tipoServicio.mesa disabled>
+                                                        <label class="form-check-label" for="checkMesa">
+                                                            Mesa
+                                                        </label>
+                                                    </li>
+                                                    <li class="li-horizontal">
+                                                        <input class="form-check-input" type="radio" name="tipo_servicio" v-model="pagoObj.tipo_servicio" id="checkDelivery" :value=tipoServicio.delivery disabled>
+                                                        <label class="form-check-label" for="checkDelivery">
+                                                            Delivery
+                                                        </label>
+                                                    </li>
+                                                    <li class="li-horizontal">
+                                                        <input class="form-check-input" type="radio" name="tipo_servicio" v-model="pagoObj.tipo_servicio" id="checkTakeAway" :value=tipoServicio.take_away disabled>
+                                                        <label class="form-check-label" for="checkTakeAway">
+                                                            Para llevar
+                                                        </label>
+                                                    </li>
+                                                </ul>
+                                                <!-- fin tipo de servicio -->
+                                        </tr>
                                         <tr v-if="reg.tipo_pago == 0">
                                             <td scope="col"><i class="far fa-money-bill-alt"></i> Efectivo</td>
                                             <td>
@@ -135,7 +158,7 @@
                                             <td scope="col"><i class="fab fa-cc-visa"></i> Cambio</td>
                                             <td>
                                                 <input type="number" class="form-control" disabled v-model="reg.cambio">
-                                                <ListErrors :errores="errores.visa"></ListErrors>
+                                                <ListErrors :errores="errores.cambio"></ListErrors>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -145,7 +168,6 @@
                     </div>
                 </div>
             </div>
-            <facturaCocina :nro_pedido="nro_pedido" :cliente="ventaProductoObj" :productosArray="productosArray" :esFactura="esFactura" :detallePago="reg"></facturaCocina>
         </div>
     </Marco>
 </template>
@@ -160,8 +182,8 @@ import ContainerPedidos from '@/components/Cajero/ContainerPedidos';
 import {misMixins} from '@/mixins/misMixins.js';
 import flatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
-import {Hindi} from 'flatpickr/dist/l10n/hi';
-import facturaCocina from '@/components/Invoices/facturaCocina';
+import {renderFrameComanda, listOfProductsToString} from '@/utils/printcomandas.js';
+
 export default{
     name: 'HistorialPedidos',
     components: {
@@ -172,13 +194,13 @@ export default{
         ListErrors,
         Pagination,
         ContainerPedidos,
-        facturaCocina
+        //facturaCocina
     },
     data() {
         return {
             data_usr: {},
             pedidosArray: [],
-            productosArray: [],
+            listOfProductsInTheOrder: [],
             ventaProductoObj: {
                 total: 0,
                 sub_total: 0,
@@ -200,12 +222,17 @@ export default{
             pedidoMsg: '',
             sw: false,
             type_user: this.$store.state.type_user,
-            esFactura: false,
+            isForCustomer: false,
             formaDePago: {
                 efectivo: 0,
                 tarjeta: 1,
                 qr: 2
             }, //0 efectivo, 1 tarjeta, 2 qr
+            tipoServicio: {
+                mesa: 0,
+                delivery: 1,
+                take_away: 2
+            }, //0 mesa, 1 delivery, 2 take away
         }
     },
     mixins: [misMixins],
@@ -268,7 +295,7 @@ export default{
             if(this.$refs.statePrint != null){
                 this.$refs.statePrint.checked = false;
             }
-            this.esFactura = false;
+            this.isForCustomer = false;
             this.$Progress.start()
             this.nro_pedido = obj.nro_venta
             this.$store.dispatch('indicePedidosActiveAction', obj.id_venta_producto)
@@ -276,7 +303,7 @@ export default{
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.get(url)
             .then(response => {
-                this.productosArray = response.data.data
+                this.listOfProductsInTheOrder = response.data.data
                 this.ventaProductoObj = response.data.vprod[0]
                 this.pagoObj = response.data.vpag[0]
                 console.log("Detalle de pago: ",this.pagoObj)
@@ -308,7 +335,7 @@ export default{
                 axios.post(this.$store.state.url_root+`api/auth/pago`, this.reg)
                 .then(response => {
                     if(response.data.error == null){
-                        this.esFactura = false
+                        this.isForCustomer = false
                         this.pagoObj = response.data.data
                         this.reg = response.data.data
                         this.getPedidosArray();
@@ -323,7 +350,7 @@ export default{
                                 this.pedidoMsg = `${response.data.error.total_pagar_mayor}`
                             }
                         }else{
-                            this.pedidoMsg = `${response.data.error.efectivo_mayor}`   
+                            this.pedidoMsg = `${response.data.error.efectivo_mayor}`
                         }
                         this.$Progress.fail()
                         this.$refs.pagarPedidoBtn.className = "btn btn-primary"
@@ -340,16 +367,89 @@ export default{
             this.pedidoMsg = '',
             this.errores = {}
         },
-        printTicket(){
-            window.print()
-        },
-        chengeStatePrint(){
-            if(this.$refs.statePrint.checked){
-                this.esFactura = true
-            }else{
-                this.esFactura = false
+        cleanOrder(){
+            this.pedidoMsg = '',
+            this.errores = {}
+            this.nro_pedido = 0;
+            this.listOfProductsInTheOrder = [];
+            this.ventaProductoObj = {
+                total: 0,
+                sub_total: 0,
+                descuento: 0,
+                nombre_cliente: ''
+            },
+            this.reg = {
+                efectivo: 0,
+                total_pagar: 0,
+                visa: 0,
+                mastercard: 0,
+                sub_total: 0,
+                cambio: 0,
             }
         },
+        changeStateIsForCustomer(){
+            if(this.$refs.statePrint.checked){
+                this.isForCustomer = true
+            }else{
+                this.isForCustomer = false
+            }
+        },
+        printTicket(){
+            let dataForOrderTicket = {
+                nombre_restaurant: this.$store.state.restauranteData.restaurant,
+                sucursal: this.$store.state.restauranteData.sucursal,
+                caja: this.$store.state.restauranteData.caja,
+                listaProductos: listOfProductsToString(this.listOfProductsInTheOrder),
+                paymentDetails: this.reg,
+                nro_pedido: this.nro_pedido,
+                datosCliente: this.ventaProductoObj,
+                identificacion: this.getIdentificacion,
+                isForCustomer: this.isForCustomer
+            }
+            console.log(dataForOrderTicket)
+            renderFrameComanda();
+             // Obtener el PDF
+            const loadingToast = this.$toasted.show('Cargando comprobante...', { 
+                type: 'info',
+                duration: null // No se cierra automáticamente
+            });
+
+            let _dataForOrderTicket = dataForOrderTicket;
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.post(this.$store.state.url_root + 'api/auth/printcomanda', _dataForOrderTicket, { responseType: 'blob' })
+            .then(response => {
+                const file = new Blob([response.data], { type: 'application/pdf' });
+                const fileURL = URL.createObjectURL(file);
+                const iframe = document.getElementById('pdfIframe');
+                iframe.src = fileURL;
+                loadingToast.goAway(0); // Cerrar mensaje de carga
+            })
+            .catch (error => {
+                this.$toasted.show("NuevoPedido: "+error, {type: 'error'})
+            });
+        },
+        cancelarPedidoMethod(orderById){
+            this.$Progress.start()
+            let cancelFoodOrderById = confirm(`¿Desea cancelar el Pedido # ${orderById.nro_venta}?`)
+            orderById.estado_venta = 'C';
+            if(cancelFoodOrderById){
+                axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+                axios.post(this.$store.state.url_root+`api/auth/updateventaproducto`, orderById)
+                .then(response => {
+                    this.getPedidosArray();
+                    this.$toasted.show(`Pedido # ${orderById.nro_venta} cancelado correctamente`, {type: 'success'})
+                    this.cleanOrder();
+                    this.$Progress.finish()
+                })
+                .catch (error => {
+                    this.$toasted.show(`Error al cancelar el pedido # ${orderById.nro_venta}`, {type: 'error'})
+                    this.$Progress.fail()
+                });
+            }else{
+                console.log("No se cancelo el pedido");
+                this.$Progress.fail()
+            }    
+        }
     },
 }
 </script>
