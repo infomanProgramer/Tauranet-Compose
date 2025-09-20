@@ -431,7 +431,7 @@ export default{
         cancelarPedidoMethod(orderById){
             this.$Progress.start()
             let cancelFoodOrderById = confirm(`¿Desea cancelar el Pedido # ${orderById.nro_venta}?`)
-            orderById.estado_venta = 'C';
+            orderById.estado_venta = 1;
             if(cancelFoodOrderById){
                 axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.post(this.$store.state.url_root+`api/auth/updateventaproducto`, orderById)

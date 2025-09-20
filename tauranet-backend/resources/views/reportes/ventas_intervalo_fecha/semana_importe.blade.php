@@ -42,7 +42,6 @@
                 <th>Hasta</th>
                 <th>Total Pedidos</th>
                 <th>Total Ventas</th>
-                <th>Total Ganancia</th>
             </tr>
         </thead>
         <tbody>
@@ -53,7 +52,6 @@
                     <td>{{ $item['fechaHasta'] }}</td>
                     <td>{{ $item['total_pedidos'] }}</td>
                     <td>{{ number_format($item['total_ventas'], 2) }}</td>
-                    <td>{{ number_format($item['total_ganancia'], 2) }}</td>
                 </tr>
             @endforeach
         </tbody>

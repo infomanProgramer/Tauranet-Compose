@@ -63,8 +63,6 @@
                             <table-column show="nom_producto" label="Producto"></table-column>
                             <table-column show="nom_categoria" label="Categoría"></table-column>
                             <table-column show="importe" label="Importe"></table-column>
-                            <table-column show="importe_base" label="Neto"></table-column>
-                            <table-column show="ganancia" label="Ganancia"></table-column>
                         </table-component>
                     </div>
                 </div>
@@ -165,7 +163,7 @@ export default{
                     this.pagination = response.data.dataT
                     this.productoImporteArray.forEach(element => {
                         this.labels.push(element.nom_producto)
-                        this.importe.push(element.ganancia)
+                        this.importe.push(element.importe)
                     })
                     this.empleadoImporteCollection = {
                         labels: this.labels,

@@ -696,7 +696,7 @@ export default{
             this.cliente.id_sucursal = this.data_usr.id_sucursal
             this.cliente.importe = !this.editarImporte? this.calculaImporte:this.infoPayment.importeRecalculado
             this.cliente.importe_base = this.calculaImporteBase
-            this.cliente.estado_venta = 'P'
+            this.cliente.estado_venta = 0
             this.cliente.id_caja = this.data_usr.id_caja
             this.cliente.isNewCustomer = this.isNewCustomer //true antiguo cliente
             this.cliente.efectivo = this.infoPayment.tipo_pago == 0 ? this.infoPayment.efectivo : null

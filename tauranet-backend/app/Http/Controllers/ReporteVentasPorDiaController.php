@@ -27,14 +27,9 @@ class ReporteVentasPorDiaController extends ApiController
                 vp.nro_venta as nro_pedido,
                 c.nombre_completo as cliente,
                 c2.nombre_usuario as atendido_por,
-                CASE 
-                    WHEN p.tipo_pago = 2 THEN 'QR'
-                    WHEN p.tipo_pago = 1 THEN 'TARJETA'
-                    ELSE 'EFECTIVO'
-                END as tipo_pago,
+                (SELECT descripcion FROM diccionario_datos WHERE tabla='pagos' AND campo='tipo_pago' AND codigo=p.tipo_pago) as tipo_pago,
                 p.importe as importe,
-                p.importe_base as importe_neto,
-                (p.importe - p.importe_base) as ganancia
+                (SELECT descripcion FROM diccionario_datos WHERE tabla='pagos' AND campo='tipo_servicio' AND codigo=p.tipo_servicio) as tipo_servicio
             ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
             ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
             ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
@@ -43,7 +38,7 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', '=', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
-            ->where('vp.estado_venta', '=', 'P')
+            ->where('vp.estado_venta', '=', 0)
             ->orderByDesc('hora')
             ->paginate(10);
 
@@ -54,25 +49,28 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
-            ->where('vp.estado_venta', '=', 'P')
+            ->where('vp.estado_venta', '=', 0)
             ->selectRaw('
                 SUM(p.importe) as importe_total,
                 SUM(p.importe_base) as importe_neto_total,
                 (SUM(p.importe) - SUM(p.importe_base)) as ganancia_total,
                 (
-                    SELECT COUNT(*) FROM pagos 
-                    WHERE tipo_pago = 0 
-                    AND DATE(created_at) = ?
+                    SELECT COUNT(*) FROM pagos as p
+                    inner join venta_productos as vp on vp.id_venta_producto = p.id_venta_producto
+                    WHERE p.tipo_pago = 0 and vp.estado_venta = 0
+                    AND DATE(p.created_at) = ?
                 ) as total_efectivo,
                 (
-                    SELECT COUNT(*) FROM pagos 
-                    WHERE tipo_pago = 1 
-                    AND DATE(created_at) = ?
+                    SELECT COUNT(*) FROM pagos as p
+                    inner join venta_productos as vp on vp.id_venta_producto = p.id_venta_producto
+                    WHERE p.tipo_pago = 1 and vp.estado_venta = 0
+                    AND DATE(p.created_at) = ?
                 ) as total_tarjeta,
                 (
-                    SELECT COUNT(*) FROM pagos 
-                    WHERE tipo_pago = 2 
-                    AND DATE(created_at) = ?
+                    SELECT COUNT(*) FROM pagos as p
+                    inner join venta_productos as vp on vp.id_venta_producto = p.id_venta_producto
+                    WHERE p.tipo_pago = 2 and vp.estado_venta = 0
+                    AND DATE(p.created_at) = ?
                 ) as total_qr
             ', [$fecha, $fecha, $fecha])
             ->first();
@@ -92,14 +90,9 @@ class ReporteVentasPorDiaController extends ApiController
                 vp.nro_venta as nro_pedido,
                 c.nombre_completo as cliente,
                 c2.nombre_usuario as atendido_por,
-                CASE 
-                    WHEN p.tipo_pago = 2 THEN 'QR'
-                    WHEN p.tipo_pago = 1 THEN 'TARJETA'
-                    ELSE 'EFECTIVO'
-                END as tipo_pago,
+                (SELECT descripcion FROM diccionario_datos WHERE tabla='pagos' AND campo='tipo_pago' AND codigo=p.tipo_pago) as tipo_pago,
                 p.importe as importe,
-                p.importe_base as importe_neto,
-                (p.importe - p.importe_base) as ganancia
+                (SELECT descripcion FROM diccionario_datos WHERE tabla='pagos' AND campo='tipo_servicio' AND codigo=p.tipo_servicio) as tipo_servicio
             ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
             ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
             ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
@@ -108,7 +101,7 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', '=', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
-            ->where('vp.estado_venta', '=', 'P')
+            ->where('vp.estado_venta', '=', 0)
             ->orderByDesc('hora')
             ->get();
 
@@ -122,9 +115,8 @@ class ReporteVentasPorDiaController extends ApiController
                 'Cliente' => $row->cliente,
                 'Atendido Por' => $row->atendido_por,
                 'Tipo Pago' => $row->tipo_pago,
+                'Servicio' => $row->tipo_servicio,
                 'Importe' => $row->importe,
-                'Importe Neto' => $row->importe_neto,
-                'Ganancia' => $row->ganancia,
             ];
         }
 
@@ -134,7 +126,7 @@ class ReporteVentasPorDiaController extends ApiController
             public function __construct($data) { $this->data = $data; }
             public function collection() { return collect($this->data); }
             public function headings(): array {
-                return ['Hora', 'Nro. Pedido', 'Cliente', 'Atendido Por', 'Tipo Pago', 'Importe', 'Importe Neto', 'Ganancia'];
+                return ['Hora', 'Nro. Pedido', 'Cliente', 'Atendido Por', 'Tipo Pago', 'Servicio', 'Importe'];
             }
         };
 
@@ -166,14 +158,9 @@ class ReporteVentasPorDiaController extends ApiController
                 vp.nro_venta as nro_pedido,
                 c.nombre_completo as cliente,
                 c2.nombre_usuario as atendido_por,
-                CASE 
-                    WHEN p.tipo_pago = 2 THEN 'QR'
-                    WHEN p.tipo_pago = 1 THEN 'TARJETA'
-                    ELSE 'EFECTIVO'
-                END as tipo_pago,
+                (SELECT descripcion FROM diccionario_datos WHERE tabla='pagos' AND campo='tipo_pago' AND codigo=p.tipo_pago) as tipo_pago,
                 p.importe as importe,
-                p.importe_base as importe_neto,
-                (p.importe - p.importe_base) as ganancia
+                (SELECT descripcion FROM diccionario_datos WHERE tabla='pagos' AND campo='tipo_servicio' AND codigo=p.tipo_servicio) as tipo_servicio
             ")->leftJoin('clientes as c', 'c.id_cliente', '=', 'vp.id_cliente')
             ->leftJoin('cajeros as c2', 'c2.id_cajero', '=', 'vp.id_cajero')
             ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
@@ -182,7 +169,7 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', '=', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
-            ->where('vp.estado_venta', '=', 'P')
+            ->where('vp.estado_venta', '=', 0)
             ->orderByDesc('hora')
             ->get();
 
@@ -195,25 +182,28 @@ class ReporteVentasPorDiaController extends ApiController
             ->join('sucursals as s', 's.id_sucursal', '=', 'cj.id_sucursal')
             ->whereDate('vp.created_at', $fecha)
             ->where('s.id_restaurant', $idRestaurante)
-            ->where('vp.estado_venta', '=', 'P')
+            ->where('vp.estado_venta', '=', 0)
             ->selectRaw('
                 SUM(p.importe) as importe_total,
                 SUM(p.importe_base) as importe_neto_total,
                 (SUM(p.importe) - SUM(p.importe_base)) as ganancia_total,
                 (
-                    SELECT COUNT(*) FROM pagos 
-                    WHERE tipo_pago = 0 
-                    AND DATE(created_at) = ?
+                    SELECT COUNT(*) FROM pagos as p
+                    inner join venta_productos as vp on vp.id_venta_producto = p.id_venta_producto
+                    WHERE p.tipo_pago = 0 and vp.estado_venta = 0
+                    AND DATE(p.created_at) = ?
                 ) as total_efectivo,
                 (
-                    SELECT COUNT(*) FROM pagos 
-                    WHERE tipo_pago = 1 
-                    AND DATE(created_at) = ?
+                    SELECT COUNT(*) FROM pagos as p
+                    inner join venta_productos as vp on vp.id_venta_producto = p.id_venta_producto
+                    WHERE p.tipo_pago = 1 and vp.estado_venta = 0
+                    AND DATE(p.created_at) = ?
                 ) as total_tarjeta,
                 (
-                    SELECT COUNT(*) FROM pagos 
-                    WHERE tipo_pago = 2 
-                    AND DATE(created_at) = ?
+                    SELECT COUNT(*) FROM pagos as p
+                    inner join venta_productos as vp on vp.id_venta_producto = p.id_venta_producto
+                    WHERE p.tipo_pago = 2 and vp.estado_venta = 0
+                    AND DATE(p.created_at) = ?
                 ) as total_qr
             ', [$fecha, $fecha, $fecha])
             ->first();
@@ -231,7 +221,7 @@ class ReporteVentasPorDiaController extends ApiController
     }
 
     // Graficos
-    public function productoCantidad($idRestaurante, $idCategoria,$fechaIni, $fechaFin){
+    public function productoCantidad($idRestaurante, $idCategoria, $fechaIni, $fechaFin){
         if($fechaIni == 'null'){
             $response = Response::json(['error' => ['ini' => ['Fecha ini es requerido']]], 200);
             return $response;
@@ -377,9 +367,7 @@ class ReporteVentasPorDiaController extends ApiController
                 $exportData[] = [
                     'Producto' => $row->nom_producto,
                     'Categoria' => $row->nom_categoria,
-                    'Importe' => $row->importe,
-                    'Importe Neto' => $row->importe_base,
-                    'Ganancia' => $row->ganancia,
+                    'Importe' => $row->importe
                 ];
             }
 
@@ -389,7 +377,7 @@ class ReporteVentasPorDiaController extends ApiController
                 public function __construct($data) { $this->data = $data; }
                 public function collection() { return collect($this->data); }
                 public function headings(): array {
-                    return ['Producto', 'Categoria', 'Importe', 'Importe Neto', 'Ganancia'];
+                    return ['Producto', 'Categoria', 'Importe'];
                 }
             };
             return Excel::download($export, 'gananciaPorProducto_'.$fechaFin.'.xlsx');
@@ -429,9 +417,7 @@ class ReporteVentasPorDiaController extends ApiController
             $exportData[] = [
                 'Producto' => $row->nom_producto,
                 'Categoria' => $row->nom_categoria,
-                'Importe' => $row->importe,
-                'Importe Neto' => $row->importe_base,
-                'Ganancia' => $row->ganancia,
+                'Importe' => $row->importe
             ];
         }
 

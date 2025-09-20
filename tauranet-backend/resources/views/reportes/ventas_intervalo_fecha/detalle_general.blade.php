@@ -28,12 +28,11 @@
         <thead>
             <tr>
                 <th>Fecha</th>
-                <th>Cantidad</th>
+                <th>Pedidos</th>
                 <th>Total efectivo</th>
                 <th>Total tarjeta</th>
                 <th>Total QR</th>
                 <th>Total ventas</th>
-                <th>Total ganancias</th>
             </tr>
         </thead>
         <tbody>
@@ -45,7 +44,6 @@
                     <td>{{ number_format($venta->total_tarjeta, 2) }}</td>
                     <td>{{ number_format($venta->total_qr, 2) }}</td>
                     <td>{{ number_format($venta->total_ventas, 2) }}</td>
-                    <td>{{ number_format($venta->total_ganancias, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -66,11 +64,6 @@
             <tr style="background-color: #ffffff;">
                 <td><strong>Total ventas</strong></td>
                 <td>{{number_format($totalesRangoFecha->total_ventas, 2)}}</td>
-                <td></td>
-            </tr>
-            <tr style="background-color: #f9f9f9;">
-                <td><strong>Total ganancia</strong></td>
-                <td>{{number_format($totalesRangoFecha->total_ganancia, 2)}}</td>
                 <td></td>
             </tr>
             <tr style="background-color: #ffffff;">

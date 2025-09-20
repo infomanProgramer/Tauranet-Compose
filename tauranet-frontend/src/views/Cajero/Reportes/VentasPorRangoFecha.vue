@@ -32,8 +32,8 @@
                         </div>
                         <div class="col-md-6 d-flex justify-content-end align-items-end">
                             <button type="submit" class="btn btn-primary mr-2">Generar</button>
-                            <button class="btn btn-success mr-2" @click="exportarExcel">Excel</button>
-                            <button class="btn btn-danger" @click="exportarPDF">PDF</button>
+                            <button type="button" class="btn btn-success mr-2" @click="exportarExcel">Excel</button>
+                            <button type="button" class="btn btn-danger" @click="exportarPDF">PDF</button>
                         </div>
                 </div>
             </form>
@@ -49,12 +49,11 @@
                             :show-caption=false
                             >
                             <table-column show="fecha" label="Fecha"></table-column>
-                            <table-column show="cantidad" label="Cantidad"></table-column>
+                            <table-column show="cantidad" label="Pedidos"></table-column>
                             <table-column show="total_efectivo" label="Total efectivo"></table-column>
                             <table-column show="total_tarjeta" label="Total tarjeta"></table-column>
                             <table-column show="total_qr" label="Total QR" :sortable="false"></table-column> 
                             <table-column show="total_ventas" label="Total ventas" :sortable="false"></table-column>
-                            <table-column show="total_ganancias" label="Total ganancias" :sortable="false"></table-column>
                         </table-component>
                     </div>
                 </div>
@@ -83,13 +82,8 @@
                                     <td scope="col"></td>
                                 </tr>
                                 <tr>
-                                    <td scope="col" class="subtituloPedidos">Total ventas</td>
+                                    <td scope="col" class="subtituloPedidos">Total importe</td>
                                     <td scope="col">{{totalDia.total_ventas}}</td>
-                                    <td scope="col"></td>
-                                </tr>
-                                <tr>
-                                    <td scope="col" class="subtituloPedidos">Total ganancia</td>
-                                    <td scope="col">{{totalDia.total_ganancia}}</td>
                                     <td scope="col"></td>
                                 </tr>
                                 <tr>

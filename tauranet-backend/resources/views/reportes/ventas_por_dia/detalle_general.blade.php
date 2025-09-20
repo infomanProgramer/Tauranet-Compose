@@ -32,9 +32,8 @@
                 <th>Cliente</th>
                 <th>Atendido por</th>
                 <th>Tipo pago</th>
+                <th>Servicio</th>
                 <th>Importe</th>
-                <th>Importe Neto</th>
-                <th>Ganancia</th>
             </tr>
         </thead>
         <tbody>
@@ -45,9 +44,8 @@
                     <td>{{ $venta->cliente }}</td>
                     <td>{{ $venta->atendido_por }}</td>
                     <td>{{ $venta->tipo_pago }}</td>
+                    <td>{{ $venta->tipo_servicio }}</td>
                     <td>{{ number_format($venta->importe, 2) }}</td>
-                    <td>{{ number_format($venta->importe_neto, 2) }}</td>
-                    <td>{{ number_format($venta->ganancia, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -55,14 +53,11 @@
 
      <div class="totales">
         <p><strong>Total del dia:</strong></p>
-        <p>Importe total: Bs {{ number_format($totalDia->importe_total, 2) }}</p>
-        <p>Importe neto total: Bs {{ number_format($totalDia->importe_neto_total, 2) }}</p>
-        <p>Ganancia total: Bs {{ number_format($totalDia->ganancia_total, 2) }}</p>
-        <p>Tipo pago - Efectivo: Bs {{ $totalDia->total_efectivo }}</p>
-        <p>Tipo pago - Tarjeta: Bs {{ $totalDia->total_tarjeta }}</p>
-        <p>Tipo pago - QR: Bs {{ $totalDia->total_qr }}</p>
+        <p>Importe total: {{ number_format($totalDia->importe_total, 2) }}</p>
+        <p>Tipo pago - Efectivo: {{ $totalDia->total_efectivo }}</p>
+        <p>Tipo pago - Tarjeta: {{ $totalDia->total_tarjeta }}</p>
+        <p>Tipo pago - QR: {{ $totalDia->total_qr }}</p>
     </div>
-
     <!-- <div class="footer"> -->
         <!-- <p>Generado por: leslie</p> -->
     <!-- </div> -->

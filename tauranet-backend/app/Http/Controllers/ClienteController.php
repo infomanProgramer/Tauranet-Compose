@@ -36,7 +36,6 @@ class ClienteController extends ApiController
         $response = Response::json(['data' => $listaClientes], 200);
         return $response;
     }
-    
     public function getClientesByRestaurant($idRestaurant){
         $listaClientes = DB::table('clientes as cl')
             ->where('cl.id_restaurant', '=', $idRestaurant)
@@ -182,7 +181,7 @@ class ClienteController extends ApiController
                     'importe' => 'required',
                     'importe_base' => 'required',
                     'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
-                    'estado_venta' => 'required',
+                    'estado_venta' => 'required|numeric|between:0,2',
                     'listaProductos' => 'required'
                 ];
             } else {
@@ -197,7 +196,7 @@ class ClienteController extends ApiController
                     'importe_base' => 'required|numeric|between:0,9999999.99',
                     'tipo_servicio' => 'required|numeric|between:0,2',//0=mesa, 1=delivery, 2=take away
                     'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
-                    'estado_venta' => 'required',
+                    'estado_venta' => 'required|numeric|between:0,2',
                     'listaProductos' => 'required'
                 ];
             }

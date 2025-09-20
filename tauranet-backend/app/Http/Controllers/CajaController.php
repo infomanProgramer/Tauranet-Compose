@@ -42,16 +42,16 @@ class CajaController extends ApiController
         return $response;
     }
 
-    // public function sucursalPerRestaurant($idRestaurant){
-    //     $caja = DB::table('sucursals as s')
-    //         ->where('s.id_restaurant', '=', $idRestaurant)
-    //         ->orderBy('s.nombre', 'asc')
-    //         ->get();
-    //     $response = Response::json(['data' => $caja], 200);
-    //     return $response;
-    // }
+    public function sucursalPerRestaurant($idRestaurant){
+        $caja = DB::table('sucursals as s')
+            ->where('s.id_restaurant', '=', $idRestaurant)
+            ->orderBy('s.nombre', 'asc')
+            ->get();
+        $response = Response::json(['data' => $caja], 200);
+        return $response;
+    }
 
-    public function sucursalPerRestaurant(){
+    public function getAllSucursals(){
         $caja = DB::table('sucursals as s')
             ->orderBy('s.nombre', 'asc')
             ->get();

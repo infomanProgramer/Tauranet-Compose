@@ -7,6 +7,10 @@ use DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use PDF;
+
 
 class ReporteController extends ApiController
 {
@@ -26,216 +30,86 @@ class ReporteController extends ApiController
         $response = Response::json(['data' => $repHoy], 200);
         return $response;
     }
-    public function detalleVentas($idRestaurante, $fecha_ini, $fecha_fin, $idSucursal, $idPerfil){
+    public function queryDetalleVentas($idRestaurante, $fecha_ini, $fecha_fin){
+        $dventas = DB::table('venta_productos as v')
+            ->leftJoin('clientes as cl', 'cl.id_cliente', '=', 'v.id_cliente')
+            ->join('cajeros as c', 'c.id_cajero', '=', 'v.id_cajero')
+            ->join('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
+            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
+            ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
+            ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
+            ->where('s.id_restaurant', $idRestaurante)
+            ->where('v.estado_venta', '=', 0)
+            ->whereBetween(DB::raw('DATE(h.fecha)'), ["'". $fecha_ini ."'", "'". $fecha_fin ."'"])
+            ->orderByDesc('v.created_at')
+            ->select(
+                'h.fecha', 
+                's.nombre as nombreSucursal', 
+                'v.nro_venta', 
+                'cl.nombre_completo', //datos cliente
+                'c.nombre_usuario', //datos del usuario que lo atendio
+                DB::raw("(SELECT descripcion FROM diccionario_datos WHERE tabla='pagos' AND campo='tipo_pago' AND codigo=p.tipo_pago) as tipo_pago"), //tipo de pago
+                DB::raw("(SELECT descripcion FROM diccionario_datos WHERE tabla='pagos' AND campo='tipo_servicio' AND codigo=p.tipo_servicio) as tipo_servicio"), //tipo de servicio
+                'p.importe' //importe
+            );
+        return $dventas;
+    }
+    public function detalleVentas($idRestaurante, $fecha_ini, $fecha_fin, $tipoReporte){
         //Datos de todas las sucursales y roles
-        if($idSucursal == -1 && $idPerfil == -1){
-            \Log::info('Todas las sucursales y perfiles');
-            $dventas = DB::table('venta_productos as v')
-                ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                ->where('s.id_restaurant', '=', $idRestaurante)
-                ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                ->orderBy('v.created_at', 'desc')
-                ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
-                ->paginate(15);
-            //Totales
-            $totales = DB::table('venta_productos as v')
-                ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                ->where('s.id_restaurant', '=', $idRestaurante)
-                ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
-                ->get();
-            $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
+        \Log::info('Todas las sucursales y perfiles');
+        $dventas = $this->queryDetalleVentas($idRestaurante, $fecha_ini, $fecha_fin);
+        if($tipoReporte == 0){//json html
+            $dventas = $dventas->paginate(15);
+            $response = Response::json(['data' => $dventas], 200);
+            return $response;
+        }else if($tipoReporte == 2){//excel
+            $dventas = $dventas->get();
+            //Log::info('dventas: ', $dventas->toArray());
+
+            $exportData = [];
+            foreach ($dventas as $row) {
+                //Log::info('row: ', $row->toArray());
+                $exportData[] = [
+                    'Fecha' => $row->fecha,
+                    'Sucursal' => $row->nombreSucursal,
+                    'Nro. Pedido' => $row->nro_venta,
+                    'Cliente' => $row->nombre_completo,
+                    'Atendido Por' => $row->nombre_usuario,
+                    'Tipo Pago' => $row->tipo_pago,
+                    'Servicio' => $row->tipo_servicio,
+                    'Importe' => $row->importe
+                ];
+            }
+    
+            // Crear una clase exportadora anónima
+            $export = new class($exportData) implements FromCollection, WithHeadings {
+                private $data;
+                public function __construct($data) { $this->data = $data; }
+                public function collection() { return collect($this->data); }
+                public function headings(): array {
+                    return ['Fecha', 'Sucursal', 'Nro. Pedido', 'Cliente', 'Atendido Por', 'Tipo Pago', 'Servicio', 'Importe'];
+                }
+            };
+            return Excel::download($export, 'reporte_detalle_ventas_'.$fecha_ini.'_'.$fecha_fin.'.xlsx');
+        }else{//error
+            $response = Response::json(['error' => ['tipoReporte' => ['Tipo de reporte es requerido']]], 200);
             return $response;
         }
-        //Datos de cualquier sucursal y un rol especifico
-        if($idSucursal == -1 && $idPerfil != -1){
-            if($idPerfil == 0){//Mozo
-                $dventas = DB::table('venta_productos as v')
-                    ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                    ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                    ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                    ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                    ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                    ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                    ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                    ->where('s.id_restaurant', '=', $idRestaurante)
-                    ->whereNull('v.id_cajero')
-                    ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    ->orderBy('v.created_at', 'desc')
-                    //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
-                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
-                    ->paginate(15);
-                //Totales
-                $totales = DB::table('venta_productos as v')
-                    ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                    ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                    ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                    ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                    ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                    ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                    ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                    ->where('s.id_restaurant', '=', $idRestaurante)
-                    ->whereNull('v.id_cajero')
-                    ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
-                    ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
-                    ->get();
-                $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
-                return $response;
-            }else if($idPerfil == 1){//Cajero
-                $dventas = DB::table('venta_productos as v')
-                    ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                    ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                    ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                    ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                    ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                    ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                    ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                    ->where('s.id_restaurant', '=', $idRestaurante)
-                    ->whereNull('v.id_mozo')
-                    ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    ->orderBy('v.created_at', 'desc')
-                    //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
-                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
-                    ->paginate(15);
-                //Totales
-                $totales = DB::table('venta_productos as v')
-                    ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                    ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                    ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                    ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                    ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                    ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                    ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                    ->where('s.id_restaurant', '=', $idRestaurante)
-                    ->whereNull('v.id_mozo')
-                    ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
-                    ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
-                    ->get();
-                $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
-                return $response;
-            }
-        }
-        if($idSucursal != -1 && $idPerfil == -1){
-            $dventas = DB::table('venta_productos as v')
-                ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                ->where('s.id_restaurant', '=', $idRestaurante)
-                ->where('v.id_sucursal', '=', $idSucursal)
-                ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                ->orderBy('v.created_at', 'desc')
-                //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
-                ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
-                ->paginate(15);
-            //Totales
-             $totales = DB::table('venta_productos as v')
-                ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                ->where('s.id_restaurant', '=', $idRestaurante)
-                ->where('v.id_sucursal', '=', $idSucursal)
-                ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
-                ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
-                ->get();
-            $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
-            return $response;
-        }
-        if($idSucursal != -1 && $idPerfil != -1){
-             if($idPerfil == 0){//Mozo
-                 $dventas = DB::table('venta_productos as v')
-                    ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                    ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                    ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                    ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                    ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                    ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                    ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                    ->where('s.id_restaurant', '=', $idRestaurante)
-                    ->where('v.id_sucursal', '=', $idSucursal)
-                    ->whereNull('v.id_cajero')
-                    ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    ->orderBy('v.created_at', 'desc')
-                    //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
-                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
-                    ->paginate(15);
-                 //Totales
-                 $totales = DB::table('venta_productos as v')
-                    ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                    ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                    ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                    ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                    ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                    ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                    ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                    ->where('s.id_restaurant', '=', $idRestaurante)
-                    ->where('v.id_sucursal', '=', $idSucursal)
-                    ->whereNull('v.id_cajero')
-                    ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
-                    ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
-                    ->get();
-                    $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
-                    return $response;
-            }else if($idPerfil == 1){//Cajero
-                $dventas = DB::table('venta_productos as v')
-                    ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                    ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                    ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                    ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                    ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                    ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                    ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                    ->where('s.id_restaurant', '=', $idRestaurante)
-                    ->where('v.id_sucursal', '=', $idSucursal)
-                    ->whereNull('v.id_mozo')
-                    ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    ->orderBy('v.created_at', 'desc')
-                    //->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', 'v.estado_atendido')
-                    ->select('h.fecha', 's.nombre as nombreSucursal', 'v.nro_venta', DB::raw("case when c.nombre_completo isNull then 'GENERAL' else c.nombre_completo end as nombre_completo"), DB::raw("case when j.nombre_usuario isNull then m.nombre_usuario else j.nombre_usuario end"), DB::raw("case when j.nombre_usuario isNull then 'Mozo' else 'Cajero' end as perfil"), DB::raw("concat('00', v.id_venta_producto) as id_venta_producto"), 'p.importe', 'p.cambio', DB::raw("CASE WHEN p.tipo_pago = 0 THEN 'Efectivo' WHEN p.tipo_pago = 1 THEN 'Tarjeta' ELSE 'Pago QR' END AS tipo_pago"),'v.estado_atendido', 'p.efectivo')
-                    ->paginate(15);
-                //Totales
-                $totales = DB::table('venta_productos as v')
-                    ->leftJoin('clientes as c', 'c.id_cliente', '=', 'v.id_cliente')
-                    ->leftJoin('cajeros as j', 'j.id_cajero', '=', 'v.id_cajero')
-                    ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
-                    ->leftJoin('pagos as p', 'p.id_venta_producto', '=', 'v.id_venta_producto')
-                    ->join('historial_caja as h', 'h.id_historial_caja', '=', 'v.id_historial_caja')
-                    ->join('cajas as a', 'a.id_caja', '=', 'h.id_caja')
-                    ->join('sucursals as s', 's.id_sucursal', '=', 'a.id_sucursal')
-                    ->where('s.id_restaurant', '=', $idRestaurante)
-                    ->where('v.id_sucursal', '=', $idSucursal)
-                    ->whereNull('v.id_mozo')
-                    ->whereBetween('h.fecha', [$fecha_ini, $fecha_fin])
-                    //->select(DB::raw('sum(p.importe) as ImporteTotal'), DB::raw('sum(p.cambio) as Cambio'))
-                    ->select(DB::raw('sum(p.importe) as importe'), DB::raw('sum(p.cambio) as cambio'), DB::raw('sum(p.efectivo) as efectivo'))
-                    ->get();
-                $response = Response::json(['data' => $dventas, 'totales' => $totales], 200);
-                return $response;
-            }
-        }
+    }
+    public function detalleVentasPDF(Request $request){
+        Log::info('detalleVentasPDF - request:', $request->all());
+        $dventas = $this->queryDetalleVentas($request->idRestaurante, $request->fecha_inicio, $request->fecha_fin);
+        $dventas = $dventas->get();
+        $pdf = PDF::loadView('reportes.detalle_ventas.detalle_ventas', [
+            'nom_restaurante' => $request->nombre_restaurante,
+            'titulo_reporte' => 'DETALLE DE VENTAS',
+            'sucursal' => $request->sucursal,
+            'caja' => $request->caja,
+            'fecha_ini' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+            'listItem' => $dventas
+        ]);
+        return $pdf->download('reporte_detalle_ventas_'.$request->fecha_inicio.'_'.$request->fecha_fin.'.pdf');
     }
     public function empleadoPedido($idRestaurante, $fechaIni, $fechaFin){
         if($fechaIni == 'null'){

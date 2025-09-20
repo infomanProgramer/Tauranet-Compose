@@ -3,7 +3,7 @@
         <div class="encabezado">
             PEDIDO {{pedidoObj.nro_venta}}
         </div>
-        <div class="cuerpo-red" :class="{cuerpoGreen: pedidoObj.estado_venta == 'P'}">
+        <div class="cuerpo-red" :class="{cuerpoGreen: pedidoObj.estado_venta == 0}">
             <div class="form-check">
                 <label class="form-check-label" for="defaultCheck2">
                     <input class="form-check-input" type="checkbox" value="" id="defaultCheck2" disabled checked v-if="pedidoObj.estado_atendido">
@@ -12,9 +12,6 @@
                 </label>
             </div>
             <span>Fecha:</span> {{pedidoObj.created_at}}<br>
-            <!-- <span>Cod:</span> 00{{pedidoObj.id_venta_producto}}<br> -->
-            <!--<span>Cliente:</span> {{nombreClienteComputed}}<br> -->
-            <!--<span>{{getIdentificacion}}:</span> {{dniClienteComputed}}<br>  -->
             <span v-if="nombreClienteComputed">Cliente: {{nombreClienteComputed}}</span><br v-if="nombreClienteComputed">
             <span v-if="dniClienteComputed">{{getIdentificacion}}: {{dniClienteComputed}}</span><br v-if="dniClienteComputed">
             <span>{{rol}}:</span> {{nombre_empleado}}<br>

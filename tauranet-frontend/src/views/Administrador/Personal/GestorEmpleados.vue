@@ -406,7 +406,7 @@ export default{
         getAllSucursales(){
             this.$Progress.start()
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                axios.get(this.$store.state.url_root+`api/auth/sucursalcombo`)
+                axios.get(this.$store.state.url_root+`api/auth/getallsucursalcombo`)
             .then(response => {
                 this.listOfAllSucursals = response.data.data;
                 this.$Progress.finish()

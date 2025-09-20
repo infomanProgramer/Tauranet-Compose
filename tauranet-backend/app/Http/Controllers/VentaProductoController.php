@@ -24,7 +24,7 @@ class VentaProductoController extends ApiController
                         ->leftJoin('mozos as m', 'm.id_mozo', '=', 'v.id_mozo')
                         ->where('c.id_caja', '=', $idCaja)
                         ->where('h.estado', '=', true)
-                        ->where('v.estado_venta', '=', 'P')
+                        ->where('v.estado_venta', '=', 0)
                         ->select('v.*', 'i.nombre_completo', 'i.dni as dni_cliente', DB::raw("nullif(concat(j.primer_nombre,' ', j.segundo_nombre,' ',j.paterno,' ',j.materno), '   ') as nombre_cajero"), DB::raw("nullif(concat(m.primer_nombre,' ', m.segundo_nombre,' ',m.paterno,' ',m.materno), '   ') as nombre_mozo"))
                         ->orderBy('v.id_venta_producto', 'desc')
                         ->get();

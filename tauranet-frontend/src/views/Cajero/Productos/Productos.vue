@@ -112,7 +112,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="" class="label-style">* Precio base({{tipoMoneda}})</label>
@@ -120,7 +120,7 @@
                                         <ListErrors :errores="errores.precio_base"></ListErrors>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -192,7 +192,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="" class="label-style">* Precio base ({{tipoMoneda}})</label>
@@ -200,7 +200,7 @@
                                         <ListErrors :errores="errores.precio_base"></ListErrors>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">

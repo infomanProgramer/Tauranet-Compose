@@ -3,59 +3,28 @@
         <div class="container-fluid">
             <form @submit.prevent="getDetalleVentas()">
                 <div class="row">
-                    <div class="col-md-5">
-                        <div class="form-group">
-                            <flat-pickr
-                                    v-model="fecha_ini"                                                       
-                                    class="form-control input-style"
-                                    :config="config"
-                                    placeholder="Fecha Inicial"
-                                    >
-                            </flat-pickr>
-                            <!-- <ListErrors :errores="fecha"></ListErrors> -->
-                        </div>
+                    <div class="col-md-3 d-flex justify-content-start align-items-end">
+                        <flat-pickr
+                            v-model="fecha_ini"                                                       
+                            class="form-control input-style"
+                            :config="config"
+                            placeholder="Fecha Desde"
+                        />
+                        <!-- <ListErrors :errores="fecha"></ListErrors> -->
                     </div>
-                    <div class="col-md-5">
-                        <div class="form-group">
-                            <flat-pickr
-                                    v-model="fecha_fin"                                                       
-                                    class="form-control input-style"
-                                    :config="config"
-                                    placeholder="Fecha Fin"
-                                    >
-                            </flat-pickr>
-                            <!-- <ListErrors :errores="fecha"></ListErrors> -->
-                        </div>
+                    <div class="col-md-3 d-flex justify-content-start align-items-end">
+                        <flat-pickr
+                            v-model="fecha_fin"                                                       
+                            class="form-control input-style"
+                            :config="config"
+                            placeholder="Fecha Hasta"
+                        />
+                        <!-- <ListErrors :errores="fecha"></ListErrors> -->
                     </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary">Buscar</button>
-                    </div>
-                </div>
-                <!-- Filtros de busqueda -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                        <label for="">
-                            Sucursal
-                            <select class="form-control" v-model="sucursalFiltro">
-                                <option value="-1" selected>Seleccionar...</option>
-                                <option v-for="s in listaSucursales" v-bind:key="s.id_sucursal" :value="s.id_sucursal">{{s.nombre}}</option>
-                            </select>
-                        </label>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                        <label for="">
-                            Perfil
-                            <select class="form-control" v-model="perfilFiltro">
-                                <option value="-1" selected>Seleccionar...</option>
-                                <option value="1">Cajero</option>
-                                <option value="0">Mozo</option>
-                                <!-- <option value="4">Cocinero</option> -->
-                            </select>
-                        </label>
-                        </div>
+                    <div class="col-md-6 d-flex justify-content-end align-items-end">
+                        <button type="submit" class="btn btn-primary mr-2">Generar</button>
+                        <button type="button" class="btn btn-success mr-2" @click="getDetalleVentasExcel()">Excel</button>
+                        <button type="button" class="btn btn-danger" @click="getDetalleVentasPDF()">PDF</button>
                     </div>
                 </div>
             </form>
@@ -75,44 +44,15 @@
                             <table-column show="nro_venta" data-type="numeric" label="Nro"></table-column>
                             <table-column show="nombre_completo" label="Cliente"></table-column>
                             <table-column show="nombre_usuario" label="Atendido por:"></table-column>
-                            <!-- <table-column show="perfil" label="Perfil"></table-column> -->
-                            <table-column show="id_venta_producto" label="Código" :sortable="false"></table-column> 
                             <table-column show="tipo_pago" label="Tipo Pago" :sortable="false"></table-column>
-                            <table-column show="efectivo" label="Efectivo" :sortable="false"></table-column>
+                            <table-column show="tipo_servicio" label="Tipo Servicio" :sortable="false"></table-column>
                             <table-column show="importe" label="Importe Total" :sortable="false"></table-column>
-                            <table-column show="cambio" label="Cambio" :sortable="false"></table-column>
-                            <table-column label="Cocina" :sortable="false" :filterable="false" cell-class="col-center">
-                                <template slot-scope="row">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" v-if="row.estado_atendido" checked disabled>
-                                        <input type="checkbox" class="form-check-input" v-else disabled>
-                                    </div>
-                                </template>
-                            </table-column>
                             <table-column label="Ver" :sortable="false" :filterable="false" cell-class="col-center">
                                 <template slot-scope="row">
                                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modalDetallePedido" @click="showDatosPedido(row)"><i class="fas fa-eye"></i></button>
                                 </template>
                             </table-column>
                         </table-component>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped table-condensed">
-                            <tbody>
-                                <tr>
-                                    <td scope="col" class="subtituloPedidos">Efectivo Total</td>
-                                    <td scope="col">{{totales.efectivo}}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="col" class="subtituloPedidos">Importe Total</td>
-                                    <td scope="col">{{totales.importe}}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="col" class="subtituloPedidos">Cambio Total</td>
-                                    <td scope="col">{{totales.cambio}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -267,6 +207,8 @@ export default{
                 sub_total: 0,
                 cambio: 0,
             },
+
+            tipo_reporte: 0,
         }
     },
     mixins: [misMixins],
@@ -308,12 +250,12 @@ export default{
             });
         },
         getDetalleVentas(url){
-            url = url || this.$store.state.url_root+`api/auth/detalleventas/${this.$store.state.id_restaurant}/fechaini/${this.fecha_ini}/fechafin/${this.fecha_fin}/sucursal/${this.sucursalFiltro}/perfil/${this.perfilFiltro}`
+            this.tipo_reporte = 0; //json html
+            url = url || this.$store.state.url_root+`api/auth/detalleventas/${this.$store.state.id_restaurant}/fechaini/${this.fecha_ini}/fechafin/${this.fecha_fin}/tiporeporte/${this.tipo_reporte}`
             this.$Progress.start()
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.get(url)
             .then(response => {
-                this.totales = response.data.totales[0]
                 this.detalleVentasArray = response.data.data.data;
                 this.pagination = response.data.data
                 this.$Progress.finish()
@@ -321,6 +263,57 @@ export default{
             .catch (error => {
                 this.$toasted.show("DetalleVentas.vue: "+error, {type: 'error'})
                 this.$Progress.fail()
+            });
+        },
+        getDetalleVentasExcel(){
+            this.tipo_reporte = 2; //excel
+            let url = this.$store.state.url_root+`api/auth/detalleventasexcel/${this.$store.state.id_restaurant}/fechaini/${this.fecha_ini}/fechafin/${this.fecha_fin}/tiporeporte/${this.tipo_reporte}`
+            this.$Progress.start()
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.get(url, { responseType: 'blob' })
+            .then(response => {
+                console.log(response.data);
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `reporte_detalle_ventas_${this.fecha_ini}_${this.fecha_fin}.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.$Progress.finish();
+            })
+            .catch (error => {
+                this.$toasted.show("DetalleVentas.vue: "+error, {type: 'error'})
+                this.$Progress.fail()
+            });
+        },
+        getDetalleVentasPDF() {
+            this.tipo_reporte = 1; //pdf
+            this.$Progress.start();
+            let url = this.$store.state.url_root+`api/auth/detalleventaspdf`
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            let datosPdf = {
+                idRestaurante: this.$store.state.id_restaurant,
+                nombre_restaurante: this.$store.state.restauranteData.restaurant,
+                fecha_inicio: this.fecha_ini,
+                fecha_fin: this.fecha_fin,
+                sucursal: this.$store.state.restauranteData.sucursal,
+                caja: this.$store.state.restauranteData.caja
+            };
+            axios.post(url, datosPdf, { responseType: 'blob' })
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `reporte_detalle_ventas_${this.fecha_ini}_${this.fecha_fin}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.$Progress.finish();
+            })
+            .catch(error => {
+                this.$toasted.show("Error al exportar a PDF: " + error, { type: 'error' });
+                this.$Progress.fail();
             });
         },
         showDatosPedido(obj){

@@ -42,10 +42,9 @@
                             <table-column show="nro_pedido" label="Nro. Pedido"></table-column>
                             <table-column show="cliente" label="Cliente"></table-column>
                             <table-column show="atendido_por" label="Atendido Por:"></table-column>
-                            <table-column show="tipo_pago" label="Tipo Pago" :sortable="false"></table-column> 
+                            <table-column show="tipo_pago" label="Tipo Pago" :sortable="false"></table-column>
+                            <table-column show="tipo_servicio" label="Servicio" :sortable="false"></table-column> 
                             <table-column show="importe" label="Importe" :sortable="false"></table-column>
-                            <table-column show="importe_neto" label="Importe Neto" :sortable="false"></table-column>
-                            <table-column show="ganancia" label="Ganancia" :sortable="false"></table-column>
                         </table-component>
                     </div>
                 </div>
@@ -66,14 +65,6 @@
                                 <tr>
                                     <td scope="col" class="subtituloPedidos">Importe total</td>
                                     <td scope="col">{{totalDia.importe_total}}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="col" class="subtituloPedidos">Importe neto total</td>
-                                    <td scope="col">{{totalDia.importe_neto_total}}</td>
-                                </tr>
-                                <tr>
-                                    <td scope="col" class="subtituloPedidos">Ganancia total</td>
-                                    <td scope="col">{{totalDia.ganancia_total}}</td>
                                 </tr>
                                 <tr>
                                     <td scope="col" class="subtituloPedidos">Tipo pago - Efectivo</td>

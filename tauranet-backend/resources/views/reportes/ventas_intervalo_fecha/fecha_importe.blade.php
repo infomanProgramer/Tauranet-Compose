@@ -39,7 +39,6 @@
             <tr>
                 <th>Fecha</th>
                 <th>Importe</th>
-                <th>Ganancia</th>
             </tr>
         </thead>
         <tbody>
@@ -47,7 +46,6 @@
                 <tr>
                     <td>{{ $item->fecha }}</td>
                     <td>{{ number_format($item->importe, 2) }}</td>
-                    <td>{{ number_format($item->ganancia, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>

@@ -27,3 +27,32 @@ ON diccionario_datos (tabla, campo, codigo);
     ('venta_productos', 'estado_venta', 'P', 'Pagado', 'verde', 1),
     ('venta_productos', 'estado_venta', 'C', 'Cancelado', 'rojo', 2),
     ('venta_productos', 'estado_venta', 'E', 'Pendiente', 'amarillo', 3);
+
+---- Estados de tipo servicio
+    INSERT INTO diccionario_datos (tabla, campo, codigo, descripcion, valor_extra, orden)
+    VALUES
+    ('pagos', 'tipo_servicio', '0', 'mesa', 'verde', 1),
+    ('pagos', 'tipo_servicio', '1', 'delivery', 'rojo', 2),
+    ('pagos', 'tipo_servicio', '2', 'take_away', 'amarillo', 3);
+
+---- Estados de tipo pago
+    INSERT INTO diccionario_datos (tabla, campo, codigo, descripcion, valor_extra, orden)
+    VALUES
+    ('pagos', 'tipo_pago', '0', 'efectivo', 'verde', 1),
+    ('pagos', 'tipo_pago', '1', 'tarjeta', 'rojo', 2),
+    ('pagos', 'tipo_pago', '2', 'pago_qr', 'amarillo', 3);
+
+
+
+
+
+
+
+ALTER TABLE diccionario_datos
+ALTER COLUMN codigo TYPE integer
+USING codigo::integer;
+
+
+ALTER TABLE venta_productos 
+ALTER COLUMN estado_venta TYPE integer
+USING estado_venta::integer;

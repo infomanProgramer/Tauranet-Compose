@@ -119,8 +119,7 @@ Route::group([
 
     //Rutas Administrador, SuperAdministrador, Mozo, Cajero
     Route::group(['middleware' => 'auth:mozo,admin,cajero,sadmin'], function () {
-        //Route::get('sucursalcombo/{idRestaurant}', 'CajaController@sucursalPerRestaurant');
-        Route::get('sucursalcombo', 'CajaController@sucursalPerRestaurant');
+        Route::get('getallsucursalcombo', 'CajaController@getAllSucursals');
         Route::get('personal/{idRestaurant}/page/{pag}/sucursal/{idSucursal}', 'PersonalController@filtra_personal');
         Route::get('allcajas/{idSucursal}', 'CajaController@allcajas');
         Route::get('allcajas', 'CajaController@allallcajas');
@@ -165,12 +164,15 @@ Route::group([
         //Ex rutas de Administrador (Reportes)
         Route::get('aperturacajas/{idRestaurante}/sucursal/{idSucursal}', 'ReporteController@aperturaCajas');
         Route::get('cliente/restaurant/{idRestaurant}', 'ClienteController@getClientesByRestaurant');
-        Route::get('detalleventas/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/sucursal/{idSucursal}/perfil/{idPerfil}', 'ReporteController@detalleVentas');
+        Route::get('detalleventas/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/tiporeporte/{tipoReporte}', 'ReporteController@detalleVentas');
+        Route::get('detalleventasexcel/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/tiporeporte/{tipoReporte}', 'ReporteController@detalleVentas');
+        Route::post('detalleventaspdf', 'ReporteController@detalleVentasPDF');
         Route::get('empleadopedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@empleadoPedido');
         //Route::get('fechaimporte/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaImporte');
         Route::get('fechapedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaPedidos');
         Route::get('reportehoy/{idRestaurante}', 'ReporteController@getReportesHoy');
         Route::get('getgestionespagos', 'CajeroController@getGestionesPagos');
+        Route::get('sucursalcombo/{idRestaurant}', 'CajaController@sucursalPerRestaurant');
 
         //REPORTES DE VENTAS POR DIA
         // Tabla detalle general

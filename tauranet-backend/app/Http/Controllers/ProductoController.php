@@ -71,29 +71,13 @@ class ProductoController extends ApiController
         return $response;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         \Log::info($request);
         $dataValidation = [
             'nombre' => 'required|min:4|max:50',
             'precio' => 'required|numeric|between:0,9999999.99',
-            'precio_base' => 'required|numeric|between:0,9999999.99',
+            //'precio_base' => 'required|numeric|between:0,9999999.99',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
         ];
         if ($request->get("id_administrador") !== null) {
@@ -113,9 +97,6 @@ class ProductoController extends ApiController
             'precio.required' => 'El precio es requerido',
             'precio.numeric' => 'El precio tiene que ser de tipo numérico',
             'precio.between' => 'El precio tiene ser un número positivo',
-            'precio_base.required' => 'El precio base es requerido',
-            'precio_base.numeric' => 'El precio base tiene que ser de tipo numérico',
-            'precio_base.between' => 'El precio base tiene ser un número positivo',
             'id_administrador.required' => 'El Administrador es requerido',
             'id_administrador.exists' => 'El Administrador no existe',
             'id_categoria_producto.required' => 'La Categoria es requerida',
@@ -129,7 +110,7 @@ class ProductoController extends ApiController
         $producto->nombre = $request->get("nombre");
         $producto->descripcion = $request->get("descripcion");
         $producto->precio = $request->get("precio");
-        $producto->precio_base = $request->get("precio_base");
+        //$producto->precio_base = $request->get("precio_base");
         $producto->id_administrador = $request->get("id_administrador");
         if ($request->get("id_administrador") !== null) {
             $producto->id_administrador = $request->get("id_administrador");
@@ -143,37 +124,11 @@ class ProductoController extends ApiController
         $producto->save();
         return response()->json(['data' => $producto], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $producto = Producto::find($id);
         return response()->json(['data' => $producto], 201);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         \Log::info($request);
@@ -181,7 +136,7 @@ class ProductoController extends ApiController
         $dataValidation = [
             'nombre' => 'required|min:4|max:50',
             'precio' => 'required|numeric|between:0,9999999.99',
-            'precio_base' => 'required|numeric|between:0,9999999.99',
+            //'precio_base' => 'required|numeric|between:0,9999999.99',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
         ];
         if ($request->get("id_administrador") !== null && $request->get("id_administrador") !== 'null') {
@@ -201,9 +156,6 @@ class ProductoController extends ApiController
             'precio.required' => 'El precio es requerido',
             'precio.numeric' => 'El precio tiene que ser de tipo numérico',
             'precio.between' => 'El precio tiene que estar entre 0 y 99999999.99',
-            'precio_base.required' => 'El precio base es requerido',
-            'precio_base.numeric' => 'El precio base tiene que ser de tipo númerico',
-            'precio_base.between' => 'El precio base tiene un número positivo',
             'id_administrador.required' => 'El Administrador es requerido',
             'id_administrador.exists' => 'El Administrador no existe',
             'id_categoria_producto.required' => 'La Categoria es requerida',
@@ -222,9 +174,6 @@ class ProductoController extends ApiController
         if($request->has('precio')) {
             $producto->precio = $request->get("precio");
         }
-        if($request->has('precio_base')) {
-            $producto->precio_base = $request->get("precio_base");
-        }
         if ($request->get("id_administrador") !== null && $request->get("id_administrador") !== 'null') {
             $producto->id_administrador = $request->get("id_administrador");
         } elseif ($request->get("id_cajero") !== null) {
@@ -242,13 +191,6 @@ class ProductoController extends ApiController
         $producto->save();
         return response()->json(['data' => $producto], 201);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $producto = Producto::find($id)->delete();

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Ventas</title>
+    <title>Detalle Ventas</title>
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
         .header, .footer { text-align: center; margin-bottom: 20px; }
@@ -21,35 +21,36 @@
         <h2 style="margin-bottom: 5px; color: #2c3e50; letter-spacing: 1px;">{{ $titulo_reporte }}</h2>
         <h3 style="margin: 0; color: #34495e;">{{ $nom_restaurante }}</h3>
         <h4 style="margin: 0 0 10px 0; color: #7f8c8d;">{{ $sucursal }} - {{ $caja }}</h4>
-        <p style="font-size: 13px; color: #555;">Año: <strong>{{ $year }}</strong></p>
+        <p style="font-size: 13px; color: #555;">Desde: <strong>{{ $fecha_ini }}</strong> Hasta: <strong>{{ $fecha_fin }}</strong></p>
     </div>
-
-    @if(!empty($chartBase64))
-        <div style="text-align:center; margin-bottom: 20px;">
-            <img src="{{ $chartBase64 }}" alt="Gráfico" style="max-width: 600px; width: 100%; height: auto; border: 1px solid #ccc;" />
-        </div>
-    @endif
 
     <table>
         <thead>
             <tr>
-                <th>Mes</th>
-                <th>Total Pedidos</th>
-                <th>Total Ventas</th>
+                <th>Fecha</th>
+                <th>Sucursal</th>
+                <th>Nro. Pedido</th>
+                <th>Cliente</th>
+                <th>Atendido Por</th>
+                <th>Tipo Pago</th>
+                <th>Servicio</th>
+                <th>Importe</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($listItem as $item)
+            @foreach($listItem as $detalle)
                 <tr>
-                    <td>{{ $item['mes'] }}</td>
-                    <td>{{ $item['total_pedidos'] }}</td>
-                    <td>{{ number_format($item['total_ventas'], 2) }}</td>
+                    <td>{{ $detalle->fecha }}</td>
+                    <td>{{ $detalle->nombreSucursal }}</td>
+                    <td>{{ $detalle->nro_venta }}</td>
+                    <td>{{ $detalle->nombre_completo }}</td>
+                    <td>{{ $detalle->nombre_usuario }}</td>
+                    <td>{{ $detalle->tipo_pago }}</td>
+                    <td>{{ $detalle->tipo_servicio }}</td>
+                    <td>{{ number_format($detalle->importe, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-    <!-- <div class="footer"> -->
-        <!-- <p>Generado por: leslie</p> -->
-    <!-- </div> -->
 </body>
 </html>

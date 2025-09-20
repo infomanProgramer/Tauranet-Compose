@@ -15,32 +15,70 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class ReporteVentasPorRangoFechaController extends ApiController
 {
-     /**
-     * Calcula los totales por rango de fecha
-     *
-     * @param int $idRestaurante
-     * @param string $fechaInicio
-     * @param string $fechaFin
-     * @return object
-     */
-    private function calculoTotales($idRestaurante, $fechaInicio, $fechaFin)
-    {
+    private function calculoTotales($idRestaurante, $fechaInicio, $fechaFin){
         return DB::table('venta_productos as vp')
         ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
         ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
         ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
         ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
         ->where('s.id_restaurant', $idRestaurante)
+        ->where('vp.estado_venta', '=', 0)
         ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
         ->selectRaw('
             COALESCE(COUNT(*), 0) as total_pedidos,
-            COALESCE(SUM(p.importe), 0) as total_ventas,
-            COALESCE((SUM(p.importe) - SUM(p.importe_base)), 0) as total_ganancia
+            COALESCE(SUM(p.importe), 0) as total_ventas
         ')
         ->first();
     }
-    public function getReportByInterval(Request $request)
-    {
+    private function calculoTotalesPorTipoPagoEfectivo($idRestaurante, $fechaInicio, $fechaFin){
+        $totalEfectivo = DB::table('venta_productos as vp')
+            ->join('pagos as p', function ($join) {
+                $join->on('p.id_venta_producto', '=', 'vp.id_venta_producto')
+                    ->where('p.tipo_pago', '=', 0);
+            })
+            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
+            ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
+            ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
+            ->where('s.id_restaurant', $idRestaurante)
+            ->where('vp.estado_venta', '=', 0)
+            ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
+            ->selectRaw('SUM(p.importe) as total_efectivo')
+            ->first();
+        return $totalEfectivo;
+    }
+    private function calculoTotalesPorTipoPagoTarjeta($idRestaurante, $fechaInicio, $fechaFin){
+        $totalTarjeta = DB::table('venta_productos as vp')
+            ->join('pagos as p', function ($join) {
+                $join->on('p.id_venta_producto', '=', 'vp.id_venta_producto')
+                    ->where('p.tipo_pago', '=', 1);
+            })
+            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
+            ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
+            ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
+            ->where('s.id_restaurant', $idRestaurante)
+            ->where('vp.estado_venta', '=', 0)
+            ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
+            ->selectRaw('SUM(p.importe) as total_tarjeta')
+            ->first();
+        return $totalTarjeta;
+    }
+    private function calculoTotalesPorTipoPagoQR($idRestaurante, $fechaInicio, $fechaFin){
+        $totalQR = DB::table('venta_productos as vp')
+            ->join('pagos as p', function ($join) {
+                $join->on('p.id_venta_producto', '=', 'vp.id_venta_producto')
+                    ->where('p.tipo_pago', '=', 2);
+            })
+            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
+            ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
+            ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
+            ->where('s.id_restaurant', $idRestaurante)
+            ->where('vp.estado_venta', '=', 0)
+            ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
+            ->selectRaw('SUM(p.importe) as total_qr')
+            ->first();
+        return $totalQR;
+    }    
+    public function getReportByInterval(Request $request){
         Log::info('Request recibido en getReporteByInterval', ['request' => $request->all()]);
         $idRestaurante = $request->input('idRestaurante');
         $fechaInicio = $request->input('fecha_inicio');
@@ -67,45 +105,12 @@ class ReporteVentasPorRangoFechaController extends ApiController
 
         //Obtenemos totales por rango de fecha
         $totalesRangoFecha = $this->calculoTotales($idRestaurante, $fechaInicio, $fechaFin);
-
-        $totalEfectivo = DB::table('venta_productos as vp')
-            ->join('pagos as p', function ($join) {
-                $join->on('p.id_venta_producto', '=', 'vp.id_venta_producto')
-                    ->where('p.tipo_pago', '=', 0);
-            })
-            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
-            ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
-            ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
-            ->where('s.id_restaurant', $idRestaurante)
-            ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
-            ->selectRaw('SUM(p.importe) as total_efectivo')
-            ->first();
-        
-         $totalTarjeta = DB::table('venta_productos as vp')
-            ->join('pagos as p', function ($join) {
-                $join->on('p.id_venta_producto', '=', 'vp.id_venta_producto')
-                    ->where('p.tipo_pago', '=', 1);
-            })
-            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
-            ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
-            ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
-            ->where('s.id_restaurant', $idRestaurante)
-            ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
-            ->selectRaw('SUM(p.importe) as total_tarjeta')
-            ->first();
-
-        $totalQR = DB::table('venta_productos as vp')
-            ->join('pagos as p', function ($join) {
-                $join->on('p.id_venta_producto', '=', 'vp.id_venta_producto')
-                    ->where('p.tipo_pago', '=', 2);
-            })
-            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
-            ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
-            ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
-            ->where('s.id_restaurant', $idRestaurante)
-            ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
-            ->selectRaw('SUM(p.importe) as total_qr')
-            ->first();
+        //Obtiene total para efectivo
+        $totalEfectivo = $this->calculoTotalesPorTipoPagoEfectivo($idRestaurante, $fechaInicio, $fechaFin);
+        //Obtiene total para tarjeta
+        $totalTarjeta = $this->calculoTotalesPorTipoPagoTarjeta($idRestaurante, $fechaInicio, $fechaFin);
+        //Obtiene total para QR
+        $totalQR = $this->calculoTotalesPorTipoPagoQR($idRestaurante, $fechaInicio, $fechaFin);
 
         $response = Response::json([
             'ventasPorRangoFecha' => $ventasPorRangoFecha, 
@@ -117,9 +122,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
         return $response;
     }
     
-    public function getReportByIntervalExcel(Request $request)
-    {
-        Log::info('Request recibido en getReporteByIntervalExcel', ['request' => $request->all()]);
+    public function getReportByIntervalExcel(Request $request){
         $idRestaurante = $request->input('idRestaurante');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
@@ -153,8 +156,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
                 'Total efectivo' => $row->total_efectivo,
                 'Total tarjeta' => $row->total_tarjeta,
                 'Total qr' => $row->total_qr,
-                'Total ventas' => $row->total_ventas,
-                'Total ganancias' => $row->total_ganancias
+                'Total ventas' => $row->total_ventas
             ];
         }
         // Crear una clase exportadora anónima
@@ -169,8 +171,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
                     'Total efectivo',
                     'Total tarjeta',
                     'Total qr',
-                    'Total ventas',
-                    'Total ganancias'
+                    'Total ventas'
                 ];
             }
         };
@@ -178,8 +179,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
         return Excel::download($export, 'reporte_ventas_intervalo_fechas_'.$fechaInicio.'-'.$fechaFin.'.xlsx');
     }
 
-    public function getReportByIntervalPDF(Request $request)
-    {
+    public function getReportByIntervalPDF(Request $request){
         $validated = $request->validate([
             'idRestaurante' => 'required|integer|exists:restaurants,id_restaurant',
             'nombre_restaurante' => 'required|string',
@@ -209,70 +209,17 @@ class ReporteVentasPorRangoFechaController extends ApiController
                 'Total efectivo' => $row->total_efectivo,
                 'Total tarjeta' => $row->total_tarjeta,
                 'Total QR' => $row->total_qr,
-                'Total ventas' => $row->total_ventas,
-                'Total ganancias' => $row->total_ganancias,
+                'Total ventas' => $row->total_ventas
             ];
         }
-        // Log::info('Tipo de $listItem:', ['type' => gettype($listItem), 'class' => is_object($listItem) ? get_class($listItem) : null]);
-        // Log::info('Tipo de $exportData:', ['type' => gettype($exportData), 'class' => is_object($exportData) ? get_class($exportData) : null]);
         //Obtenemos totales por rango de fecha
-        $totalesRangoFecha = DB::table('venta_productos as vp')
-        ->join('pagos as p', 'p.id_venta_producto', '=', 'vp.id_venta_producto')
-        ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
-        ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
-        ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
-        ->where('s.id_restaurant', $idRestaurante)
-        ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
-        ->selectRaw('
-            COUNT(*) as total_pedidos,
-            SUM(p.importe) as total_ventas,
-            (SUM(p.importe) - SUM(p.importe_base)) as total_ganancia
-        ')
-        ->first();
-
-        $totalEfectivo = DB::table('venta_productos as vp')
-            ->join('pagos as p', function ($join) {
-                $join->on('p.id_venta_producto', '=', 'vp.id_venta_producto')
-                    ->where('p.tipo_pago', '=', 0);
-            })
-            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
-            ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
-            ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
-            ->where('s.id_restaurant', $idRestaurante)
-            ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
-            ->selectRaw('SUM(p.importe) as total_efectivo')
-            ->first();
-        
-         $totalTarjeta = DB::table('venta_productos as vp')
-            ->join('pagos as p', function ($join) {
-                $join->on('p.id_venta_producto', '=', 'vp.id_venta_producto')
-                    ->where('p.tipo_pago', '=', 1);
-            })
-            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
-            ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
-            ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
-            ->where('s.id_restaurant', $idRestaurante)
-            ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
-            ->selectRaw('SUM(p.importe) as total_tarjeta')
-            ->first();
-
-        $totalQR = DB::table('venta_productos as vp')
-            ->join('pagos as p', function ($join) {
-                $join->on('p.id_venta_producto', '=', 'vp.id_venta_producto')
-                    ->where('p.tipo_pago', '=', 2);
-            })
-            ->join('historial_caja as h', 'h.id_historial_caja', '=', 'vp.id_historial_caja')
-            ->join('cajas as c', 'c.id_caja', '=', 'h.id_caja')
-            ->join('sucursals as s', 's.id_sucursal', '=', 'c.id_sucursal')
-            ->where('s.id_restaurant', $idRestaurante)
-            ->whereBetween(DB::raw('DATE(vp.created_at)'), ["'". $fechaInicio ."'", "'". $fechaFin ."'"])
-            ->selectRaw('SUM(p.importe) as total_qr')
-            ->first();
-
-        // Log::info('Tipo de $totalesRangoFecha:', ['type' => gettype($totalesRangoFecha), 'class' => is_object($totalesRangoFecha) ? get_class($totalesRangoFecha) : null]);
-        // Log::info('Tipo de $totalEfectivo:', ['type' => gettype($totalEfectivo), 'class' => is_object($totalEfectivo) ? get_class($totalEfectivo) : null]);
-        // Log::info('Tipo de $totalTarjeta:', ['type' => gettype($totalTarjeta), 'class' => is_object($totalTarjeta) ? get_class($totalTarjeta) : null]);
-        // Log::info('Tipo de $totalQR:', ['type' => gettype($totalQR), 'class' => is_object($totalQR) ? get_class($totalQR) : null]);
+        $totalesRangoFecha = $this->calculoTotales($idRestaurante, $fechaInicio, $fechaFin);
+        //Obtiene total para efectivo
+        $totalEfectivo = $this->calculoTotalesPorTipoPagoEfectivo($idRestaurante, $fechaInicio, $fechaFin);
+        //Obtiene total para tarjeta
+        $totalTarjeta = $this->calculoTotalesPorTipoPagoTarjeta($idRestaurante, $fechaInicio, $fechaFin);
+        //Obtiene total para QR
+        $totalQR = $this->calculoTotalesPorTipoPagoQR($idRestaurante, $fechaInicio, $fechaFin);
 
         $pdf = PDF::loadView('reportes.ventas_intervalo_fecha.detalle_general', [
             'titulo_reporte' => 'REPORTE DE VENTAS POR RANGO DE FECHA',
@@ -353,8 +300,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
         foreach ($fechaImporte as $row) {
             $exportData[] = [
                 'Fecha' => $row->fecha,
-                'Importe' => $row->importe,
-                'Ganancia' => $row->ganancia,
+                'Importe' => $row->importe
             ];
         }
 
@@ -364,7 +310,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
             public function __construct($data) { $this->data = $data; }
             public function collection() { return collect($this->data); }
             public function headings(): array {
-                return ['Fecha', 'Importe', 'Ganancia'];
+                return ['Fecha', 'Importe'];
             }
         };
 
@@ -462,8 +408,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
                         'fechaDesde' => $fechaInicioSemana, 
                         'fechaHasta' => $fechaFinSemana,
                         'total_pedidos' => $totalesRangoFecha->total_pedidos,
-                        'total_ventas' => $totalesRangoFecha->total_ventas,
-                        'total_ganancia' => $totalesRangoFecha->total_ganancia
+                        'total_ventas' => $totalesRangoFecha->total_ventas
                     ];
                 }
                 $nroSemana++;
@@ -476,8 +421,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
                         'fechaDesde' => $fechaInicioSemana, 
                         'fechaHasta' => $fechaFinSemana,
                         'total_pedidos' => $totalesRangoFecha->total_pedidos,
-                        'total_ventas' => $totalesRangoFecha->total_ventas,
-                        'total_ganancia' => $totalesRangoFecha->total_ganancia
+                        'total_ventas' => $totalesRangoFecha->total_ventas
                     ];
                 }
             }
@@ -522,8 +466,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
                     'Desde' => $row['fechaDesde'],
                     'Hasta' => $row['fechaHasta'],
                     'Total Pedidos' => $row['total_pedidos'],
-                    'Total Ventas' => $row['total_ventas'],
-                    'Total Ganancia' => $row['total_ganancia'],
+                    'Total Ventas' => $row['total_ventas']
                 ];
             }
     
@@ -533,21 +476,14 @@ class ReporteVentasPorRangoFechaController extends ApiController
                 public function __construct($data) { $this->data = $data; }
                 public function collection() { return collect($this->data); }
                 public function headings(): array {
-                    return ['Semana', 'Desde', 'Hasta', 'Total Pedidos', 'Total Ventas', 'Total Ganancia'];
+                    return ['Semana', 'Desde', 'Hasta', 'Total Pedidos', 'Total Ventas'];
                 }
             };
     
             return Excel::download($export, 'semanaImporteExcel_'.$fechaIni.'_'.$fechaFin.'.xlsx');
         }
     }
-        /**
-     * Recibe un numero entre 1 y 12 y devuelve la descripción del mes
-     *
-     * @param int $nroMes
-     * @return string
-     */
-    private function getMesDescripcion(int $nroMes): string
-    {
+    private function getMesDescripcion(int $nroMes): string{
         $meses = [
             1 => 'Enero',
             2 => 'Febrero',
@@ -595,7 +531,6 @@ class ReporteVentasPorRangoFechaController extends ApiController
                 'mes' => $this->getMesDescripcion($i), 
                 'total_pedidos' => $totalesRangoFecha->total_pedidos,
                 'total_ventas' => $totalesRangoFecha->total_ventas,
-                'total_ganancia' => $totalesRangoFecha->total_ganancia
             ];
         }
         Log::info('Meses: ', $meses);
@@ -635,8 +570,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
                 $exportData[] = [
                     'Mes' => $row['mes'],
                     'Total Pedidos' => $row['total_pedidos'],
-                    'Total Ventas' => $row['total_ventas'],
-                    'Total Ganancia' => $row['total_ganancia'],
+                    'Total Ventas' => $row['total_ventas']
                 ];
             }
     
@@ -646,7 +580,7 @@ class ReporteVentasPorRangoFechaController extends ApiController
                 public function __construct($data) { $this->data = $data; }
                 public function collection() { return collect($this->data); }
                 public function headings(): array {
-                    return ['Mes', 'Total Pedidos', 'Total Ventas', 'Total Ganancia'];
+                    return ['Mes', 'Total Pedidos', 'Total Ventas'];
                 }
             };
     

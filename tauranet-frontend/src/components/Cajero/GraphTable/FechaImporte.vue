@@ -32,16 +32,16 @@
                 </div>
             </div>
             <div class="col-md-1 d-flex justify-content-start align-items-end">
-                <div class="form-group">
+                <!-- <div class="form-group">
                     X: Fecha Y:
-                </div>
+                </div> -->
             </div>
             <div class="col-md-2 d-flex justify-content-start align-items-end">
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <select class="form-control input-style" v-model="comboEjeY">
                         <option v-for="s in datosEjeY" v-bind:key="s.id" :value="s.id" :selected="s.id == 1">{{s.label}}</option>
                     </select>
-                </div>
+                </div> -->
             </div>
             <div class="col-md-3 d-flex justify-content-end align-items-end">
                 <button @click="fechaImporteMethod()" class="btn btn-primary mr-2" ref="btnBuscarRef">Generar</button>
@@ -66,7 +66,6 @@
                             >
                             <table-column show="fecha" label="Fecha"></table-column>
                             <table-column show="importe" label="Importe"></table-column>
-                            <table-column show="ganancia" label="Ganancia"></table-column>
                         </table-component>
                     </div>
                 </div>
@@ -217,7 +216,7 @@ export default{
                     this.pagination = response.data.dataTable
                     this.empleadoPedidoArray.forEach(element => {
                         this.labels.push(element.fecha)
-                    this.pedidos.push(this.comboEjeY == 1?element.importe:element.ganancia)
+                        this.pedidos.push(element.importe)
                     })
                     this.empleadoPedidoCollection = {
                         labels: this.labels,
