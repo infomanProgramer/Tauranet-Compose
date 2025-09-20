@@ -141,11 +141,10 @@ Route::group([
     Route::group(['middleware' => 'auth:cajero'], function () {
         Route::get('historialcaja/caja/{idCaja}/page/{pag}', 'HistorialCajaController@index');
         Route::post('historialcaja/{idCaja}', 'HistorialCajaController@store');
-        Route::put('historialcaja/{id}', 'HistorialCajaController@update');
+        Route::put('cashclosing/{id}', 'HistorialCajaController@cashClosing');
         Route::get('ventaproductos/caja/{idCaja}', 'VentaProductoController@index');//Muestra el historial de pedidos
         Route::post('pago', 'PagoController@store');
-        Route::get('calculamonto/{iventaproductosdHistorialCaja}', 'HistorialCajaController@calculaMontoFinal');
-        Route::put('updatemonto/{id}', 'HistorialCajaController@updateMontoFinal');
+        Route::get('updatecashamount/{idHistorialCaja}', 'HistorialCajaController@updateCashAmount');
         Route::post('clientepago', 'ClienteController@storePago');
         //Ex rutas de Administrador (Categoría Productos)
         Route::get('cproducto/{id}', 'CategoriaProductoController@show');

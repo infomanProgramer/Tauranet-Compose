@@ -18,22 +18,25 @@ class HistorialCajaController extends ApiController
         $response = Response::json(['data' => $historial], 200);
         return $response;
     }
-    public function calculaMontoFinal($idHistorialCaja){
+    private function _updateCashAmount($idHistorialCaja){
         $hcaja = DB::table('pagos as p')
                         ->join('venta_productos as v', 'v.id_venta_producto', '=', 'p.id_venta_producto')
                         ->where('v.id_historial_caja', '=', $idHistorialCaja)
+                        ->where('v.estado_venta', '=', 0)
                         ->get();
-        $response = Response::json(['data' => $hcaja], 200);
-        return $response;
-    }
-    public function updateMontoFinal(Request $request, $id){
-        \Log::info($request);
-        if($request->has('monto_final')) {
-            $historial = HistorialCaja::find($id);
-            $historial->monto = $request->monto_final;
-            $historial->save();
-            return response()->json(['data' => $historial], 201);
+        $suma = 0;
+        foreach ($hcaja as $key => $value) {
+            $suma += $value->importe;
         }
+        $historial = HistorialCaja::find($idHistorialCaja);
+        $historial->monto = $historial->monto_inicial + $suma;
+        $historial->save();
+        return $historial;
+    }
+    public function updateCashAmount($idHistorialCaja){
+        $historial = $this->_updateCashAmount($idHistorialCaja);
+        $response = Response::json(['data' => $historial], 200);
+        return $response;
     }
     public function store(Request $request, $idCaja){
         //Validar que no se registre con la misma fecha
@@ -79,9 +82,9 @@ class HistorialCajaController extends ApiController
         }
 
     }
-    public function update(Request $request, $id){
+    public function cashClosing(Request $request, $id){
         if($request->has('estado')) {
-            $historial = HistorialCaja::find($id);
+            $historial = $this->_updateCashAmount($id);
             $historial->estado = $request->estado;
             $historial->save();
             return response()->json(['data' => $historial], 201);

@@ -34,12 +34,12 @@
                                 <table-column show="monto" :label="'Monto Actual ('+tipoMoneda+')'"></table-column>
                                 <table-column label="Cerrar" :sortable="false" :filterable="false">
                                     <template slot-scope="row">
-                                        <button type="button" class="btn btn-danger" :class="{disabled: !row.estado}" @click="cerrarCaja(row.id_historial_caja, row.fecha)"><i class="fas fa-window-close"></i></button>
+                                        <button type="button" class="btn btn-danger" :class="{disabled: !row.estado}" @click="cashClosing(row.id_historial_caja, row.fecha, row.monto_inicial)"><i class="fas fa-window-close"></i></button>
                                     </template>
                                 </table-column>
                                 <table-column label="Actualizar" :sortable="false" :filterable="false">
                                     <template slot-scope="row">
-                                        <button type="button" class="btn btn-success" :class="{disabled: !row.estado}" @click="sincronizarCaja(row.id_historial_caja, row.monto_inicial)"><i class="fas fa-sync-alt"></i></button>
+                                        <button type="button" class="btn btn-success" :class="{disabled: !row.estado}" @click="updateCashAmount(row.id_historial_caja)"><i class="fas fa-sync-alt"></i></button>
                                     </template>
                                 </table-column>
                             </table-component>
@@ -207,16 +207,17 @@ export default{
             this.nro_page = this.$refs.nroEntradas.value
             this.getAllAperturaCierre()
         },
-        cerrarCaja(id, fecha){
+        cashClosing(id, fecha, monto_inicial){
             let sw = confirm(`Esta seguro que desea cerrar la caja de fecha ${fecha}`)
             if(sw){
                 this.$Progress.start()
                 this.historial.id_cajero = this.data_usr.id_cajero;
                 this.historial.estado = false;
                 axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                    axios.put(this.$store.state.url_root+`api/auth/historialcaja/${id}`, this.historial)
+                    axios.put(this.$store.state.url_root+`api/auth/cashclosing/${id}`, this.historial)
                 .then(response => {
-                    this.getAllAperturaCierre(this.$store.state.url_root+`api/auth/historialcaja/caja/${this.data_usr.id_caja}/page/${this.nro_page}?page=${this.pagination.current_page}`)
+                    //this.getAllAperturaCierre(this.$store.state.url_root+`api/auth/historialcaja/caja/${this.data_usr.id_caja}/page/${this.nro_page}?page=${this.pagination.current_page}`)
+                    this.getAllAperturaCierre()
                     this.nuevoHistorialMsg = `Se cerro la caja de fecha ${fecha}`
                     this.limpiaHistorial();
                     this.$Progress.finish()
@@ -227,29 +228,16 @@ export default{
                 });
             }
         },
-        sincronizarCaja(idHistorialCaja, monto_inicial){
+        updateCashAmount(idHistorialCaja){
             this.$Progress.start()
-            let url = this.$store.state.url_root+`api/auth/calculamonto/${idHistorialCaja}`
+            let url = this.$store.state.url_root+`api/auth/updatecashamount/${idHistorialCaja}`
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.get(url)
             .then(response => {
-                this.cajaHistorialArray = response.data.data
-                let suma = 0
-                this.cajaHistorialArray.forEach(element => {
-                    suma = Number(suma) + Number(element.efectivo) - Number(element.cambio)
-                });
-                let objeto = {}
-                objeto.monto_final = Number(monto_inicial) + Number(suma)
-                axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
-                axios.put(this.$store.state.url_root+`api/auth/updatemonto/${idHistorialCaja}`, objeto)
-                .then(response => {
-                     this.getAllAperturaCierre();
-                     this.$Progress.finish()
-                })
-                .catch (error => {
-                    this.$toasted.show("AperturaCaja.vue: "+error, {type: 'error'})
-                    this.$Progress.fail()
-                });
+                let hcaja = response.data.data
+                console.log('hcaja = ', hcaja)
+                this.getAllAperturaCierre();
+                this.$Progress.finish();
             })
             .catch (error => {
                 this.$toasted.show("AperturaCaja.vue: "+error, {type: 'error'})

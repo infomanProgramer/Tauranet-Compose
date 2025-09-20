@@ -5,7 +5,7 @@
                 <div class="col-md-8">
                     <div class="row">
                         <div class="col-md-9 alineacion-botones">
-                            <button class="btn btn-primary" ref="btnNuevoCliente" @click="addNewClient()"><i class="far fa-save"></i> Ciente Nuevo</button>
+                            <!-- <button class="btn btn-primary" ref="btnNuevoCliente" @click="addNewClient()"><i class="far fa-save"></i> Ciente Nuevo</button> -->
                             <button class="btn btn-primary" @click="limpiarPedido()"><i class="fas fa-broom"></i> Limpiar</button>
                             <button class="btn btn-danger" @click="printTicket()" v-if="IsEnablePrintBtn" style="background-color: #800080; border-color: #800080;"><i class="fas fa-print"></i> Imprimir</button>
                         </div>
@@ -22,39 +22,29 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <BoxMessage :message="nuevoPedidoMsg" :cod="'da'" icono="fas fa-exclamation-circle"></BoxMessage>
-                                <h4 class="sub-cajero">Datos Cliente</h4>
+                                <!-- <h4 class="sub-cajero">Datos Cliente</h4> -->
                                 <div class="row">
                                     <div class="col-md-2 style-datos-cliente align-self-center">
-                                        <label for="validationCustom04">Nombre</label>
+                                        <label for="validationCustom04">Nombre Cliente</label>
                                     </div>
-                                    <div class="col-md-10">
-                                        <input v-if="isNewCustomer" type="text" class="caja_texto" v-model="cliente.nombre_completo" >
-                                        <input
-                                            type="text"
-                                            class="caja_texto"
-                                            v-model="cliente.nombre_completo"
-                                            v-else
-                                            disabled
-                                            style="background-color: #f5f5f5; color: #888; cursor: not-allowed; opacity: 1;"
-                                        >
-                                        
+                                    <div class="col-md-10 mt-2 mb-2">
+                                        <input type="text" class="caja_texto" v-model="cliente.nombre_completo" >
                                         <ListErrors :errores="errores.nombre_completo"></ListErrors>
                                     </div>
                                 </div>
-                                <div class="row">
+                                <!-- <div class="row">
                                     <div class="col-md-2 style-datos-cliente align-self-center">
                                         <label for="validationCustom04">{{getIdentificacion}}</label>
                                     </div>
                                     <div class="col-md-10">
                                         <div class="enlinea caja_texto">                                        
-                                            <!-- <input type="number" v-model="cliente.dni" v-if="isNewCustomer" disabled> -->
                                             <input type="number" v-model="cliente.dni">
                                             <button type="button" @click="getListaClientes()" class="btn" data-toggle="modal" data-target="#modalListaClientes" v-if="!isNewCustomer"><i class="fas fa-search"></i></button>
                                         </div>
                                         <ListErrors :errores="errores.dni"></ListErrors>
                                         <a href="#" class="style-limpiar" @click="habilitaCamposCliente()">Limpiar</a>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div class="row caja-style" v-if="type_user == 0">
@@ -76,8 +66,8 @@
                                     <table class="table table-bordered table-striped table-condensed">
                                         <tbody>
                                             <tr>
-                                                <td scope="col">Seleccione el método de pago</td>
-                                                <td>
+                                                <td scope="col">
+                                                    <strong style="margin-left: 10px;">Método de pago</strong>
                                                     <ul class="mb-0 mt-0" style="list-style: none;">
                                                         <li class="li-horizontal">
                                                             <i class="far fa-money-bill-alt"></i>
@@ -97,10 +87,8 @@
                                                     </ul>
                                                     <ListErrors :errores="errores.tipo_pago"></ListErrors>
                                                 </td>
-                                            </tr>
-                                            <tr>
-                                                <td scope="col">Seleccione el tipo de servicio</td>
                                                 <td>
+                                                    <strong style="margin-left: 10px;">Tipo de servicio</strong>
                                                     <ul class="mb-0 mt-0" style="list-style: none;">
                                                         <li class="li-horizontal">
                                                             <input class="form-check-input" type="radio" name="tipo_servicio" v-model="infoPayment.tipo_servicio" id="checkMesa" :value=tipoDeServicio.mesa>
@@ -698,7 +686,7 @@ export default{
             this.cliente.importe_base = this.calculaImporteBase
             this.cliente.estado_venta = 0
             this.cliente.id_caja = this.data_usr.id_caja
-            this.cliente.isNewCustomer = this.isNewCustomer //true antiguo cliente
+            //this.cliente.isNewCustomer = this.isNewCustomer //true antiguo cliente
             this.cliente.efectivo = this.infoPayment.tipo_pago == 0 ? this.infoPayment.efectivo : null
             this.cliente.tipo_pago = this.infoPayment.tipo_pago
             this.cliente.id_sucursal = this.data_usr.id_sucursal

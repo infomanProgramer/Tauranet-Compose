@@ -172,44 +172,23 @@ class ClienteController extends ApiController
                 return $this->errorResponse(['apertura_caja' => 'No hay caja aperturada para '.$now], 201);
             }
             $validacionArray = [];
-            if (!$request->isNewCustomer) {//antiguo cliente
-                \Log::info('Cliente antiguo 1');
-                $validacionArray = [
-                    'id_cajero' => 'required_without_all:id_mozo',
-                    'id_mozo' => 'required_without_all:id_cajero',
-                    'id_sucursal' => 'required|exists:sucursals,id_sucursal',
-                    'importe' => 'required',
-                    'importe_base' => 'required',
-                    'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
-                    'estado_venta' => 'required|numeric|between:0,2',
-                    'listaProductos' => 'required'
-                ];
-            } else {
-                \Log::info('Cliente nuevo 1');
-                $validacionArray = [
-                    'nombre_completo' => 'required|min:4|max:100|nullable',
-                    'dni' => ['required', new UniqueCliente($request->id_restaurant)],
-                    'id_cajero' => 'required_without_all:id_mozo',
-                    'id_mozo' => 'required_without_all:id_cajero',
-                    'id_sucursal' => 'required|exists:sucursals,id_sucursal',
-                    'importe' => 'required|numeric|between:0,9999999.99',
-                    'importe_base' => 'required|numeric|between:0,9999999.99',
-                    'tipo_servicio' => 'required|numeric|between:0,2',//0=mesa, 1=delivery, 2=take away
-                    'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
-                    'estado_venta' => 'required|numeric|between:0,2',
-                    'listaProductos' => 'required'
-                ];
-            }
+            $validacionArray = [
+                'nombre_completo' => $request->has('nombre_completo') ? 'min:4|max:100' : '',
+                'id_cajero' => 'required_without_all:id_mozo',
+                'id_mozo' => 'required_without_all:id_cajero',
+                'id_sucursal' => 'required|exists:sucursals,id_sucursal',
+                'importe' => 'required|numeric|between:0,9999999.99',
+                //'importe_base' => 'required|numeric|between:0,9999999.99',
+                'tipo_servicio' => 'required|numeric|between:0,2',//0=mesa, 1=delivery, 2=take away
+                'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
+                'estado_venta' => 'required|numeric|between:0,2',
+                'listaProductos' => 'required'
+            ];
             $validator = Validator::make($request->all(), $validacionArray,
             $messages = [
                 'nombre_completo.required' => 'El Nombre es requerido',
                 'nombre_completo.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
                 'nombre_completo.max' => 'El Nombre tiene que tener 50 caracteres como maximo',
-                'dni.required' => 'El dni es requerido',
-                'dni.min' => 'El dni tiene que tener 4 caracteres como mínimo',
-                'dni.max' => 'El dni tiene que tener 100 caracteres como maximo',
-                'dni.unique' => 'El dni ya existe',
-                'dni.numeric' => 'El dni debe ser de tipo númerico',
                 'id_cajero.required_without_all' => 'El cajero o mozo es requerido',
                 'id_cajero.exists' => 'El cajero no existe',
                 'id_mozo.required_without_all' => 'El cajero o mozo es requerido',
@@ -230,9 +209,6 @@ class ClienteController extends ApiController
             $validator->sometimes('id_mozo', 'exists:mozos,id_mozo', function ($input) {
                 return !empty($input->id_mozo);
             });
-            $validator->sometimes('dni', 'numeric|min:999|nullable', function ($input) {
-                return !empty($input->dni);
-            });
             $validator->sometimes('efectivo', 'required|numeric|between:1,99999999.99', function ($input) {
                 return $input->tipo_pago == 0;
             });
@@ -243,7 +219,7 @@ class ClienteController extends ApiController
                 return response()->json(["error" => $validator->errors()], 201);
             }
             if(($request->efectivo >= $request->importe && $request->tipo_pago == 0) || $request->tipo_pago != 0) {
-                if ($request->isNewCustomer) {
+                if ($request->has("nombre_completo")) {
                     //Almacena datos del nuevo cliente
                     $idRestaurant = DB::table('sucursals')
                         ->where('id_sucursal', '=', $request->id_sucursal)
@@ -252,13 +228,10 @@ class ClienteController extends ApiController
                     //$data= json_decode( json_encode($idRestaurant), true);
                     $cliente = new Cliente();
                     $cliente->nombre_completo = $request->get("nombre_completo");
-                    $cliente->dni = $request->get("dni");
+                    //$cliente->dni = $request->get("dni");
                     $cliente->id_restaurant = $idRestaurant->id_restaurant;
                     if ($request->has('id_cajero')) {
                         $cliente->id_cajero = $request->get("id_cajero");
-                    }
-                    if ($request->has('id_mozo')) {
-                        $cliente->id_mozo = $request->get("id_mozo");
                     }
                     $cliente->save();
                 }
@@ -268,25 +241,18 @@ class ClienteController extends ApiController
                 $vproducto->id_historial_caja = $hcaja[0]->id_historial_caja;
                 $vproducto->estado_atendido = false;
 
-                if ($request->isNewCustomer) {//Si es cliente nuevo se le asigna el id de la base de datos
+                if ($request->has("nombre_completo")) {//Si es cliente nuevo se le asigna el id de la base de datos
                     $vproducto->id_cliente = $cliente->id_cliente;
-                } else {
-                    //Si es cliente antiguo se le asigna el id del cliente que viene en el request
-                    $vproducto->id_cliente = $request->get("id_cliente");
-                }
-
+                } 
                 $vproducto->id_sucursal = $request->get("id_sucursal");
                 if ($request->has('id_cajero')) {
                     $vproducto->id_cajero = $request->get("id_cajero");
-                }
-                if ($request->has('id_mozo')) {
-                    $vproducto->id_mozo = $request->get("id_mozo");
                 }
                 $vproducto->save();
                 $pago = new Pago();
                 $pago->efectivo = $request->get("efectivo");
                 $pago->importe = $request->get("importe");
-                $pago->importe_base = $request->get("importe_base");
+                //$pago->importe_base = $request->get("importe_base");
                 $pago->cambio = $request->get("cambio");
                 $pago->id_venta_producto = $vproducto->id_venta_producto;
                 $pago->id_cajero = $request->get("id_cajero");
