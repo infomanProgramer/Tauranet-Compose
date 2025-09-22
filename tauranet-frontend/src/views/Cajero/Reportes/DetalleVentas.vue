@@ -104,28 +104,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <!-- Datos Cliente -->
-                                    <h5 class="sub-cajero">Cliente</h5>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped table-condensed">
-                                            <tbody>
-                                                <tr>
-                                                    <td scope="col">Señor(es)</td>
-                                                    <td v-if="ventaProductoObj.nombre_completo!=null">{{ventaProductoObj.nombre_completo}}</td>
-                                                    <td v-else>GENERAL</td>
-                                                </tr>
-                                                <tr>
-                                                    <td scope="col">{{getIdentificacion}}</td>
-                                                    <td v-if="ventaProductoObj.dni!=null">{{ventaProductoObj.dni}}</td>
-                                                    <td v-else>GENERAL</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div> 
-                                </div>
-                            </div>
                         </div>
                     </template>
                     <template v-slot:footer>
@@ -317,6 +295,7 @@ export default{
             });
         },
         showDatosPedido(obj){
+            console.log('obj = ', obj)
             this.$Progress.start()
             this.nro_pedido = obj.nro_venta
             let url = this.$store.state.url_root+`api/auth/productovendido/pedido/${obj.id_venta_producto}`

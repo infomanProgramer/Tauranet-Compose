@@ -43,6 +43,7 @@ class ReporteController extends ApiController
             ->whereBetween(DB::raw('DATE(h.fecha)'), ["'". $fecha_ini ."'", "'". $fecha_fin ."'"])
             ->orderByDesc('v.created_at')
             ->select(
+                'v.id_venta_producto',
                 'h.fecha', 
                 's.nombre as nombreSucursal', 
                 'v.nro_venta', 
