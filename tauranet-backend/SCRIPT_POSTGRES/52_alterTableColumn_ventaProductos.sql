@@ -1,1 +1,0 @@
-ALTER TABLE venta_productos RENAME COLUMN sub_total TO importe;
