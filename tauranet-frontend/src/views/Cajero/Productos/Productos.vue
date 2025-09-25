@@ -112,15 +112,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="" class="label-style">* Precio base({{tipoMoneda}})</label>
-                                        <input type="text" class="form-control input-style" v-model="producto.precio_base" :placeholder="'Precio unitario ('+tipoMoneda+')'">
-                                        <ListErrors :errores="errores.precio_base"></ListErrors>
-                                    </div>
-                                </div>
-                            </div> -->
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -192,15 +183,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="" class="label-style">* Precio base ({{tipoMoneda}})</label>
-                                        <input type="text" class="form-control input-style" v-model="producto.precio_base" >
-                                        <ListErrors :errores="errores.precio_base"></ListErrors>
-                                    </div>
-                                </div>
-                            </div> -->
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -378,7 +360,7 @@ export default{
                         window.$("#modalNuevoProducto").modal('hide');
                         this.limpiaProducto();
                         this.nuevoProductoMsg = `El producto <strong>${response.data.data.nombre}</strong> se creo correctamente`
-                        this.$Progress.finish()
+                        //this.$Progress.finish()
                         this.$refs.nuevoProductoBtn.className = "btn btn-primary"
                     }else{
                         this.errores = response.data.error

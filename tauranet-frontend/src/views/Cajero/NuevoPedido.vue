@@ -710,7 +710,8 @@ export default{
                         this.ventaProdObj = response.data.vprod
                         this.nroPedido_ticket = response.data.nro_pedido
                         this.limpiarPedido();
-                        this.$toasted.show('Se realizo el pago del pedido correctamente', {type: 'success'})
+                        this.$toasted.show('Se realizo el pago del pedido correctamente', 
+                        {type: 'success',   duration: 3000})
                         this.IsEnablePrintBtn = true
                         this.$Progress.finish()
                         this.$refs.pagarPedidoBtn.className = "btn btn-success"
