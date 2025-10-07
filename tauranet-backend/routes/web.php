@@ -11,11 +11,19 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/{any}', function () {
+//     return file_get_contents(public_path('dist/index.html'));
+// })->where('any', '^(?!api).*$');
 
-Route::get('reporte/{id}', 'PdfController@reportePDF');
+Route::get('/{any}', function () {
+    return file_get_contents(public_path('index.html'));
+})->where('any', '^(?!api|js|css|img|assets|favicon\.ico).*$');
+
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+//Route::get('reporte/{id}', 'PdfController@reportePDF');
 
 
 

@@ -30,18 +30,5 @@ services:
     volumes:
       - ./tauranet-backend:/var/www
 
-  frontend:
-    build:
-      context: ./tauranet-frontend
-      dockerfile: Dockerfile
-    container_name: tauranet-frontend-container
-    ports:
-      - "8085:8080"
-    depends_on:
-      - backend
-    volumes:
-      - ./tauranet-frontend:/app
-      - /app/node_modules
-
 volumes:
   tauranet-db-data:
