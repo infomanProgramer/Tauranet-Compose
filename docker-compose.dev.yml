@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ./tauranet-backend
+      dockerfile: Dockerfile
+    container_name: tauranet-backend-dev
+    ports:
+      - "8081:80"
+    environment:
+      DB_HOST: postgres-db-tauranet   # apunta a la BD de producción
+      DB_PORT: 5432
+      DB_DATABASE: tauranet_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: pgadmin1325
+    volumes:
+      - ./tauranet-backend:/var/www
+
+  frontend:
+    build:
+      context: ./tauranet-frontend
+      dockerfile: Dockerfile
+    container_name: tauranet-frontend-dev
+    ports:
+      - "8085:8080"
+    depends_on:
+      - backend
+    volumes:
+      - ./tauranet-frontend:/app
+      - /app/node_modules

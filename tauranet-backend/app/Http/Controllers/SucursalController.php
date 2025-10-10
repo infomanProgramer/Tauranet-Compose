@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use DB;
 use Validator;
+use Illuminate\Support\Facades\Log;
 
 class SucursalController extends ApiController
 {
@@ -95,6 +96,8 @@ class SucursalController extends ApiController
      */
     public function store(Request $request)
     {
+        Log::info("Entrando a store guardar sucursal");
+        Log::info($request->all());
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|min:4|max:50|regex:/^[a-zA-Z0-9\s]+$/',
             'descripcion' => 'min:5|nullable',

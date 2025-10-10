@@ -9,14 +9,14 @@ services:
     ports:
       - "25432:5432"
     volumes:
-      - tauranet-db-data:/var/lib/postgresql/data
+      - tauranet-prod-db-data:/var/lib/postgresql/data
       - ./tauranet-backend/tauranet_db.sql:/docker-entrypoint-initdb.d/tauranet_db.sql
 
   backend:
     build:
       context: ./tauranet-backend
       dockerfile: Dockerfile
-    container_name: tauranet-backend-container
+    container_name: tauranet-backend-prod
     ports:
       - "8080:80"
     depends_on:
@@ -31,4 +31,4 @@ services:
       - ./tauranet-backend:/var/www
 
 volumes:
-  tauranet-db-data:
+  tauranet-prod-db-data:
