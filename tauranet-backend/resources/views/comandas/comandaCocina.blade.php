@@ -4,12 +4,15 @@
   <meta charset="UTF-8">
   <style>
     @page {
-      margin: 3px;
+      margin: 5px;
       size: 72mm 1000mm; /* ancho fijo de 72mm, alto dinámico */
     }
     body {
       font-family: sans-serif;
       font-size: 12px;
+    }
+    p {
+      margin-left: 5px;
     }
     h2, h3 {
       text-align: center;

@@ -173,7 +173,7 @@ class ClienteController extends ApiController
             }
             $validacionArray = [];
             $validacionArray = [
-                'nombre_completo' => $request->has('nombre_completo') ? 'min:4|max:100' : '',
+                'nombre_completo' => $request->has('nombre_completo') && $request->nombre_completo != '' ? 'min:4|max:100' : '',
                 'id_cajero' => 'required_without_all:id_mozo',
                 'id_mozo' => 'required_without_all:id_cajero',
                 'id_sucursal' => 'required|exists:sucursals,id_sucursal',

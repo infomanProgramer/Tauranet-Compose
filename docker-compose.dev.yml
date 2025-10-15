@@ -7,11 +7,11 @@ services:
     ports:
       - "8081:80"
     environment:
-      DB_HOST: postgres-db-tauranet   # apunta a la BD de producción
-      DB_PORT: 5432
-      DB_DATABASE: tauranet_db
-      DB_USERNAME: postgres
-      DB_PASSWORD: pgadmin1325
+      DB_HOST: ${DB_HOST}   # apunta a la BD de producción
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./tauranet-backend:/var/www
 

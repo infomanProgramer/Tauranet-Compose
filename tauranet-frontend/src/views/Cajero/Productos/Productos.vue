@@ -12,10 +12,9 @@
                             </select>
                     </label>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">               
-                        <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modalNuevoProducto"><i class="fas fa-plus"></i> Nuevo</button>
-                    </div>
+                <div class="col-md-6 d-flex justify-content-end align-items-end">
+                        <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#modalNuevoProducto"><i class="fas fa-plus"></i> Nuevo</button>
+                        <button class="btn btn-success mr-2" @click="exportarExcel">Excel</button>
                 </div>
             </div>
             <div class="row">
@@ -298,6 +297,28 @@ export default{
             })
             .catch (error => {
                 this.$toasted.show("Productos.vue: "+error, {type: 'error'})
+                this.$Progress.fail()
+            });
+        },
+        exportarExcel() {
+            // Lógica para exportar a Excel
+            this.$Progress.start();
+            let url = this.$store.state.url_root+`api/auth/productoexcel/${this.$store.state.id_restaurant}/categoria/${this.comboCategorias}`//ok
+            axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
+            axios.get(url, { responseType: 'blob' })
+            .then(response => {
+                console.log(response.data);
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `reporte_productos.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                this.$Progress.finish();
+            })
+            .catch(error => {
+                this.$toasted.show("Error al exportar a Excel: "+error, {type: 'error'})
                 this.$Progress.fail()
             });
         },

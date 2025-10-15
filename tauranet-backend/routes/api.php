@@ -155,6 +155,7 @@ Route::group([
         Route::delete('cproducto/{id}', 'CategoriaProductoController@destroy');
         //Ex rutas de Administrador (Productos)
         Route::get('producto/{pag}/restaurant/{idRestaurante}/categoria/{idCategoria}', 'ProductoController@index');
+        Route::get('productoexcel/{idRestaurante}/categoria/{idCategoria}', 'ProductoController@exportProductsToExcel');
         Route::get('producto/{id}', 'ProductoController@show');
         Route::post('producto', 'ProductoController@store');
         Route::post('productoupdate/{id}', 'ProductoController@update');

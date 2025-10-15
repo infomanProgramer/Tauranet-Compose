@@ -28,7 +28,7 @@
                                         <label for="validationCustom04">Nombre Cliente</label>
                                     </div>
                                     <div class="col-md-10 mt-2 mb-2">
-                                        <input type="text" class="caja_texto" v-model="cliente.nombre_completo" >
+                                        <input type="text" class="caja_texto" v-model="cliente.nombre_completo" placeholder="Opcional">
                                         <ListErrors :errores="errores.nombre_completo"></ListErrors>
                                     </div>
                                 </div>

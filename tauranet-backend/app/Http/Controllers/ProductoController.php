@@ -8,6 +8,9 @@ use DB;
 use App\Producto;
 use Validator;
 use File;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class ProductoController extends ApiController
 {
@@ -16,18 +19,14 @@ class ProductoController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($pag, $idRestaurante, $idCategoria)
-    {
+    public function getProducts($idRestaurante, $idCategoria){
         if($idCategoria == -1){
             $producto = DB::table('productos as p')
                 ->join('categoria_productos as c', 'c.id_categoria_producto', '=', 'p.id_categoria_producto')
                 ->where('c.id_restaurant', '=', $idRestaurante)
                 ->whereNull('p.deleted_at')
                 ->orderBy('p.created_at', 'desc')
-                ->select('p.*', 'c.nombre as categoriaProducto')
-                ->paginate($pag);
-            $response = Response::json(['data' => $producto], 200);
-            return $response;
+                ->select('p.*', 'c.nombre as categoriaProducto');
         }else if($idCategoria != -1){
             $producto = DB::table('productos as p')
                 ->join('categoria_productos as c', 'c.id_categoria_producto', '=', 'p.id_categoria_producto')
@@ -35,12 +34,36 @@ class ProductoController extends ApiController
                 ->where('p.id_categoria_producto', '=', $idCategoria)
                 ->whereNull('p.deleted_at')
                 ->orderBy('p.created_at', 'desc')
-                ->select('p.*', 'c.nombre as categoriaProducto')
-                ->paginate($pag);
-            $response = Response::json(['data' => $producto], 200);
-            return $response;
+                ->select('p.*', 'c.nombre as categoriaProducto');
         }
+        return $producto;
+    }
+    public function index($pag, $idRestaurante, $idCategoria){
+        $productos = $this->getProducts($idRestaurante, $idCategoria)->paginate($pag);
+        $response = Response::json(['data' => $productos], 200);
+        return $response;
+    }
 
+    public function exportProductsToExcel($idRestaurante, $idCategoria){
+        $productos = $this->getProducts($idRestaurante, $idCategoria)->get();
+        $exportData = [];
+        foreach ($productos as $row) {
+            $exportData[] = [
+                'Categoría' => $row->categoriaProducto,
+                'Producto' => $row->nombre,
+                'Precio' => $row->precio
+            ];
+        }
+        $export = new class($exportData) implements FromCollection, WithHeadings {
+            private $data;
+            public function __construct($data) { $this->data = $data; }
+            public function collection() { return collect($this->data); }
+            public function headings(): array {
+                return ['Categoría', 'Producto', 'Precio'];
+            }
+        };
+
+        return Excel::download($export, 'reporte_productos.xlsx');
     }
 
     public function listaProductos($idSucursal, $idCategoria){

@@ -10,21 +10,21 @@
                     </div>
                 </div>
                 <div class="row">
-                        <div class="col-md-6 d-flex justify-content-start align-items-end">
-                            <flat-pickr
-                                v-model="fecha"
-                                class="form-control input-style"
-                                :config="config"
-                                placeholder="Seleccionar fecha"
-                            >
-                            </flat-pickr>
-                            <!-- <ListErrors :errores="fecha"></ListErrors> -->
-                        </div>
-                        <div class="col-md-6 d-flex justify-content-end align-items-end">
-                            <button type="submit" class="btn btn-primary mr-2">Generar</button>
-                            <button class="btn btn-success mr-2" @click="exportarExcel">Excel</button>
-                            <button class="btn btn-danger" @click="exportarPDF">PDF</button>
-                        </div>
+                    <div class="col-md-6 d-flex justify-content-start align-items-end">
+                        <flat-pickr
+                            v-model="fecha"
+                            class="form-control input-style"
+                            :config="config"
+                            placeholder="Seleccionar fecha"
+                        >
+                        </flat-pickr>
+                        <!-- <ListErrors :errores="fecha"></ListErrors> -->
+                    </div>
+                    <div class="col-md-6 d-flex justify-content-end align-items-end">
+                        <button type="submit" class="btn btn-primary mr-2">Generar</button>
+                        <button class="btn btn-success mr-2" @click="exportarExcel">Excel</button>
+                        <button class="btn btn-danger" @click="exportarPDF">PDF</button>
+                    </div>
                 </div>
             </form>
             <div class="row">

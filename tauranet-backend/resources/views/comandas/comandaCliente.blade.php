@@ -11,6 +11,9 @@
       font-family: sans-serif;
       font-size: 12px;
     }
+    p {
+      margin-left: 5px;
+    }
     h2, h3 {
       text-align: center;
       margin: 5px 0;
