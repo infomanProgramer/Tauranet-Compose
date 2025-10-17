@@ -107,7 +107,7 @@
                                                 </td>
                                             </tr>
                                             <tr v-if="infoPayment.tipo_pago == 0">
-                                                <td scope="col"><i class="far fa-money-bill-alt"></i> Monto entregado por el cliente ({{tipoMoneda}})</td>
+                                                <td scope="col"><i class="far fa-money-bill-alt"></i> Efectivo entregado por el cliente ({{tipoMoneda}})</td>
                                                 <td>
                                                     <input type="number" class="form-control" v-model="infoPayment.efectivo">
                                                     <ListErrors :errores="errores.efectivo"></ListErrors>
@@ -666,12 +666,6 @@ export default{
             this.isNewCustomer = true;
             if(this.isNewCustomer)
                 this.cliente = {}
-            // this.cliente = {
-            //     nombre_completo: '',
-            //     dni: ''
-            // }
-            // this.errores = {};
-            // this.nuevoPedidoMsg = '';
         },
         changeNewCustomerStatus(){
             this.isNewCustomer = true;

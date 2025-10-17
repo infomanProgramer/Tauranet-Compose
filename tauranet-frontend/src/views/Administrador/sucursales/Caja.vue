@@ -281,7 +281,7 @@ export default{
                 this.listOfAllRestaurantes = response.data.data;
             })
             .catch (error => {
-                alert("GestorEmpleados.vue: "+error)
+                this.$toasted.show("GestorEmpleados.vue: "+error, {type: 'error'})
             });
         },
         cambiaOption(){

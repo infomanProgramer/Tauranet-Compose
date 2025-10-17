@@ -71,7 +71,7 @@
                             this.errores = response.data.errors;
                         }
                     }).catch((error) => {
-                        alert("Error en el servidor: "+error);
+                        this.$toasted.show("Error en el servidor: "+error, {type: 'error'});
                     })
                 }else{
                     this.errores.type_user = ['Debe asignar el tipo de usuario'];

@@ -206,7 +206,7 @@ export default{
                 this.pagination = response.data.data;
             })
             .catch (error => {
-                alert("restaurantes.vue: "+error)
+                this.$toasted.show("restaurantes.vue: "+error, {type: 'error'})
             });
         },
         limpiaSucursal(){
@@ -243,7 +243,7 @@ export default{
                 }
             })
             .catch (error => {
-                alert("Sucursales.vue: "+error)
+                this.$toasted.show("Sucursales.vue: "+error, {type: 'error'})
             });
         },
         getDatosSucursal(id){
@@ -254,7 +254,7 @@ export default{
                 this.Sucursal = response.data.data;
             })
             .catch (error => {
-                alert("Sucursales.vue: "+error)
+                this.$toasted.show("Sucursales.vue: "+error, {type: 'error'})
             });
         },
         editaSucursal(id){
@@ -280,7 +280,7 @@ export default{
                 }
             })
             .catch (error => {
-                alert("Sucursales.vue: "+error)
+                this.$toasted.show("Sucursales.vue: "+error, {type: 'error'})
             });
         },
         cambiaOption(){
@@ -294,7 +294,7 @@ export default{
                 this.Restaurantes = response.data.data;
             })
             .catch (error => {
-                alert("Sucursales.vue: "+error)
+                this.$toasted.show("Sucursales.vue: "+error, {type: 'error'})
             });
         },
         mostrarPorRestaurante(){
@@ -307,7 +307,7 @@ export default{
                     this.pagination = response.data.data;
                 })
                 .catch (error => {
-                    alert("Sucursales.vue: "+error)
+                    this.$toasted.show("Sucursales.vue: "+error, {type: 'error'})
                 });
             }
             else{

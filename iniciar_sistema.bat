@@ -1,30 +1,30 @@
 @echo off
 setlocal
-title Arrancando Tauranet (producción)...
+title Starting Tauranet...
 
-:: CONFIGURACION
+:: CONFIGURATION
 set SITE_URL=http://localhost:8080
 set WAIT_SECONDS=10
 set COMPOSE_FILE=docker-compose.prod.yml
 set PROJECT_NAME=prod
 
-:: Verificar si Docker está corriendo
+:: Check if Docker is running
 docker info >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Docker Desktop no esta corriendo. Intentando iniciarlo...
+    echo Docker Desktop is not running. Attempting to start it...
     start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe"
     timeout /t %WAIT_SECONDS% /nobreak >nul
 )
 
-:: Arrancar contenedores existentes del proyecto "prod"
+:: Start existing containers for the "prod" project
 docker compose -p %PROJECT_NAME% -f %COMPOSE_FILE% start
 
-echo Contenedores iniciados correctamente.
+echo Containers started successfully.
 timeout /t 2 >nul
 
-:: Abrir el navegador
+:: Open the browser
 start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --incognito "%SITE_URL%"
 
-echo Sistema Tauranet listo.
+echo System ready.
 timeout /t 2 >nul
 exit /b 0

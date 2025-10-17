@@ -47,23 +47,23 @@ class HistorialCajaController extends ApiController
             if(sizeof($estado_valida)==0) {
                 $validator = Validator::make($request->all(), [
                     'monto_inicial' => 'required|numeric|between:0,99999999.99',
-                    'fecha' => 'required|date:dd/mm/YYYY'
                 ],
                     $messages = [
                         'monto_inicial.required' => 'El monto inicial es requerido',
                         'monto_inicial.numeric' => 'El monto inicial tiene que ser de tipo numérico',
                         'monto_inicial.between' => 'El monto inicial tiene que estar entre 0 y 99999999.99',
-                        'fecha.required' => 'La fecha es requerida',
-                        'fecha.date' => 'La fecha no tiene el formato correcto',
                     ]);
                 if ($validator->fails()) {
                     return response()->json(["error" => $validator->errors()], 201);
                 }
+                
+                $fecha_actual = date('Y-m-d');
+                
                 $historial = new HistorialCaja();
                 $historial->monto_inicial = $request->get("monto_inicial");
                 $historial->monto = $request->get("monto_inicial");
                 $historial->estado = $request->get("estado");
-                $historial->fecha = $request->get("fecha");
+                $historial->fecha =   $fecha_actual;
                 if ($request->has('id_administrador')) {
                     $historial->id_administrador = $request->get("id_administrador");
                 }
@@ -78,7 +78,7 @@ class HistorialCajaController extends ApiController
                 return $this->errorResponse(['valores' => 'Existe otra apertura de caja que no ha sido cerrada'], 201);
             }
         }else{
-            return $this->errorResponse(['valores' => 'Ya existe una apertura de caja con la fecha '.$request->fecha], 201);
+            return $this->errorResponse(['valores' => 'Ya existe una apertura de caja con la fecha '.$fecha_actual], 201);
         }
 
     }

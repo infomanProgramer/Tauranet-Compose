@@ -289,7 +289,7 @@ export default{
             })
             .catch (error => {
                 this.$Progress.fail()
-                alert("restaurantes.vue: "+error)
+                this.$toasted.show("Administrador.vue: "+error, {type: 'error'})
             });
         },
         limpiaAdministrador(){
@@ -323,7 +323,7 @@ export default{
             })
             .catch (error => {
                 this.$Progress.fail()
-                alert("Administrador.vue: "+error)
+                this.$toasted.show("Administrador.vue: "+error, {type: 'error'})
             });
         },
         getDatosAdministrador(id){
@@ -337,7 +337,7 @@ export default{
             })
             .catch (error => {
                 this.$Progress.fail()
-                alert("Administrador.vue: "+error)
+                this.$toasted.show("Administrador.vue: "+error, {type: 'error'})
             });
         },
         editaAdministrador(id){
@@ -369,7 +369,7 @@ export default{
             })
             .catch (error => {
                 this.$Progress.fail()
-                alert("Administrador.vue: "+error)
+                this.$toasted.show("Administrador.vue: "+error, {type: 'error'})
             });
         },
         cambiaEstado(){
@@ -390,7 +390,7 @@ export default{
                 this.Restaurantes = response.data.data;
             })
             .catch (error => {
-                alert("Administrador.vue: "+error)
+                this.$toasted.show("Administrador.vue: "+error, {type: 'error'})
             });
         },
         mostrarPorRestaurante(){
@@ -403,7 +403,7 @@ export default{
                     this.pagination = response.data.data;
                 })
                 .catch (error => {
-                    alert("Administrador.vue: "+error)
+                    this.$toasted.show("Administrador.vue: "+error, {type: 'error'})
                 });
             }
             else{
@@ -443,7 +443,7 @@ export default{
                     }
                 })
                 .catch (error => {
-                    alert("Administrador.vue: "+error)
+                    this.$toasted.show("Administrador.vue: "+error, {type: 'error'})
                 });
             }
             else{
@@ -460,7 +460,7 @@ export default{
             })
             .catch (error => {
                 this.$Progress.fail()
-                alert("Administrador.vue: "+error)
+                this.$toasted.show("Administrador.vue: "+error, {type: 'error'})
             });
         }
     },

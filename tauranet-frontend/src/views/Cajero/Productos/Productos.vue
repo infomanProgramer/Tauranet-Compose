@@ -111,7 +111,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="" class="label-style">Descripción</label>
@@ -119,7 +119,7 @@
                                         <ListErrors :errores="errores.descripcion"></ListErrors>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="row">
                                 <div class="col-md-6">
                                    <croppa v-model="myCroppa"
@@ -182,7 +182,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="" class="label-style">Descripción</label>
@@ -190,7 +190,7 @@
                                         <ListErrors :errores="errores.descripcion"></ListErrors>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="row">
                                 <div class="col-md-6">
                                     <!-- Edita imagen -->
@@ -369,9 +369,6 @@ export default{
                         formData.append(item, this.producto[item]);
                     }
                 }
-                // for(let val of formData.values()){
-                //     console.log(val)
-                // }
                 axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
                 axios.defaults.headers.common["Content-Type"] = "multipart/form-data";
                 axios.post(this.$store.state.url_root+`api/auth/producto`, formData)//ok

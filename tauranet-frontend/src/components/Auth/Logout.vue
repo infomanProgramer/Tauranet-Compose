@@ -9,7 +9,7 @@
                     this.$router.push({name: 'superadmin'})
                 })
                 .catch(error => {
-                    alert("Logout.vue: "+error);
+                    this.$toasted.show("Logout.vue: "+error, {type: 'error'});
                 })
             }else{
                 this.$store.dispatch('destroyToken')
@@ -17,7 +17,7 @@
                     this.$router.push({name: 'login'})
                 })
                 .catch(error => {
-                    alert("Logout.vue: "+error);
+                    this.$toasted.show("Logout.vue: "+error, {type: 'error'});
                 })
             }
         },

@@ -292,7 +292,7 @@ export default{
                 this.pagination = response.data.data;
             })
             .catch (error => {
-                alert("restaurantes.vue: "+error)
+                this.$toasted.show("restaurantes.vue: "+error, {type: 'error'})
             });
         },
         cleanInfoRestaurant(){
@@ -324,7 +324,7 @@ export default{
                 }
             })
             .catch (error => {
-                alert("restaurantes.vue: "+error)
+                this.$toasted.show("restaurantes.vue: "+error, {type: 'error'})
             });
         },
         getInfoRestaurantById(id){
@@ -337,7 +337,7 @@ export default{
                 this.$refs.estadoRestaurant.checked = this.infoRestaurant.estado;
             })
             .catch (error => {
-                alert("restaurantes.vue: "+error)
+                this.$toasted.show("restaurantes.vue: "+error, {type: 'error'})
             });
         },
         updateInfoRestaurantById(id){
@@ -363,7 +363,7 @@ export default{
                 }
             })
             .catch (error => {
-                alert("restaurantes.vue: "+error)
+                this.$toasted.show("restaurantes.vue: "+error, {type: 'error'})
             });
         },
         cambiaEstado(){
@@ -393,7 +393,7 @@ export default{
                 this.Suscripciones = response.data.data;
             })
             .catch (error => {
-                alert("restaurantes.vue: "+error)
+                this.$toasted.show("restaurantes.vue: "+error, {type: 'error'})
             });
         }
     },

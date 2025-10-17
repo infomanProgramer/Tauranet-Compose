@@ -66,7 +66,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="" class="label-style">Descripción</label>
@@ -74,7 +74,7 @@
                                         <ListErrors :errores="errores.descripcion"></ListErrors>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </template>
                     <template v-slot:footer>
@@ -97,7 +97,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="" class="label-style">Descripción</label>
@@ -105,7 +105,7 @@
                                         <ListErrors :errores="errores.descripcion"></ListErrors>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </template>
                     <template v-slot:footer>

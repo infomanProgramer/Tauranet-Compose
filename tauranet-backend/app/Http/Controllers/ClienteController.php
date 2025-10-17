@@ -178,7 +178,6 @@ class ClienteController extends ApiController
                 'id_mozo' => 'required_without_all:id_cajero',
                 'id_sucursal' => 'required|exists:sucursals,id_sucursal',
                 'importe' => 'required|numeric|between:0,9999999.99',
-                //'importe_base' => 'required|numeric|between:0,9999999.99',
                 'tipo_servicio' => 'required|numeric|between:0,2',//0=mesa, 1=delivery, 2=take away
                 'tipo_pago' => 'required|numeric|between:0,2',//0=efectivo, 1=tarjeta, 2=pago qr
                 'estado_venta' => 'required|numeric|between:0,2',
@@ -198,10 +197,10 @@ class ClienteController extends ApiController
                 'listaProductos.required' => 'La lista de productos es requerida',
                 'efectivo.required' => 'El efectivo es requerido',
                 'efectivo.numeric' => 'El efectivo tiene que ser de tipo numérico',
-                'efectivo.between' => 'El efectivo tiene que estar entre 1 y 999999999,99',
+                'efectivo.between' => 'El monto tiene que ser un número positivo',
                 'cambio.required' => 'El cambio es requerida',
                 'cambio.numeric' => 'El cambio tiene que ser de tipo numérico',
-                'cambio.between' => 'El cambio tiene que estar entre 0 y 999999999,99'
+                'cambio.between' => 'El cambio tiene que ser un número positivo'
             ]);
             $validator->sometimes('id_cajero', 'exists:cajeros,id_cajero', function ($input) {
                 return !empty($input->id_cajero);

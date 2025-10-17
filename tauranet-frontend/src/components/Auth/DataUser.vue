@@ -42,7 +42,7 @@
                     this.datosUsuarioObj = response.data;
                 })
                 .catch(error => {
-                    alert("DataUser.vue: "+error);
+                    this.$toasted.show("DataUser.vue: "+error, {type: 'error'});
                 });
             },
         }

@@ -65,7 +65,7 @@ class CategoriaProductoController extends ApiController
     {
         \Log::info($request);
         $dataValidation = [
-            'nombre' => 'required|min:4|max:50',
+            'nombre' => 'required|min:4|max:15',
             'id_restaurant' => 'required|exists:restaurants,id_restaurant',
         ];
         if ($request->get("id_administrador") !== null) {
@@ -79,13 +79,13 @@ class CategoriaProductoController extends ApiController
         }
         $validator = Validator::make($request->all(), $dataValidation,
         $messages = [
-            'nombre.required' => 'El Nombre es requerido',
-            'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
-            'nombre.max' => 'El Nombre tiene que tener 50 caracteres como maximo',
-            'id_administrador.required' => 'El Administrador es requerido',
-            'id_administrador.exists' => 'El Administrador no existe',
-            'id_restaurant.required' => 'El Administrador es requerido',
-            'id_restaurant.exists' => 'El Administrador no existe',
+            'nombre.required' => 'La categoria es requerida',
+            'nombre.min' => 'La categoria tiene que tener 4 caracteres como mínimo',
+            'nombre.max' => 'La categoria tiene que tener 15 caracteres como maximo',
+            'id_administrador.required' => 'El administrador es requerido',
+            'id_administrador.exists' => 'El administrador no existe',
+            'id_restaurant.required' => 'El restaurante es requerido',
+            'id_restaurant.exists' => 'El restaurante no existe',
         ]);
         if ($validator->fails()) {
             return response()->json(["error" => $validator->errors()], 201);
@@ -116,30 +116,12 @@ class CategoriaProductoController extends ApiController
         return response()->json(['data' => $cproducto], 201);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         \Log::info($request);
         $cproducto = CategoriaProducto::find($id);
         $dataValidation = [
-            'nombre' => 'required|min:4|max:50',
+            'nombre' => 'required|min:4|max:15',
             'id_restaurant' => 'required|exists:restaurants,id_restaurant',
         ];
         if ($request->get("id_administrador") !== null) {
@@ -153,11 +135,11 @@ class CategoriaProductoController extends ApiController
         }
         $validator = Validator::make($request->all(), $dataValidation,
         $messages = [
-            'nombre.required' => 'El Nombre es requerido',
-            'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
-            'nombre.max' => 'El Nombre tiene que tener 50 caracteres como maximo',
-            'id_administrador.required' => 'El Administrador es requerido',
-            'id_administrador.exists' => 'El Administrador no existe',
+            'nombre.required' => 'La categoria es requerida',
+            'nombre.min' => 'La categoria tiene que tener 4 caracteres como mínimo',
+            'nombre.max' => 'La categoria tiene que tener 15 caracteres como maximo',
+            'id_administrador.required' => 'El administrador es requerido',
+            'id_administrador.exists' => 'El administrador no existe',
             'id_restaurant.required' => 'El restaurante es requerido',
             'id_restaurant.exists' => 'El restaurante no existe',
         ]);

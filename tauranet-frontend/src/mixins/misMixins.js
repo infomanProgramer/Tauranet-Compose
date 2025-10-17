@@ -33,7 +33,7 @@ export const misMixins = {
             resolve(response);
           })
           .catch(error => {
-            alert("misMixin.js: " + error);
+            this.$toasted.show("misMixin.js: " + error, { type: "error" });
             reject(error);
           });
       });

@@ -59,14 +59,14 @@
                         <div class="container-fluid">
                             <div class="row">
                                 <BoxMessage :message="datosRepetidos" :cod="'da'" icono="fas fa-exclamation-circle"></BoxMessage>
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="" class="label-style">Monto Inicial ({{tipoMoneda}})</label>
                                         <input type="text" class="form-control input-style" v-model="historial.monto_inicial">
                                         <ListErrors :errores="errores.monto_inicial"></ListErrors>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <!-- <div class="col-md-6">
                                     <label for="" class="label-style">Fecha</label>
                                     <flat-pickr
                                             v-model="historial.fecha"                                                       
@@ -75,7 +75,7 @@
                                             >
                                     </flat-pickr>
                                     <ListErrors :errores="errores.fecha"></ListErrors>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </template>
@@ -182,7 +182,7 @@ export default{
             .then(response => {
                 if(response.data.error == null){
                     this.getAllAperturaCierre()
-                    this.nuevoHistorialMsg = `Se aperturo la caja en fecha ${this.historial.fecha}`
+                    this.nuevoHistorialMsg = `Se aperturo la caja en fecha ${response.data.data.fecha}`
                     this.limpiaHistorial();
                     window.$("#modalAperturaCaja").modal('hide');
                     this.$Progress.finish()

@@ -86,7 +86,7 @@ export default{
                 this.listOfAllRestaurantes = response.data.data;
             })
             .catch (error => {
-                alert("GestorEmpleados.vue: "+error)
+                this.$toasted.show("TipoMoneda.vue: "+error, {type: 'error'})
             });
         },
         getConfigByRestaurant() {

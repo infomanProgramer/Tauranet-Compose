@@ -96,11 +96,9 @@ class ProductoController extends ApiController
 
     public function store(Request $request)
     {
-        \Log::info($request);
         $dataValidation = [
-            'nombre' => 'required|min:4|max:50',
+            'nombre' => 'required|min:4|max:19',
             'precio' => 'required|numeric|between:0,9999999.99',
-            //'precio_base' => 'required|numeric|between:0,9999999.99',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
         ];
         if ($request->get("id_administrador") !== null) {
@@ -116,7 +114,7 @@ class ProductoController extends ApiController
         $messages = [
             'nombre.required' => 'El Nombre es requerido',
             'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
-            'nombre.max' => 'El Nombre tiene que tener 50 caracteres como maximo',
+            'nombre.max' => 'El Nombre tiene que tener 19 caracteres como maximo',
             'precio.required' => 'El precio es requerido',
             'precio.numeric' => 'El precio tiene que ser de tipo numérico',
             'precio.between' => 'El precio tiene ser un número positivo',
@@ -154,12 +152,10 @@ class ProductoController extends ApiController
     }
     public function update(Request $request, $id)
     {
-        \Log::info($request);
         $producto = Producto::find($id);
         $dataValidation = [
-            'nombre' => 'required|min:4|max:50',
+            'nombre' => 'required|min:4|max:19',
             'precio' => 'required|numeric|between:0,9999999.99',
-            //'precio_base' => 'required|numeric|between:0,9999999.99',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
         ];
         if ($request->get("id_administrador") !== null && $request->get("id_administrador") !== 'null') {
@@ -175,10 +171,10 @@ class ProductoController extends ApiController
         $messages = [
             'nombre.required' => 'El Nombre es requerido',
             'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
-            'nombre.max' => 'El Nombre tiene que tener 50 caracteres como maximo',
+            'nombre.max' => 'El Nombre tiene que tener 19 caracteres como maximo',
             'precio.required' => 'El precio es requerido',
             'precio.numeric' => 'El precio tiene que ser de tipo numérico',
-            'precio.between' => 'El precio tiene que estar entre 0 y 99999999.99',
+            'precio.between' => 'El precio tiene ser un número positivo',
             'id_administrador.required' => 'El Administrador es requerido',
             'id_administrador.exists' => 'El Administrador no existe',
             'id_categoria_producto.required' => 'La Categoria es requerida',
