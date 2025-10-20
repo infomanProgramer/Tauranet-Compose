@@ -1,5 +1,5 @@
 <template>
-    <Marco titulo="Detalle Ventas" icono="fas fa-chart-bar">
+    <Marco titulo="Detalle ventas por pedido" icono="fas fa-chart-bar">
         <div class="container-fluid">
             <form @submit.prevent="getDetalleVentas()">
                 <div class="row">

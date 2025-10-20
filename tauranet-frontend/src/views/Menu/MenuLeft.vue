@@ -220,26 +220,16 @@
                                 name_path: 'ventasporrangofecha',
                                 name: 'Ventas por rango de fecha',
                             },
-                            // {
-                            //     id: 1,
-                            //     name_path: 'hoy',
-                            //     name: 'Hoy',
-                            // },
                             {
                                 id: 3,
                                 name_path: 'detalleventas',
-                                name: 'Detalle Ventas',
-                            }
-                            // {
-                            //     id: 4,
-                            //     name_path: 'estadisticas',
-                            //     name: 'Estadísticas',
-                            // },
-                            // {
-                            //     id: 5,
-                            //     name_path: 'cajareport',
-                            //     name: 'Cajas',
-                            // },
+                                name: 'Detalle Pedidos',
+                            },
+                            {
+                                id: 4,
+                                name_path: 'detalleproducto',
+                                name: 'Detalle Productos',
+                            },
                         ]
                     },
                     {

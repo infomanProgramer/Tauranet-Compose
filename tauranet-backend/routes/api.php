@@ -164,9 +164,14 @@ Route::group([
         //Ex rutas de Administrador (Reportes)
         Route::get('aperturacajas/{idRestaurante}/sucursal/{idSucursal}', 'ReporteController@aperturaCajas');
         Route::get('cliente/restaurant/{idRestaurant}', 'ClienteController@getClientesByRestaurant');
+        //Detalle ventas por pedido
         Route::get('detalleventas/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/tiporeporte/{tipoReporte}', 'ReporteController@detalleVentas');
-        Route::get('detalleventasexcel/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/tiporeporte/{tipoReporte}', 'ReporteController@detalleVentas');
         Route::post('detalleventaspdf', 'ReporteController@detalleVentasPDF');
+        //Detalle ventas por productos
+        Route::get('detalleproductos/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/tiporeporte/{tipoReporte}', 'ReporteController@detalleProducto');
+        Route::get('detalleproductosexcel/{idRestaurante}/fechaini/{fecha_ini}/fechafin/{fecha_fin}/tiporeporte/{tipoReporte}', 'ReporteController@detalleProducto');
+        Route::post('detalleproductospdf', 'ReporteController@detalleProductoPDF');
+        //Detalle ventas por empleado
         Route::get('empleadopedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@empleadoPedido');
         //Route::get('fechaimporte/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaImporte');
         Route::get('fechapedido/{idRestaurante}/fechaini/{fechaIni}/fechafin/{fechaFin}', 'ReporteController@fechaPedidos');

@@ -22,6 +22,7 @@ import ConfigDni from "./views/Administrador/Config/ConfigDni";
 import Hoy from "./views/Cajero/Reportes/Hoy";
 import CajaReport from "./views/Cajero/Reportes/CajaReport";
 import DetalleVentas from "./views/Cajero/Reportes/DetalleVentas";
+import DetalleProducto from "./views/Cajero/Reportes/DetalleProducto";
 import Estadisticas from "./views/Cajero/Reportes/Estadisticas";
 import CocinaPedidos from "./views/Cocinero/CocinaPedidos";
 import VentasPorDia from "./views/Cajero/Reportes/VentasPorDia";
@@ -140,6 +141,14 @@ export default new Router({
           name: "detalleventas",
           path: "detalleventas",
           component: DetalleVentas,
+          meta: {
+            requiresRolCajero: true
+          }
+        },
+        {
+          name: "detalleproducto",
+          path: "detalleproducto",
+          component: DetalleProducto,
           meta: {
             requiresRolCajero: true
           }

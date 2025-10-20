@@ -163,6 +163,9 @@ class CajeroController extends ApiController
     }
     public function show($id){
         Log::info("id cajero: ". $id);
+        $mac = exec('getmac');
+        //$mac = strtok($mac, ' '); // primera MAC address
+        Log::info("mac: ". $mac);
         $cajero = DB::table('cajeros as c')
                   ->join('cajas as ca', 'ca.id_caja', '=', 'c.id_caja')
                   ->join('sucursals as s', 's.id_sucursal', '=', 'ca.id_sucursal')

@@ -55,6 +55,26 @@ class ReporteController extends ApiController
             );
         return $dventas;
     }
+    public function queryDetalleProducto($idRestaurante, $fecha_ini, $fecha_fin){
+        $detVentaProductos = DB::table('historial_caja as hc')
+        ->join('venta_productos as vp', 'vp.id_historial_caja', '=', 'hc.id_historial_caja')
+        ->join('producto_vendidos as pv', 'pv.id_venta_producto', '=', 'vp.id_venta_producto')
+        ->join('productos as p', 'p.id_producto', '=', 'pv.id_producto')
+        ->join('categoria_productos as cp', 'cp.id_categoria_producto', '=', 'p.id_categoria_producto')
+        ->whereBetween(DB::raw('DATE(hc.fecha)'), ["'". $fecha_ini ."'", "'". $fecha_fin ."'"])
+        ->select([
+            'cp.nombre as categoria',
+            'p.nombre as producto',
+            'pv.p_unit as precio_unitario',
+            DB::raw('SUM(pv.cantidad) as cantidad_vendida'),
+            DB::raw('SUM(pv.p_unit*pv.cantidad) as ingreso_total'),
+        ])
+        ->groupBy('cp.nombre', 'p.nombre', 'pv.p_unit')
+        ->orderBy('cp.nombre')
+        ->orderBy('p.nombre')
+        ->orderBy('pv.p_unit');  
+        return $detVentaProductos;
+    }
     public function detalleVentas($idRestaurante, $fecha_ini, $fecha_fin, $tipoReporte){
         //Datos de todas las sucursales y roles
         \Log::info('Todas las sucursales y perfiles');
@@ -97,6 +117,46 @@ class ReporteController extends ApiController
             return $response;
         }
     }
+    public function detalleProducto($idRestaurante, $fecha_ini, $fecha_fin, $tipoReporte){
+        $detVentaProductos = $this->queryDetalleProducto($idRestaurante, $fecha_ini, $fecha_fin);   
+
+        if($tipoReporte == 0)//json html
+        {   
+            $detVentaProductos = $detVentaProductos->paginate(15);
+            $response = Response::json(['data' => $detVentaProductos], 200);
+            return $response;
+        }else if($tipoReporte == 1){//excel
+            $detVentaProductos = $detVentaProductos->get();
+            //Log::info('dventas: ', $dventas->toArray());
+
+            $exportData = [];
+            foreach ($detVentaProductos as $row) {
+                //Log::info('row: ', $row->toArray());
+                $exportData[] = [
+                    'Categoria' => $row->categoria,
+                    'Producto' => $row->producto,
+                    'Precio unitario' => $row->precio_unitario,
+                    'Cantidad vendida' => $row->cantidad_vendida,
+                    'Ingreso total' => $row->ingreso_total
+                ];
+            }
+    
+            // Crear una clase exportadora anónima
+            $export = new class($exportData) implements FromCollection, WithHeadings {
+                private $data;
+                public function __construct($data) { $this->data = $data; }
+                public function collection() { return collect($this->data); }
+                public function headings(): array {
+                    return ['Categoria', 'Producto', 'Precio unitario', 'Cantidad vendida', 'Ingreso total'];
+                }
+            };
+            return Excel::download($export, 'reporte_detalle_productos_'.$fecha_ini.'_'.$fecha_fin.'.xlsx');
+        }else{//error
+            $response = Response::json(['error' => ['tipoReporte' => ['Tipo de reporte es requerido']]], 200);
+            return $response;
+        }
+        return null;
+    }
     public function detalleVentasPDF(Request $request){
         Log::info('detalleVentasPDF - request:', $request->all());
         $dventas = $this->queryDetalleVentas($request->idRestaurante, $request->fecha_inicio, $request->fecha_fin);
@@ -111,6 +171,21 @@ class ReporteController extends ApiController
             'listItem' => $dventas
         ]);
         return $pdf->download('reporte_detalle_ventas_'.$request->fecha_inicio.'_'.$request->fecha_fin.'.pdf');
+    }
+    public function detalleProductoPDF(Request $request){
+        Log::info('detalleProductoPDF - request:', $request->all());
+        $detVentaProductos = $this->queryDetalleProducto($request->idRestaurante, $request->fecha_inicio, $request->fecha_fin);
+        $detVentaProductos = $detVentaProductos->get();
+        $pdf = PDF::loadView('reportes.detalle_ventas.detalle_productos', [
+            'nom_restaurante' => $request->nombre_restaurante,
+            'titulo_reporte' => 'DETALLE DE VENTAS POR PRODUCTO',
+            'sucursal' => $request->sucursal,
+            'caja' => $request->caja,
+            'fecha_ini' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+            'listItem' => $detVentaProductos
+        ]);
+        return $pdf->download('reporte_detalle_productos_'.$request->fecha_inicio.'_'.$request->fecha_fin.'.pdf');
     }
     public function empleadoPedido($idRestaurante, $fechaIni, $fechaFin){
         if($fechaIni == 'null'){

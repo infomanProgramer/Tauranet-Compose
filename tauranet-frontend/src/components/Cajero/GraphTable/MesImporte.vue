@@ -4,6 +4,7 @@
             <div class="col-md-12">
                 <h4 class="mt-3 mb-2 font-weight-bold text-primary" style="font-size: 1.5rem; border-bottom: 3px solid #007bff; padding-bottom: 6px;">
                     Ventas por mes
+                    <i class="fas fa-chart-area mr-2"></i>         
                 </h4>
             </div>
         </div>
