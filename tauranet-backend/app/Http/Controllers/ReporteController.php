@@ -62,6 +62,7 @@ class ReporteController extends ApiController
         ->join('productos as p', 'p.id_producto', '=', 'pv.id_producto')
         ->join('categoria_productos as cp', 'cp.id_categoria_producto', '=', 'p.id_categoria_producto')
         ->whereBetween(DB::raw('DATE(hc.fecha)'), ["'". $fecha_ini ."'", "'". $fecha_fin ."'"])
+        ->where('vp.estado_venta', 0)
         ->select([
             'cp.nombre as categoria',
             'p.nombre as producto',
