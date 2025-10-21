@@ -13,7 +13,7 @@
         </li>
         <li class="nav-item" id="datos-usuario">
             <!-- Opciones del Usuario -->
-            <a data-toggle="collapse" href="#subMenuAdministrador" class="custom-menu-link-profile" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrowA">
+            <a data-toggle="collapse" href="#subMenuAdministrador" class="custom-menu-link-profile" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrowA" :title="collapsed ? rol : null">
                 <img id="foto-perfil" :src="fotoperfil" class="rounded-circle" alt="Cinque Terre" width="40" height="40">
                 <div class="align-middle" v-if="!collapsed" style="line-height: 1.2; height: 100%; width: 100%; display: flex; flex-direction: column; justify-content: center;">
                     <strong><DataUser :dataReturn="['nombre_usuario']"></DataUser></strong>
@@ -24,7 +24,7 @@
             <!-- Sub menu -->
             <ul class="collapse deleteStyleUL" id="subMenuAdministrador">
                 <li>
-                    <router-link :to="{name: 'logout'}" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}">
+                    <router-link :to="{name: 'logout'}" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}" :title="collapsed ? 'Cerrar sesión' : null">
                         <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>
                         <span v-show="!collapsed">Cerrar sesión</span>
                     </router-link>
@@ -32,7 +32,7 @@
             </ul>
         </li>
         <li class="nav-item" v-for="item in menu" :key="item.id">
-            <a data-toggle="collapse" :href="'#collapseExample'+item.id" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrow(item.id-1)" v-if="item.sub_menus.length>0" class="custom-menu-link" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}">
+            <a data-toggle="collapse" :href="'#collapseExample'+item.id" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrow(item.id-1)" v-if="item.sub_menus.length>0" class="custom-menu-link" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}" :title="collapsed ? item.name : null">
                 <i :class="item.icon+' menu-icon icon-left'"></i>
                 <span class="text-menu-item" v-show="!collapsed">{{item.name}}</span>
                 <i
@@ -41,7 +41,7 @@
                     ref="iconoSubMenu"
                     v-show="!collapsed"></i>
             </a>
-            <router-link class="custom-menu-link" tag="a" v-else :to="{name: item.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}">
+            <router-link class="custom-menu-link" tag="a" v-else :to="{name: item.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}" :title="collapsed ? item.name : null">
                 <i :class="item.icon+' menu-icon icon-left'"></i>
                 <span class="text-menu-item" v-show="!collapsed">{{item.name}}</span>
                 <i v-show="false" class="fas fa-angle-left arrow icon-right" ref="iconoSubMenu"></i>
@@ -49,10 +49,11 @@
             <!-- sub menu -->
             <ul class="collapse deleteStyleUL" :id="'collapseExample'+item.id">
                 <!-- <li v-for="sub in item.sub_menus" :key="sub.id" class="nav-link" style="justify-content: left; padding-left: 1rem; height: 2.5rem;"> -->
-                <li v-for="sub in item.sub_menus" :key="sub.id" class="nav-link">
-                    <router-link :to="{name: sub.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}">
+                <li v-for="sub in item.sub_menus" :key="sub.id" class="nav-link" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}" :title="collapsed ? sub.name : null">
+                    <router-link :to="{name: sub.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}" :title="collapsed ? sub.name : null">
                         <i class="fas fa-circle" style="font-size: 0.3rem; color: #b0b0b0; margin-right: 8px;"></i>
                         <span v-show="!collapsed">{{sub.name}}</span>
+                        <span v-show="false" style="color: #b0b0b0;">{{sub.name}}</span>
                     </router-link>
                 </li>
             </ul>
