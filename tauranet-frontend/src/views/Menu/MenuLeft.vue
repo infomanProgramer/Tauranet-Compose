@@ -1,59 +1,70 @@
 <template>
-    <ul class="nav flex-column" id="MenuLeft">
+    <ul class="nav flex-column" id="MenuLeft" :class="{ collapsed }" :style="collapsed ? { minWidth: '3rem', width: '3rem' } : {}">
         <li class="nav-item" id="logo-tauranet">
             <!-- Logo -->
             <a class="navbar-brand" href="#">
-                <img alt="Perfil Usuario" src="../../assets/logo-tauranet.svg" width="120"/>
+                <template v-if="collapsed">
+                    <span style="font-weight: bold; display: flex; align-items: center; justify-content: center;">TN</span>
+                </template>
+                <template v-else>
+                    <img alt="Perfil Usuario" src="../../assets/logo-tauranet.svg" width="120"/>
+                </template>
             </a>
         </li>
         <li class="nav-item" id="datos-usuario">
             <!-- Opciones del Usuario -->
-            <a data-toggle="collapse" href="#subMenuAdministrador" class="custom-menu-link-profile" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrowA">
+            <a data-toggle="collapse" href="#subMenuAdministrador" class="custom-menu-link-profile" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrowA">
                 <img id="foto-perfil" :src="fotoperfil" class="rounded-circle" alt="Cinque Terre" width="40" height="40">
-                <div class="align-middle" style="line-height: 1.2; height: 100%; width: 100%; display: flex; flex-direction: column; justify-content: center;">
+                <div class="align-middle" v-if="!collapsed" style="line-height: 1.2; height: 100%; width: 100%; display: flex; flex-direction: column; justify-content: center;">
                     <strong><DataUser :dataReturn="['nombre_usuario']"></DataUser></strong>
                     <span id="rol_usuario" style="font-size: 0.85rem; color: #b0b0b0; margin-top: 2px;">{{rol}}</span>
                 </div>
-                <i class="fas fa-angle-left arrow icon-right-profile" ref="iconoSubMenuAdmin"></i>
+                <i v-show="!collapsed" class="fas fa-angle-left arrow icon-right-profile" ref="iconoSubMenuAdmin"></i>
             </a>
             <!-- Sub menu -->
             <ul class="collapse deleteStyleUL" id="subMenuAdministrador">
                 <li>
-                    <router-link :to="{name: 'logout'}">
+                    <router-link :to="{name: 'logout'}" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}">
                         <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>
-                        Cerrar sesión
+                        <span v-show="!collapsed">Cerrar sesión</span>
                     </router-link>
                 </li>
             </ul>
         </li>
         <li class="nav-item" v-for="item in menu" :key="item.id">
-            <a data-toggle="collapse" :href="'#collapseExample'+item.id" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrow(item.id-1)" v-if="item.sub_menus.length>0" class="custom-menu-link">
+            <a data-toggle="collapse" :href="'#collapseExample'+item.id" role="button" aria-expanded="false" aria-controls="collapseExample" @click="changeArrow(item.id-1)" v-if="item.sub_menus.length>0" class="custom-menu-link" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}">
                 <i :class="item.icon+' menu-icon icon-left'"></i>
-                <span class="text-menu-item">{{item.name}}</span>
+                <span class="text-menu-item" v-show="!collapsed">{{item.name}}</span>
                 <i
                     v-if="item.sub_menus.length>0"
                     class="fas fa-angle-left arrow icon-right"
                     ref="iconoSubMenu"
-                ></i>
+                    v-show="!collapsed"></i>
             </a>
-            <router-link class="custom-menu-link" tag="a" v-else :to="{name: item.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu">
+            <router-link class="custom-menu-link" tag="a" v-else :to="{name: item.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}">
                 <i :class="item.icon+' menu-icon icon-left'"></i>
-                <span class="text-menu-item">{{item.name}}</span>
+                <span class="text-menu-item" v-show="!collapsed">{{item.name}}</span>
                 <i v-show="false" class="fas fa-angle-left arrow icon-right" ref="iconoSubMenu"></i>
             </router-link>
             <!-- sub menu -->
             <ul class="collapse deleteStyleUL" :id="'collapseExample'+item.id">
                 <!-- <li v-for="sub in item.sub_menus" :key="sub.id" class="nav-link" style="justify-content: left; padding-left: 1rem; height: 2.5rem;"> -->
                 <li v-for="sub in item.sub_menus" :key="sub.id" class="nav-link">
-                    <router-link :to="{name: sub.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu">
+                    <router-link :to="{name: sub.name_path}" active-class="activo_sub_menu" exact-active-class="activo_sub_menu" :style="collapsed ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}">
                         <i class="fas fa-circle" style="font-size: 0.3rem; color: #b0b0b0; margin-right: 8px;"></i>
-                        {{sub.name}}
+                        <span v-show="!collapsed">{{sub.name}}</span>
                     </router-link>
                 </li>
             </ul>
         </li>
+        <li class="nav-item" style="display: flex; justify-content: center; padding-top: 1rem; padding-bottom: 1rem;">
+            <button @click="collapsed = !collapsed" class="btn btn-sm" :title="collapsed ? 'Mostrar menú' : 'Ocultar menú'" style="background: #444; color: #fff; border: none; border-radius: 4px; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center;">
+                <i :class="collapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
+            </button>
+        </li>
     </ul>
 </template>
+
 <script>
     import DataUser from '@/components/Auth/DataUser'
     export default{
@@ -81,6 +92,7 @@
                 tipo_usuario: null,
                 menu: [],
                 ruta_publica: this.$store.state.url_root,
+                collapsed: false,
                 menu_administrador: [
                     {
                         id: 1,
@@ -332,6 +344,7 @@
         },
     }
 </script>
+
 <style lang="scss">
     #MenuLeft{
         // min-width: 15rem;
@@ -436,6 +449,11 @@
                 justify-content: right;
             }
         }
+    }
+    #MenuLeft.collapsed{
+        min-width: 5rem !important;
+        width: 5rem !important;
+        overflow: hidden;
     }
     .activo_sub_menu {
         font-weight: 600;
