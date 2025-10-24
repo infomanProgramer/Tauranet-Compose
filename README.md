@@ -79,4 +79,8 @@ php artisan config:clear
 php artisan config:cache
 ~~~
 
+## Ofuscador de código PHP
+
+https://php-minify.com/php-obfuscator/
+
 
