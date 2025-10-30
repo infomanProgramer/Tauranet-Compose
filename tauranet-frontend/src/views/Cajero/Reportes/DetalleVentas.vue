@@ -245,7 +245,7 @@ export default{
         },
         getDetalleVentasExcel(){
             this.tipo_reporte = 2; //excel
-            let url = this.$store.state.url_root+`api/auth/detalleventasexcel/${this.$store.state.id_restaurant}/fechaini/${this.fecha_ini}/fechafin/${this.fecha_fin}/tiporeporte/${this.tipo_reporte}`
+            let url = this.$store.state.url_root+`api/auth/detalleventas/${this.$store.state.id_restaurant}/fechaini/${this.fecha_ini}/fechafin/${this.fecha_fin}/tiporeporte/${this.tipo_reporte}`
             this.$Progress.start()
             axios.defaults.headers.common["Authorization"] = "Bearer " + this.$store.state.token;
             axios.get(url, { responseType: 'blob' })

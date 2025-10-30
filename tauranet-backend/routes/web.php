@@ -11,6 +11,12 @@
 |
 */
 
+Route::get('/license-error', function () {
+    return view('license.error', [
+        'message' => request('m', 'Error de licencia desconocido.'),
+    ]);
+})->name('license.error');
+
 Route::get('/{any}', function () {
     return file_get_contents(public_path('index.html'));
 })->where('any', '^(?!api|js|css|img|assets|favicon\.ico).*$');

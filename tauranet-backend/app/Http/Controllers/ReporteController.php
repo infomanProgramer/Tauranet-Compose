@@ -78,7 +78,7 @@ class ReporteController extends ApiController
     }
     public function detalleVentas($idRestaurante, $fecha_ini, $fecha_fin, $tipoReporte){
         //Datos de todas las sucursales y roles
-        \Log::info('Todas las sucursales y perfiles');
+        \Log::info('Todas las sucursales y perfiles tipo reporte: '.$tipoReporte);
         $dventas = $this->queryDetalleVentas($idRestaurante, $fecha_ini, $fecha_fin);
         if($tipoReporte == 0){//json html
             $dventas = $dventas->paginate(15);
