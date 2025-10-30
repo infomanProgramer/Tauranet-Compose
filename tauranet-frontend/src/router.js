@@ -27,6 +27,7 @@ import Estadisticas from "./views/Cajero/Reportes/Estadisticas";
 import CocinaPedidos from "./views/Cocinero/CocinaPedidos";
 import VentasPorDia from "./views/Cajero/Reportes/VentasPorDia";
 import VentasPorRangoFecha from "./views/Cajero/Reportes/VentasPorRangoFecha";
+import LicenseError from "./views/Errors/LicenseError";
 
 Vue.use(Router);
 
@@ -34,6 +35,11 @@ export default new Router({
   mode: "history",
   base: process.env.BASE_URL,
   routes: [
+    {
+      path: "/license-error",
+      name: "license-error",
+      component: LicenseError
+    },
     {
       path: "/",
       name: "login",

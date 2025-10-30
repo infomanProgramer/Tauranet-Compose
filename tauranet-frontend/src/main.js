@@ -14,6 +14,7 @@ import VueProgress from "vue-progress";
 import Croppa from "vue-croppa";
 import "vue-croppa/dist/vue-croppa.css";
 import Toasted from "vue-toasted";
+import axios from "axios";
 
 Vue.component("table-component", TableComponent);
 Vue.component("table-column", TableColumn);
@@ -147,6 +148,28 @@ Vue.use(VueProgressBar, {
   location: "top",
   inverse: false
 });
+
+// Interceptor global: en 403 redirige a la pantalla CLI del frontend
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    try {
+      const status = error && error.response && error.response.status;
+      console.log(error.response.data);
+      if (status === 403) {
+        const msg = (error.response.data && (error.response.data.message || error.response.data.m)) || "Error de licencia.";
+        if (router.currentRoute.name !== "license-error") {
+          router.push({ name: "license-error", query: { m: msg } });
+        }
+        // Evitar unhandled rejection en llamadas que no esperan continuar
+        return Promise.reject(error);
+      }
+    } catch (e) {
+      // noop
+    }
+    return Promise.reject(error);
+  }
+);
 
 new Vue({
   router,

@@ -18,6 +18,10 @@ class VerifyLicense
         $license = LicenseHelper::verifyLicense();
 
         if (!$license['valid']) {
+            // Para rutas API devolvemos JSON 403; para cualquier otra ruta, redirigimos a la vista CLI
+            if ($request->is('api/*')) {
+                return response()->json(['message' => $license['message']], 403);
+            }
             return redirect()->route('license.error', ['m' => $license['message']]);
         }
 
