@@ -45,6 +45,7 @@
     }
     .cantidad {
       width: 15%;
+      text-align: center;
     }
     .producto {
       width: 40%;
@@ -70,7 +71,7 @@
       {{ $identificacion }}: {{ $datosCliente['dni'] }}<br>
     @endif
     Servicio: @if($paymentDetails['tipo_servicio'] == 0) Mesa @elseif($paymentDetails['tipo_servicio'] == 1) Delivery @else Para llevar @endif <br>
-    Fecha: {{ $fechaActual }}
+    Fecha: {{ $fechaActual }} - {{ date('H:i') }}
   </p>
   <p class="center"><strong>Pedido # {{ $numero }}</strong></p>
   <table>
