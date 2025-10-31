@@ -144,13 +144,13 @@ docker-compose exec backend composer install
 Exporta en formato plano en el directorio de donde se encuentra la terminal
 
 ~~~
-docker-compose exec -t db pg_dump -U postgres -F c tauranet_db > tauranet_db_backup
+docker exec -t postgres-db-tauranet pg_dump -U postgres -F c tauranet_db > tauranet_db_backup
 ~~~
 
 exportar en formato plano
 
 ~~~
-docker-compose exec -T db pg_dump -U postgres -F p tauranet_db > tauranet_db_backup.sql
+docker exec -t postgres-db-tauranet pg_dump -U postgres -F p tauranet_db > tauranet_db_backup.sql
 ~~~
 
 Esportar en formato directo, útil para backups grandes

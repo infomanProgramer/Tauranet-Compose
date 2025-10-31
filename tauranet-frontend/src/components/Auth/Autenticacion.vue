@@ -5,7 +5,7 @@
                 <a class="navbar-brand" href="#">
                     <img alt="Perfil Usuario" src="../../assets/logo-tauranet.svg" width="300" class="img-fluid"/><br>
                     <p class="text-center mt-3" style="font-size: 0.8rem; font-weight: normal; opacity: 0.5;">
-                        <span>Sistema de restaurante</span><br>
+                        <span>Sistema de restobar</span><br>
                         <span>v 1.0.0</span>
                     </p>
                 </a>
