@@ -4,7 +4,7 @@
             <div class="col-md-12 text-center">
                 <a class="navbar-brand" href="#">
                     <img alt="Perfil Usuario" src="../../assets/logo-tauranet.svg" width="300" class="img-fluid"/><br>
-                    <span>Sistema de Restaurante Dev</span>
+                    <span>Sistema de restobar</span>
                 </a>
             </div>          
         </div>
