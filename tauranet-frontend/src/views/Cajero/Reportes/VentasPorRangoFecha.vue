@@ -5,7 +5,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h4 class="mt-3 mb-2 font-weight-bold text-primary" style="font-size: 1.5rem; border-bottom: 3px solid #007bff; padding-bottom: 6px;">
-                            Detalle general
+                            Detalle de ventas
                         </h4>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <h4 class="mt-3 mb-2 font-weight-bold text-primary" style="font-size: 1.5rem; border-bottom: 3px solid #007bff; padding-bottom: 6px;">
-                        Totales Generales
+                        Totales
                     </h4>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped table-condensed" style="table-layout: fixed; width: 100%;">
