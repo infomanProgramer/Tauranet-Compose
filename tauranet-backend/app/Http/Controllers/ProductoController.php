@@ -97,8 +97,9 @@ class ProductoController extends ApiController
     public function store(Request $request)
     {
         $dataValidation = [
-            'nombre' => 'required|min:4|max:19',
+            'nombre' => 'required|min:4|max:21',
             'precio' => 'required|numeric|between:0,9999999.99',
+            'descripcion' => 'nullable|min:4|max:22',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
         ];
         if ($request->get("id_administrador") !== null) {
@@ -114,10 +115,12 @@ class ProductoController extends ApiController
         $messages = [
             'nombre.required' => 'El Nombre es requerido',
             'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
-            'nombre.max' => 'El Nombre tiene que tener 19 caracteres como maximo',
+            'nombre.max' => 'El Nombre tiene que tener 21 caracteres como maximo',
             'precio.required' => 'El precio es requerido',
             'precio.numeric' => 'El precio tiene que ser de tipo numérico',
             'precio.between' => 'El precio tiene ser un número positivo',
+            'descripcion.min' => 'La Descripcion tiene que tener 4 caracteres como mínimo',
+            'descripcion.max' => 'La Descripcion tiene que tener 22 caracteres como maximo',
             'id_administrador.required' => 'El Administrador es requerido',
             'id_administrador.exists' => 'El Administrador no existe',
             'id_categoria_producto.required' => 'La Categoria es requerida',
@@ -154,8 +157,9 @@ class ProductoController extends ApiController
     {
         $producto = Producto::find($id);
         $dataValidation = [
-            'nombre' => 'required|min:4|max:19',
+            'nombre' => 'required|min:4|max:21',
             'precio' => 'required|numeric|between:0,9999999.99',
+            'descripcion' => 'nullable|min:4|max:22',
             'id_categoria_producto' => 'required|not_in:-1|exists:categoria_productos,id_categoria_producto',
         ];
         if ($request->get("id_administrador") !== null && $request->get("id_administrador") !== 'null') {
@@ -171,7 +175,7 @@ class ProductoController extends ApiController
         $messages = [
             'nombre.required' => 'El Nombre es requerido',
             'nombre.min' => 'El Nombre tiene que tener 4 caracteres como mínimo',
-            'nombre.max' => 'El Nombre tiene que tener 19 caracteres como maximo',
+            'nombre.max' => 'El Nombre tiene que tener 21 caracteres como maximo',
             'precio.required' => 'El precio es requerido',
             'precio.numeric' => 'El precio tiene que ser de tipo numérico',
             'precio.between' => 'El precio tiene ser un número positivo',
@@ -180,11 +184,13 @@ class ProductoController extends ApiController
             'id_categoria_producto.required' => 'La Categoria es requerida',
             'id_categoria_producto.not_in' => 'La Categoria es requerida',
             'id_categoria_producto.exists' => 'La Categoria no existe',
+            'descripcion.min' => 'La Descripcion tiene que tener 4 caracteres como mínimo',
+            'descripcion.max' => 'La Descripcion tiene que tener 22 caracteres como maximo',
         ]);
         if ($validator->fails()) {
             return response()->json(["error" => $validator->errors()], 201);
         }
-        if($request->has('nombre')) {
+        if($request->has('nombre') && $request->nombre != $producto->nombre) {
             $producto->nombre = $request->get("nombre");
         }
         if($request->has('descripcion') && $request->descripcion != 'null') {

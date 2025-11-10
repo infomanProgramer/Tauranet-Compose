@@ -86,7 +86,7 @@
     <tbody>
       @foreach($items as $item)
         <tr>
-          <td class="cantidad">{{ $item->cantidad }}</td>
+          <td class="cantidad">{{ $item->cantidad }}x</td>
           <td class="producto">{{ $item->detalle }}</td>
           <td class="punit">{{ $item->p_unit }}</td>
           <td class="importe">{{ $item->importe }}</td>

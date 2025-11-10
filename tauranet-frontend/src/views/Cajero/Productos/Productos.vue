@@ -47,6 +47,7 @@
                             >
                             <table-column show="categoriaProducto" label="Categoría"></table-column>   
                             <table-column show="nombre" label="Producto"></table-column>
+                            <table-column show="descripcion" label="Descripción"></table-column>
                             <table-column show="precio" :label="'Precio ('+tipoMoneda+')'" :filterable="false"></table-column>
                             <table-column label="Imagen">
                                 <template slot-scope="row">
@@ -111,7 +112,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- <div class="row">
+                            <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="" class="label-style">Descripción</label>
@@ -119,7 +120,7 @@
                                         <ListErrors :errores="errores.descripcion"></ListErrors>
                                     </div>
                                 </div>
-                            </div> -->
+                            </div>
                             <div class="row">
                                 <div class="col-md-6">
                                    <croppa v-model="myCroppa"
@@ -182,7 +183,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- <div class="row">
+                            <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="" class="label-style">Descripción</label>
@@ -190,7 +191,7 @@
                                         <ListErrors :errores="errores.descripcion"></ListErrors>
                                     </div>
                                 </div>
-                            </div> -->
+                            </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <!-- Edita imagen -->

@@ -196,10 +196,10 @@
                     </div>    
                 </div>
                 <div class="col-md-4">
-                    <div class="row"><h4 class="sub-cajero">Categoria</h4></div>
+                    <div class="row"><h4 class="sub-cajero">Categoría</h4></div>
                     <div class="row contenedor-categorias">
-                        <div class="item-categoria" :class="{itemCategoriaActive: indiceActive==-1}" @click="getAllProductosMethod(-1)">Todos</div>
-                        <div class="item-categoria" :class="{itemCategoriaActive: item.id_categoria_producto==indiceActive}" v-for="item in listaCategorias" v-bind:key="item.id_categoria_producto" @click="getAllProductosMethod(item.id_categoria_producto)">{{item.nombre}}</div>
+                        <div class="item-categoria" :class="{itemCategoriaActive: indiceActive==-1}" @click="getFilteredCategory(-1)">Todos</div>
+                        <div class="item-categoria" :class="{itemCategoriaActive: item.id_categoria_producto==indiceActive}" v-for="item in listaCategorias" v-bind:key="item.id_categoria_producto" @click="getFilteredCategory(item.id_categoria_producto)">{{item.nombre}}</div>
                     </div>
                     <div class="row">
                         <h4 class="sub-cajero">Productos</h4>
@@ -209,15 +209,22 @@
                     </div>
                     <div class="row contenedor-productos">
                         <div class="item-producto" v-for="item in matchProductos" v-bind:key="item.id_producto" @click="agregaProductoMethod(item)">
-                            <div>
+                            <!-- <div>
                                 <img v-if="item.producto_image != null" :src="ruta_publica+'imgProductos/'+item.producto_image" class="img-fluid" alt="No se encontro la imagen" width="120" height="120">
                                 <img v-else :src="ruta_publica+'imgLogos/sinImagen.svg'" class="img-fluid" alt="No se encontro la imagen" width="120" height="120">
+                            </div> -->
+                            <div>
+                                <div style="position: relative;">
+                                    <img v-if="item.producto_image != null" :src="ruta_publica+'imgProductos/'+item.producto_image" class="img-fluid" alt="No se encontro la imagen" width="120" height="120">
+                                    <img v-else :src="ruta_publica+'imgLogos/sinImagen.svg'" class="img-fluid" alt="No se encontro la imagen" width="120" height="120">
+                                    <div style="position: absolute; bottom: 0; right: 0; padding: 5px; background-color: rgba(0, 0, 0, 0.5); color: white; font-weight: bold;">
+                                        {{parseFloat(item.precio)}} {{tipoMoneda}}
+                                    </div>
+                                </div>
                             </div>
                             <div>
-                                <span class="nombre_producto">{{item.nombre.toUpperCase()}}</span>
-                            </div>
-                            <div>
-                                <span class="precio_producto">{{parseFloat(item.precio)}} {{tipoMoneda}}</span>
+                                <span class="nombre_producto resaltado" :style="{'text-align': 'center', 'line-height': '2', 'display': 'block', 'margin': '0'}">{{item.nombre}}</span>
+                                <span class="precio_producto" v-if="item.descripcion" style="line-height: 1; display: block; margin: 0 0 5px 0;">{{item.descripcion}}</span>
                             </div>
                         </div>
                     </div>
@@ -319,6 +326,7 @@ export default{
             buscaProducto: '',
             listaCategorias: [],
             listaProductos: [],
+            listaProductosStatic: [],
             data_usr: {},
             ruta_publica: this.$store.state.url_root,
             indiceActive: -1,
@@ -469,6 +477,7 @@ export default{
                 axios.get(url)
             .then(response => {
                 this.listaProductos = response.data.data;
+                this.listaProductosStatic = this.listaProductos;
                 this.$Progress.finish()
             })
             .catch (error => {
@@ -476,6 +485,18 @@ export default{
                 this.$Progress.fail()
             });
         },
+        getFilteredCategory(idCategoria){
+            this.indiceActive = idCategoria
+            idCategoria = idCategoria || -1
+            if(idCategoria == -1){
+                this.listaProductos = this.listaProductosStatic
+                return
+            }
+            this.listaProductos = this.listaProductosStatic.filter(prod=>{
+                return prod.id_categoria_producto == idCategoria
+            })
+        },
+        
         agregaProductoMethod(item){
             //Verifica si el elemento existe en la tabla
             let sw = false
@@ -891,10 +912,13 @@ export default{
             }
             .precio_producto{
                 color: #ff9800;
-                font-weight: bold;
+                // font-weight: bold;
+                padding: 0 !important;
+                font-size: 12px;
             }
             .nombre_producto{
                 color: white;
+                font-size: 13px;
             }
         }
     }
@@ -907,5 +931,9 @@ export default{
         display: flex;
         align-items: center;
         gap: 0.5rem;
+    }
+    .resaltado{
+        font-weight: bold;
+        color: white;
     }
 </style>
