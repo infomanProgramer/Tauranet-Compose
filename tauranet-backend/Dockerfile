@@ -49,7 +49,14 @@ COPY start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 RUN sed -i 's/\r$//' /usr/local/bin/start.sh
 
-COPY ./docker/php.ini /usr/local/etc/php/
+RUN printf "; custom php.ini for Laravel + PostgreSQL\n" \
+    > /usr/local/etc/php/conf.d/zzz-custom.ini \
+ && printf "memory_limit = 512M\n" \
+    >> /usr/local/etc/php/conf.d/zzz-custom.ini \
+ && printf "upload_max_filesize = 100M\n" \
+    >> /usr/local/etc/php/conf.d/zzz-custom.ini \
+ && printf "post_max_size = 100M\n" \
+    >> /usr/local/etc/php/conf.d/zzz-custom.ini
 
 RUN mkdir -p /var/www/bootstrap/cache \
     && chmod -R 777 /var/www/storage /var/www/bootstrap/cache \
