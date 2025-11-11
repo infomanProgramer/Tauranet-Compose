@@ -13,7 +13,13 @@ return [
     */
    
     'supportsCredentials' => false,
-    'allowedOrigins' => ['*'],
+    'allowedOrigins' => (function () {
+        $origins = env('CORS_ALLOWED_ORIGINS', '*');
+        if ($origins === '*') {
+            return ['*'];
+        }
+        return array_values(array_filter(array_map('trim', explode(',', $origins))));
+    })(),
     'allowedOriginsPatterns' => [],
     'allowedHeaders' => ['*'],
     'allowedMethods' => ['*'],

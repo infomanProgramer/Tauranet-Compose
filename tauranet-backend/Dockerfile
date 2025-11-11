@@ -31,7 +31,7 @@ RUN docker-php-ext-configure gd \
 
 # Habilitar mod_rewrite de Apache
 RUN a2enmod rewrite
-
+RUN sed -ri 's/AllowOverride\s+None/AllowOverride All/i' /etc/apache2/apache2.conf
 # Cambiar DocumentRoot a /var/www/public
 RUN sed -i 's|/var/www/html|/var/www/public|g' /etc/apache2/sites-available/000-default.conf
 
@@ -43,7 +43,10 @@ WORKDIR /var/www
 
 COPY . .
 
-RUN composer install --no-interaction --prefer-dist
+RUN composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
 
 COPY ./docker/php.ini /usr/local/etc/php/
 
@@ -54,4 +57,4 @@ RUN mkdir -p /var/www/bootstrap/cache \
 # Exponer el puerto de PHP-FPM
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD ["start.sh"]

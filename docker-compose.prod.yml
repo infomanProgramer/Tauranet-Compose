@@ -3,9 +3,9 @@ services:
     image: postgres:16
     container_name: postgres-db-tauranet
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pgadmin1325
+      POSTGRES_DB: tauranet_db
     ports:
       - "25432:5432"
     volumes:
@@ -22,11 +22,11 @@ services:
     depends_on:
       - db
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: postgres-db-tauranet
+      DB_PORT: 25432
+      DB_DATABASE: tauranet_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: pgadmin1325
     volumes:
       - ./tauranet-backend:/var/www
 

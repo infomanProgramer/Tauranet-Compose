@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: tauranet-backend
+    env: docker
+    dockerfilePath: tauranet-backend/Dockerfile
+    dockerContext: tauranet-backend
+    autoDeploy: true
+    plan: starter
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        sync: false
+      - key: APP_KEY
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: CACHE_DRIVER
+        value: file
+      - key: QUEUE_DRIVER
+        value: sync
+      - key: SESSION_DRIVER
+        value: file
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+
+  - type: static_site
+    name: tauranet-frontend
+    buildCommand: cd tauranet-frontend && npm ci && npm run build
+    staticPublishPath: tauranet-frontend/dist
+    pullRequestPreviewsEnabled: true
+    autoDeploy: true
+    envVars:
+      - key: VUE_APP_API_URL
+        sync: false
