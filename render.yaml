@@ -2,7 +2,7 @@ services:
   - type: web
     name: tauranet-backend
     env: docker
-    dockerfilePath: tauranet-backend/Dockerfile
+    dockerfilePath: Dockerfile
     dockerContext: tauranet-backend
     autoDeploy: true
     plan: starter

@@ -47,6 +47,7 @@ RUN composer install --no-interaction --prefer-dist --no-dev --optimize-autoload
 
 COPY start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
+RUN sed -i 's/\r$//' /usr/local/bin/start.sh
 
 COPY ./docker/php.ini /usr/local/etc/php/
 
