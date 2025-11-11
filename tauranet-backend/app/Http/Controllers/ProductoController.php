@@ -51,6 +51,7 @@ class ProductoController extends ApiController
             $exportData[] = [
                 'Categoría' => $row->categoriaProducto,
                 'Producto' => $row->nombre,
+                'Descripción' => $row->descripcion,
                 'Precio' => $row->precio
             ];
         }
@@ -59,7 +60,7 @@ class ProductoController extends ApiController
             public function __construct($data) { $this->data = $data; }
             public function collection() { return collect($this->data); }
             public function headings(): array {
-                return ['Categoría', 'Producto', 'Precio'];
+                return ['Categoría', 'Producto', 'Descripción', 'Precio'];
             }
         };
 
