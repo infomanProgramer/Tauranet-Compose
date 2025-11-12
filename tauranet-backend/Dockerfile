@@ -42,7 +42,7 @@ RUN curl -sS https://getcomposer.org/download/1.8.6/composer.phar -o /usr/local/
 
 WORKDIR /var/www
 
-COPY composer.json composer.lock ./
+COPY composer.json ./
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_MEMORY_LIMIT=-1
