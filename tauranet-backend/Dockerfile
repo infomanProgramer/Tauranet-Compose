@@ -10,6 +10,7 @@ RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list \
     libfreetype6-dev \
     libzip-dev \
     libpq-dev \
+    ca-certificates \
     zip \
     unzip \
     git \
@@ -41,9 +42,17 @@ RUN curl -sS https://getcomposer.org/download/1.8.6/composer.phar -o /usr/local/
 
 WORKDIR /var/www
 
-COPY . .
+COPY composer.json composer.lock ./
 
-RUN composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
+RUN composer --version \
+ && composer config -g repos.packagist composer https://repo.packagist.org \
+ && composer clear-cache || true \
+ && composer diagnose || true \
+ && composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader --no-scripts -vvv
+
+COPY . .
 
 RUN printf '#!/usr/bin/env bash\n' > /usr/local/bin/start.sh \
  && printf 'set -euo pipefail\n\n' >> /usr/local/bin/start.sh \
@@ -58,6 +67,7 @@ RUN printf '#!/usr/bin/env bash\n' > /usr/local/bin/start.sh \
  && printf 'php artisan config:clear || true\n' >> /usr/local/bin/start.sh \
  && printf 'php artisan route:clear || true\n' >> /usr/local/bin/start.sh \
  && printf 'php artisan view:clear || true\n' >> /usr/local/bin/start.sh \
+ && printf 'php artisan package:discover --ansi || true\n' >> /usr/local/bin/start.sh \
  && printf 'php artisan config:cache || true\n' >> /usr/local/bin/start.sh \
  && printf 'php artisan route:cache || true\n\n' >> /usr/local/bin/start.sh \
  && printf 'php artisan storage:link || true\n\n' >> /usr/local/bin/start.sh \
