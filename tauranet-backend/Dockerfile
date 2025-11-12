@@ -45,9 +45,25 @@ COPY . .
 
 RUN composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
 
-COPY start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
-RUN sed -i 's/\r$//' /usr/local/bin/start.sh
+RUN printf '#!/usr/bin/env bash\n' > /usr/local/bin/start.sh \
+ && printf 'set -euo pipefail\n\n' >> /usr/local/bin/start.sh \
+ && printf 'mkdir -p /var/www/bootstrap/cache\n' >> /usr/local/bin/start.sh \
+ && printf 'chmod -R 777 /var/www/storage /var/www/bootstrap/cache || true\n' >> /usr/local/bin/start.sh \
+ && printf 'chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache || true\n\n' >> /usr/local/bin/start.sh \
+ && printf 'if [ -f .env ]; then\n' >> /usr/local/bin/start.sh \
+ && printf '  if ! grep -q "^APP_KEY=\\S\\+" .env; then\n' >> /usr/local/bin/start.sh \
+ && printf '    php artisan key:generate --force\n' >> /usr/local/bin/start.sh \
+ && printf '  fi\n' >> /usr/local/bin/start.sh \
+ && printf 'fi\n\n' >> /usr/local/bin/start.sh \
+ && printf 'php artisan config:clear || true\n' >> /usr/local/bin/start.sh \
+ && printf 'php artisan route:clear || true\n' >> /usr/local/bin/start.sh \
+ && printf 'php artisan view:clear || true\n' >> /usr/local/bin/start.sh \
+ && printf 'php artisan config:cache || true\n' >> /usr/local/bin/start.sh \
+ && printf 'php artisan route:cache || true\n\n' >> /usr/local/bin/start.sh \
+ && printf 'php artisan storage:link || true\n\n' >> /usr/local/bin/start.sh \
+ && printf 'apache2-foreground\n' >> /usr/local/bin/start.sh \
+ && chmod +x /usr/local/bin/start.sh \
+ && sed -i 's/\r$//' /usr/local/bin/start.sh
 
 RUN printf "; custom php.ini for Laravel + PostgreSQL\n" \
     > /usr/local/etc/php/conf.d/zzz-custom.ini \
